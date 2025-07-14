@@ -1,0 +1,10 @@
+.starsCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Помещает канвас позади всего остального контента */
+  /* ✅ Устанавливаем градиентный фон непосредственно на канвас */
+  background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+}

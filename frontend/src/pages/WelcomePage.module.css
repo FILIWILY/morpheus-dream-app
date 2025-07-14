@@ -1,0 +1,46 @@
+/* ✅ Правим стили контейнера для идеального центрирования */
+.container {
+    display: flex;
+    flex-direction: column; /* Добавляем для выравнивания */
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 16px;
+    box-sizing: border-box; /* Учитываем padding в расчетах */
+}
+
+.contentBox {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 400px;
+    padding: 24px;
+    background-color: #1a1a1f;
+    border-radius: 16px;
+    text-align: center; /* Центрируем текст внутри блока */
+}
+
+.title {
+    font-weight: 700 !important;
+    margin-bottom: 0 !important; /* Убираем лишний отступ */
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin-top: -8px !important; /* Придвигаем ближе к заголовку */
+    margin-bottom: 16px !important;
+}
+
+.alert {
+    text-align: left;
+    background-color: transparent !important; /* Делаем фон прозрачным */
+    color: var(--text-secondary) !important;
+    padding: 0 !important; /* Убираем лишние отступы */
+    font-size: 14px;
+}
+
+.skipButton {
+    color: var(--text-secondary);
+}

@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ... все ваши переменные --bg-color, --text-primary и т.д. остаются здесь ... */
+  --bg-color: #111115;
+  --text-primary: #F2F2F7;
+  --text-secondary: #8A8A93;
+  --accent-primary: #C850FF;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --accent-psychoanalysis: #C850FF;
+  --accent-esoteric: #00D4FF;
+  --accent-astrology: #4D7BFF;
+  --accent-folkloric: #34E49D;
+  
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  /* ✅ ДЕЛАЕМ ФОН ПРОЗРАЧНЫМ, чтобы было видно звездное небо */
+  background-color: transparent; 
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background: transparent;
+}

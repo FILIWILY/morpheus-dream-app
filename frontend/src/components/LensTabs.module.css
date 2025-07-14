@@ -1,0 +1,39 @@
+.tabsContainer {
+    position: relative;
+    display: flex;
+    /* Тонкая серая линия под всем блоком вкладок */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tabButton {
+    /* Убираем все лишнее - фон, рамки */
+    background: none;
+    border: none;
+    /* Задаем отступы для кликабельной области */
+    padding: 12px 16px; 
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--text-secondary); /* Цвет неактивной вкладки */
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+/* Убираем отступ у первой кнопки слева и у последней справа для выравнивания */
+.tabButton:first-child {
+    padding-left: 0;
+}
+.tabButton:last-child {
+    padding-right: 0;
+}
+
+
+/* Стиль для анимированного индикатора */
+.indicator {
+    position: absolute;
+    bottom: -1px; /* Накладывается на border-bottom, чтобы перекрыть его */
+    height: 2px;
+    /* Цвет фона будет приходить из инлайн-стилей */
+    border-radius: 1px;
+    /* Плавная анимация движения и изменения размера */
+    transition: left 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease;
+}
