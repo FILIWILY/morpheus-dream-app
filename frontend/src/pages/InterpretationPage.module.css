@@ -11,23 +11,6 @@
     gap: 12px; /* Уменьшаем гэп */
 }
 
-/* ✅ Стили для новой кнопки "назад" */
-.backButton {
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* Увеличиваем кликабельную область без видимых границ */
-    padding: 4px;
-    margin-left: -4px; /* Компенсируем padding */
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
-}
-
-.backButton:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
 .pageTitle {
     font-size: 20px;
     font-weight: 600;
@@ -66,4 +49,30 @@
     line-height: 1.6;
     color: var(--text-primary);
     margin: 0;
+}
+/* ✅ Стили для заглушки с замком */
+.lockContainer {
+    margin-top: 24px;
+    padding: 32px 24px;
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    text-align: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.lockContainer:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-color: var(--text-secondary);
+}
+
+.lockIcon {
+    font-size: 40px !important;
+    margin-bottom: 16px;
+}
+
+.lockText {
+    font-size: 15px;
+    line-height: 1.5;
 }

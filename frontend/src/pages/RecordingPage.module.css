@@ -1,25 +1,21 @@
+/* ... (стили .pageContainer, .header, .title, .content, .footer, .inputWrapper, .textField остаются без изменений) ... */
 .pageContainer {
     display: flex;
     flex-direction: column;
     height: 100%;
     max-width: 900px; 
     margin: 0 auto;
-    /* ✅ УБИРАЕМ боковые отступы, чтобы дочерние элементы могли быть во всю ширину */
-    padding: 16px 0; 
+    padding: 16px;
     box-sizing: border-box;
 }
-
 .header {
     text-align: center;
-    /* ✅ Добавляем отступы здесь, чтобы заголовок не прилипал к краям */
-    padding: 24px 16px; 
+    padding: 24px 0;
 }
-
 .title {
     font-size: 28px;
     font-weight: 600;
 }
-
 .content {
     flex-grow: 1;
     display: flex;
@@ -27,87 +23,99 @@
     align-items: center;
     min-height: 250px;
 }
-
-/* ✅ Контейнер для поля ввода теперь имеет свои отступы */
 .footer {
-    padding: 0 16px 12px 16px; /* Верхний отступ 0, боковые и нижний заданы */
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
 }
-
 .inputWrapper {
-    /* Занимает 100% ширины своего родителя (.footer) */
     width: 100%;
-    margin: 0 auto;
-
+    max-width: 480px;
     display: flex;
     align-items: center;
     gap: 8px;
-    
-    /* ✅ Делаем поле "уже" по высоте, как вы и просили */
-    padding: 8px 10px 8px 20px; 
-
-    background-color: rgba(44, 44, 46, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    
-    /* Идеальная форма "таблетки" */
-    border-radius: 999px; 
-    
+    padding: 8px 8px 8px 16px; 
+    background-color: rgba(30, 20, 46, 0.8);
+    border-radius: 20px; 
+    border: 1px solid var(--border-color);
     box-sizing: border-box;
+    transition: width 0.3s ease;
 }
-
 .textField {
     width: 100%;
     color: var(--text-primary);
 }
 
 
-/* Стили для "Орба" остаются без изменений */
+/* ✅ ФИНАЛЬНЫЕ СТИЛИ ДЛЯ КНОПКИ И ЭМБЛЕМЫ */
+
+@keyframes shimmer {
+  from { filter: hue-rotate(0deg); }
+  to { filter: hue-rotate(360deg); }
+}
 @keyframes rotate-layer-1 {
-  from { transform: rotate(0deg) scale(1); }
-  to { transform: rotate(360deg) scale(1.05); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 @keyframes rotate-layer-2 {
-  from { transform: rotate(0deg) scale(1.05); }
-  to { transform: rotate(-360deg) scale(1); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
 }
+
 .siriOrb {
     position: relative;
-    width: 140px;
-    height: 140px;
     cursor: pointer;
-    border-radius: 50%;
+    border-radius: 50%; /* Оставляем для правильного эффекта при нажатии */
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: transparent; 
+    
+    /* ✅ Убираем все, что делает контейнер видимым */
+    width: auto;
+    height: auto;
+    background: none;
+    border: none;
+    
     transition: transform 0.3s ease;
 }
-.siriOrb:hover { transform: scale(1.05); }
+.siriOrb:hover {
+    /* Эффект при наведении теперь будет применяться к самой эмблеме */
+    transform: scale(1.05);
+}
+
 .orbLayer {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: -80px; left: -80px; right: -80px; bottom: -80px;
     border-radius: 50%;
-    mix-blend-mode: screen;
-    animation-duration: 10s;
+    mix-blend-mode: screen; 
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     animation-direction: alternate;
+    filter: blur(60px);
+    opacity: 0.9;
 }
+
+/* ✅ Изменяем градиенты, чтобы убрать четкую форму круга */
 .orbLayer1 {
-    background: radial-gradient(circle at 30% 30%, var(--accent-esoteric), transparent 50%), 
-                radial-gradient(circle at 70% 70%, var(--accent-astrology), transparent 50%);
+    background: radial-gradient(ellipse at 30% 30%, var(--accent-esoteric), transparent 20%), 
+                radial-gradient(ellipse at 70% 70%, var(--accent-astrology), transparent 20%);
     animation-name: rotate-layer-1;
+    animation-duration: 12s;
 }
 .orbLayer2 {
-    background: radial-gradient(circle at 70% 30%, var(--accent-folkloric), transparent 50%), 
-                radial-gradient(circle at 30% 70%, var(--accent-psychoanalysis), transparent 50%);
+    background: radial-gradient(ellipse at 70% 30%, var(--accent-folkloric), transparent 40%), 
+                radial-gradient(ellipse at 30% 70%, var(--accent-psychoanalysis), transparent 40%);
     animation-name: rotate-layer-2;
-    animation-duration: 8s;
+    animation-duration: 10s;
 }
-.micIcon {
+
+.emblem {
+    width: 200px; 
+    height: 200px;
     z-index: 2;
-    transition: transform 0.3s ease;
+    animation: shimmer 5s linear infinite;
 }
-.siriOrb:hover .micIcon { transform: scale(1.1); }
+
 .siriOrb.isRecording {
     background-color: #D32F2F;
     animation: pulse 1.5s infinite;
@@ -117,4 +125,6 @@
     70% { box-shadow: 0 0 0 20px rgba(211, 47, 47, 0); }
     100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
 }
-.siriOrb.isRecording .orbLayer { display: none; }
+.siriOrb.isRecording .orbLayer, .siriOrb.isRecording .emblem {
+    display: none;
+}

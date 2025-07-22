@@ -4,9 +4,11 @@ import api from '../services/api';
 import styles from './RecordingPage.module.css';
 
 import { Box, TextField, IconButton, CircularProgress, Alert } from '@mui/material';
-import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';
 import SendIcon from '@mui/icons-material/Send';
+
+// Правильный относительный путь от /pages/ до /assets/
+import emblemSrc from '../assets/emblem.png';
 
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { LocalizationContext } from '../context/LocalizationContext';
@@ -15,7 +17,7 @@ import DateSelectionModal from '../components/DateSelectionModal';
 const RecordingPage = () => {
   const navigate = useNavigate();
   const { t, locale } = useContext(LocalizationContext);
-
+  
   const [dreamText, setDreamText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -106,13 +108,11 @@ const RecordingPage = () => {
         onClose={() => setIsModalOpen(false)}
         onDateSelect={handleDateSelect}
       />
-
       <header className={styles.header}>
         <h1 className={styles.title}>
           {isRecording ? t('recording') : t('recordYourDream')}
         </h1>
       </header>
-      
       <main className={styles.content}>
         {error && <Alert severity="error" sx={{ position: 'absolute', top: '120px' }}>{error}</Alert>}
         {isLoading ? (
@@ -124,20 +124,15 @@ const RecordingPage = () => {
             onClick={handleRecordClick}
             disabled={isLoading}
           >
-            {!isRecording && (
-              <>
-                <div className={`${styles.orbLayer} ${styles.orbLayer1}`}></div>
-                <div className={`${styles.orbLayer} ${styles.orbLayer2}`}></div>
-              </>
-            )}
+            <div className={`${styles.orbLayer} ${styles.orbLayer1}`}></div>
+            <div className={`${styles.orbLayer} ${styles.orbLayer2}`}></div>
             {isRecording 
               ? <StopIcon sx={{ fontSize: 60, color: 'white', zIndex: 2 }} /> 
-              : <MicIcon className={styles.micIcon} sx={{ fontSize: 60, color: 'white' }} />
+              : <img src={emblemSrc} alt="Record Dream Emblem" className={styles.emblem} />
             }
           </button>
         )}
       </main>
-
       <footer className={styles.footer}>
         <Box
           component="form"
@@ -172,5 +167,4 @@ const RecordingPage = () => {
     </div>
   );
 };
-
 export default RecordingPage;

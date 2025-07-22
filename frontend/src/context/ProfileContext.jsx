@@ -1,33 +1,42 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 
-export const ProfileContext = createContext();
+// ✅ Создаем контекст с "безопасными" значениями по умолчанию
+export const ProfileContext = createContext({
+  profile: null,
+  isLoading: true,
+  updateProfile: async () => {},
+});
 
 export const ProfileProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Эта функция будет вызвана только один раз при старте приложения
     const fetchProfile = async () => {
       try {
         const { data } = await api.get('/profile');
         setProfile(data);
       } catch (error) {
-        console.error("Could not fetch profile, assuming new user.", error.message);
+        // Если профиль не найден (ошибка 404) или сервер не отвечает,
+        // мы просто устанавливаем пустой объект.
+        // Это говорит приложению, что пользователь новый, и НЕ вызывает сбоя.
+        console.error("Could not fetch profile, assuming new user:", error.message);
         setProfile({}); 
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchProfile();
-  }, []);
+  }, []); // Пустой массив зависимостей означает "выполнить один раз"
 
   const updateProfile = async (newProfileData) => {
-    // ✅ Управляем состоянием загрузки при обновлении
-    setIsLoading(true); 
+    setIsLoading(true);
     try {
       const { data } = await api.put('/profile', newProfileData);
-      setProfile(data);
+      setProfile(data); // Обновляем профиль новыми данными с сервера
       return data;
     } catch (error) {
       console.error("Could not update profile", error);
@@ -37,8 +46,10 @@ export const ProfileProvider = ({ children }) => {
     }
   };
 
+  const value = { profile, isLoading, updateProfile };
+
   return (
-    <ProfileContext.Provider value={{ profile, updateProfile, isLoading }}>
+    <ProfileContext.Provider value={value}>
       {children}
     </ProfileContext.Provider>
   );

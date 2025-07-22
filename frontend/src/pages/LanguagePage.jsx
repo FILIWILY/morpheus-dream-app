@@ -4,7 +4,6 @@ import { Box, Container, AppBar, Toolbar, Typography, IconButton, FormControl, F
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { LocalizationContext } from '../context/LocalizationContext';
 
-// ✅ СОЗДАЕМ МАССИВ С ЯЗЫКАМИ ДЛЯ УДОБСТВА
 const LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'ru', label: 'Русский' },
@@ -12,6 +11,14 @@ const LANGUAGES = [
   { code: 'es', label: 'Español' },
   { code: 'fr', label: 'Français' },
 ];
+
+// ✅ Стили для радио-кнопок на темном фоне
+const radioStyles = {
+    color: 'var(--text-secondary)', // Цвет неактивного кружка
+    '&.Mui-checked': {
+        color: 'var(--accent-primary)', // Цвет активного кружка
+    },
+};
 
 const LanguagePage = () => {
   const navigate = useNavigate();
@@ -49,12 +56,11 @@ const LanguagePage = () => {
             value={selectedLocale}
             onChange={handleLanguageChange}
           >
-            {/* ✅ ДИНАМИЧЕСКИ СОЗДАЕМ СПИСОК ИЗ МАССИВА */}
             {LANGUAGES.map((lang) => (
               <FormControlLabel 
                 key={lang.code}
                 value={lang.code} 
-                control={<Radio />} 
+                control={<Radio sx={radioStyles} />} // ✅ Применяем стили
                 label={lang.label} 
               />
             ))}

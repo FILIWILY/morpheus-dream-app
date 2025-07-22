@@ -2,21 +2,21 @@ import React, { useState, useMemo, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './InterpretationPage.module.css';
 
+// Импортируем все необходимые компоненты
 import DreamTags from '../components/DreamTags';
 import InterpretationSection from '../components/InterpretationSection';
 import LensTabs from '../components/LensTabs';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
+// Импортируем контексты
 import { LocalizationContext } from '../context/LocalizationContext';
 import { useProfile } from '../context/ProfileContext';
-import { Box, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
 
-const DUMMY_DATA_FOR_FALLBACK = {
-    title: "Ошибка загрузки данных",
-    keyImages: [],
-    snapshotSummary: "Не удалось загрузить данные для этого сна. Пожалуйста, вернитесь назад и попробуйте снова.",
-    lenses: { error: { title: "Ошибка", paragraphs: {} } }
-};
+// Импортируем MUI компоненты и иконки
+import { Box, Button, Typography, CircularProgress, IconButton } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LockIcon from '@mui/icons-material/Lock';
 
+// Константы
 const LENS_ACCENT_COLORS = {
     psychoanalytic: '#C850FF',
     esoteric: '#00D4FF',
@@ -24,54 +24,45 @@ const LENS_ACCENT_COLORS = {
     folkloric: '#34E49D',
 };
 
-// ✅ Компонент для ввода данных по астрологии определен ОДИН РАЗ
-const AstrologyOnboarding = ({ onUpdate }) => {
-    const [birthDate, setBirthDate] = useState('');
-    const [birthTime, setBirthTime] = useState('');
-    const [birthPlace, setBirthPlace] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const handleSubmit = async () => {
-        if (!birthDate || !birthPlace) {
-            setError('Пожалуйста, укажите дату и место рождения.');
-            return;
-        }
-        setIsLoading(true);
-        setError('');
-        try {
-            await onUpdate({ birthDate, birthTime, birthPlace });
-        } catch (err) {
-            setError('Не удалось сохранить данные. Попробуйте еще раз.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    
+// Вспомогательный компонент для заблокированной Астрологии
+const AstrologyLock = () => {
+    const navigate = useNavigate();
     return (
-        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2, backgroundColor: '#1a1a1f', borderRadius: '12px' }}>
-            <Typography variant="h6">Астрологическая Линза</Typography>
-            <Typography color="text.secondary">Для получения астрологического толкования, пожалуйста, укажите ваши данные о рождении.</Typography>
-            <TextField label="Дата рождения (дд.мм.гггг)" value={birthDate} onChange={e => setBirthDate(e.target.value)} />
-            <TextField label="Время рождения (чч:мм)" value={birthTime} onChange={e => setBirthTime(e.target.value)} />
-            <TextField label="Место рождения (Город, Страна)" value={birthPlace} onChange={e => setBirthPlace(e.target.value)} />
-            {error && <Alert severity="error">{error}</Alert>}
-            <Button onClick={handleSubmit} variant="contained" disabled={isLoading}>
-                {isLoading ? <CircularProgress size={24} /> : "Получить толкование"}
-            </Button>
+        <Box className={styles.lockContainer} onClick={() => navigate('/profile')}>
+            <LockIcon className={styles.lockIcon} />
+            <Typography className={styles.lockText}>
+                Чтобы получить доступ к астрологической линзе, необходимо заполнить данные в личном кабинете для точной расшифровки.
+            </Typography>
         </Box>
     );
 };
 
+
+// Основной компонент страницы
 const InterpretationPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { t } = useContext(LocalizationContext);
-    const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
+    const { profile, isLoading: isProfileLoading } = useProfile();
 
-    const interpretationData = location.state?.interpretationData || DUMMY_DATA_FOR_FALLBACK;
+    const interpretationData = location.state?.interpretationData;
+
+    // Надежная проверка данных, чтобы страница не "падала"
+    if (!interpretationData || !interpretationData.lenses) {
+        return (
+            <div className={styles.pageWrapper} style={{ padding: '32px' }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>Ошибка</Typography>
+                <Typography sx={{ mb: 2 }}>
+                    Не удалось загрузить данные сна. Вероятно, вы перезагрузили страницу.
+                </Typography>
+                <Button variant="contained" onClick={() => navigate('/history')}>
+                    Вернуться к истории
+                </Button>
+            </div>
+        );
+    }
     
-    const lenses = interpretationData.lenses ? Object.keys(interpretationData.lenses) : [];
+    const lenses = Object.keys(interpretationData.lenses);
     const [activeLensKey, setActiveLensKey] = useState(lenses.length > 0 ? lenses[0] : null);
 
     const activeLensData = activeLensKey ? interpretationData.lenses[activeLensKey] : null;
@@ -86,7 +77,7 @@ const InterpretationPage = () => {
                 return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
             }
             if (isAstrologyDataMissing) {
-                return <AstrologyOnboarding onUpdate={updateProfile} />;
+                return <AstrologyLock />;
             }
         }
 
@@ -107,9 +98,10 @@ const InterpretationPage = () => {
     return (
         <div className={styles.pageWrapper}>
             <header className={styles.header}>
-                <button onClick={() => navigate(-1)} className={styles.backButton}>
+                {/* ✅ Правильная кнопка "назад" без рамки */}
+                <IconButton edge="start" color="inherit" onClick={() => navigate(-1)}>
                     <ArrowBackIcon />
-                </button>
+                </IconButton>
                 <h1 className={styles.pageTitle}>{interpretationData.title}</h1>
             </header>
 
