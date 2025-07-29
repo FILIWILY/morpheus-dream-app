@@ -7,7 +7,7 @@ import 'dotenv/config';
 import { interpretDreamWithAI } from './services/openai.js';
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8081;
 const DB_PATH = path.join(process.cwd(), 'db.json');
 
 app.use(cors());
