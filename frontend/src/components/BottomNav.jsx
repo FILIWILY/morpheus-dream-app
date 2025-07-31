@@ -23,16 +23,14 @@ const BottomNav = () => {
     navigate(newValue);
   };
 
-  // ✅ Стили для иконок
   const iconStyle = {
-    color: 'var(--text-secondary)', // Цвет неактивной иконки
+    color: 'var(--text-secondary)',
     '&.Mui-selected': {
-        color: 'var(--accent-primary)' // Цвет активной иконки
+        color: 'var(--accent-primary)'
     }
   };
 
   return (
-    // Задаем прозрачный фон для самой навигации
     <BottomNavigation 
       value={value} 
       onChange={handleChange} 
@@ -43,19 +41,19 @@ const BottomNav = () => {
         label={t('recordDream')} 
         value="/" 
         icon={<MicIcon />} 
-        sx={iconStyle} // Применяем стили
+        sx={iconStyle}
       />
       <BottomNavigationAction 
         label={t('history')} 
         value="/history" 
         icon={<HistoryIcon />} 
-        sx={iconStyle} // Применяем стили
+        sx={iconStyle}
       />
       <BottomNavigationAction 
         label={t('settings')} 
         value="/settings" 
         icon={<SettingsIcon />} 
-        sx={iconStyle} // Применяем стили
+        sx={iconStyle}
       />
     </BottomNavigation>
   );

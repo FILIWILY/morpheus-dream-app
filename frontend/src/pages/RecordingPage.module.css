@@ -1,4 +1,3 @@
-/* ... (стили .pageContainer, .header, .title, .content, .footer, .inputWrapper, .textField остаются без изменений) ... */
 .pageContainer {
     display: flex;
     flex-direction: column;
@@ -16,11 +15,12 @@
     font-size: 28px;
     font-weight: 600;
 }
+/* Этот блок центрирует кнопку */
 .content {
     flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex; /* ✅ Важно */
+    justify-content: center; /* ✅ Важно */
+    align-items: center; /* ✅ Важно */
     min-height: 250px;
 }
 .footer {
@@ -44,87 +44,4 @@
 .textField {
     width: 100%;
     color: var(--text-primary);
-}
-
-
-/* ✅ ФИНАЛЬНЫЕ СТИЛИ ДЛЯ КНОПКИ И ЭМБЛЕМЫ */
-
-@keyframes shimmer {
-  from { filter: hue-rotate(0deg); }
-  to { filter: hue-rotate(360deg); }
-}
-@keyframes rotate-layer-1 {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-@keyframes rotate-layer-2 {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
-}
-
-.siriOrb {
-    position: relative;
-    cursor: pointer;
-    border-radius: 50%; /* Оставляем для правильного эффекта при нажатии */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-    /* ✅ Убираем все, что делает контейнер видимым */
-    width: auto;
-    height: auto;
-    background: none;
-    border: none;
-    
-    transition: transform 0.3s ease;
-}
-.siriOrb:hover {
-    /* Эффект при наведении теперь будет применяться к самой эмблеме */
-    transform: scale(1.05);
-}
-
-.orbLayer {
-    position: absolute;
-    top: -80px; left: -80px; right: -80px; bottom: -80px;
-    border-radius: 50%;
-    mix-blend-mode: screen; 
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
-    filter: blur(60px);
-    opacity: 0.9;
-}
-
-/* ✅ Изменяем градиенты, чтобы убрать четкую форму круга */
-.orbLayer1 {
-    background: radial-gradient(ellipse at 30% 30%, var(--accent-esoteric), transparent 20%), 
-                radial-gradient(ellipse at 70% 70%, var(--accent-astrology), transparent 20%);
-    animation-name: rotate-layer-1;
-    animation-duration: 12s;
-}
-.orbLayer2 {
-    background: radial-gradient(ellipse at 70% 30%, var(--accent-folkloric), transparent 40%), 
-                radial-gradient(ellipse at 30% 70%, var(--accent-psychoanalysis), transparent 40%);
-    animation-name: rotate-layer-2;
-    animation-duration: 10s;
-}
-
-.emblem {
-    width: 200px; 
-    height: 200px;
-    z-index: 2;
-    animation: shimmer 5s linear infinite;
-}
-
-.siriOrb.isRecording {
-    background-color: #D32F2F;
-    animation: pulse 1.5s infinite;
-}
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7); }
-    70% { box-shadow: 0 0 0 20px rgba(211, 47, 47, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
-}
-.siriOrb.isRecording .orbLayer, .siriOrb.isRecording .emblem {
-    display: none;
 }

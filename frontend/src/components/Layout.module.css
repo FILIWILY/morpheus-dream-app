@@ -1,15 +1,15 @@
 .layoutContainer {
     display: flex;
     flex-direction: column;
-    height: 100%; /* Занимает всю доступную высоту от родителя (#root) */
+    height: 100%;
     box-sizing: border-box;
 }
 
 .mainContent {
-    flex-grow: 1; /* Основной контент занимает все доступное место */
-    display: flex; /* Важно, чтобы дочерний элемент мог растянуться на 100% высоты */
+    flex-grow: 1;
+    display: flex;
     flex-direction: column;
-    overflow: hidden; /* Предотвращает случайный скролл */
+    overflow: hidden;
 }
 
 .nav {

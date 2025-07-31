@@ -1,7 +1,0 @@
-.highlight {
-    color: var(--accent-psychoanalysis); /* Используем основной фиолетовый акцент */
-    font-weight: 600;
-    background-color: rgba(200, 80, 255, 0.1);
-    padding: 2px 4px;
-    border-radius: 4px;
-}

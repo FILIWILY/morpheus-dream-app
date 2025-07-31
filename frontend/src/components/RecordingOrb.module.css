@@ -1,0 +1,32 @@
+.container {
+    position: relative;
+    width: 340px;  /* Немного больше */
+    height: 340px; /* Немного больше */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.container:hover {
+    transform: scale(1.05);
+}
+
+.canvasContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.stopIcon {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 80px !important;
+    z-index: 10;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+    /* Отключаем события мыши, чтобы сфера под иконкой оставалась кликабельной */
+    pointer-events: none; 
+}

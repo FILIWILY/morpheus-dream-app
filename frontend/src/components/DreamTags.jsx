@@ -3,17 +3,14 @@ import styles from './DreamTags.module.css';
 import { LocalizationContext } from '../context/LocalizationContext';
 
 const DreamTags = ({ tags = [] }) => {
-  // ✅ Получаем функцию `t` из контекста локализации
   const { t } = useContext(LocalizationContext);
 
-  // ✅ Если тегов нет, компонент не будет рендериться
   if (!tags || tags.length === 0) {
     return null;
   }
 
   return (
     <div>
-      {/* ✅ Используем ключ перевода для заголовка */}
       <h2 className={styles.title}>{t('keySymbolBreakdown')}</h2>
       <p className={styles.tagsText}>
         {tags.join(' · ')}

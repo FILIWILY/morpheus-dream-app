@@ -10,7 +10,7 @@ const StarryBackground = () => {
 
     const ctx = canvas.getContext('2d');
     let stars = [];
-    const numStars = window.innerWidth > 768 ? 500 : 250; // Меньше звезд на мобильных
+    const numStars = window.innerWidth > 768 ? 500 : 250;
     let animationFrameId;
 
     const resizeCanvas = () => {

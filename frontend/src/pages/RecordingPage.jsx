@@ -4,12 +4,11 @@ import api from '../services/api';
 import styles from './RecordingPage.module.css';
 
 import { Box, TextField, IconButton, CircularProgress, Alert } from '@mui/material';
-import StopIcon from '@mui/icons-material/Stop';
 import SendIcon from '@mui/icons-material/Send';
 
-// Правильный относительный путь от /pages/ до /assets/
-import emblemSrc from '../assets/emblem.png';
-
+// --- ВАЖНЫЕ ИЗМЕНЕНИЯ ---
+// 1. Импортируем новый RecordingOrb
+import RecordingOrb from '../components/RecordingOrb'; 
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { LocalizationContext } from '../context/LocalizationContext';
 import DateSelectionModal from '../components/DateSelectionModal';
@@ -25,7 +24,8 @@ const RecordingPage = () => {
   const [dreamDate, setDreamDate] = useState(null);
   const [userAction, setUserAction] = useState(null);
 
-  const { isRecording, audioBlob, startRecording, stopRecording } = useAudioRecorder();
+  // 2. Получаем новое значение 'amplitude' из нашего обновленного хука
+  const { isRecording, audioBlob, amplitude, startRecording, stopRecording } = useAudioRecorder();
 
   useEffect(() => {
     if (dreamDate && userAction === 'startRecording') {
@@ -115,22 +115,16 @@ const RecordingPage = () => {
       </header>
       <main className={styles.content}>
         {error && <Alert severity="error" sx={{ position: 'absolute', top: '120px' }}>{error}</Alert>}
+        
         {isLoading ? (
           <CircularProgress size={140} color="primary" />
         ) : (
-          <button
-            className={`${styles.siriOrb} ${isRecording ? styles.isRecording : ''}`}
-            aria-label={isRecording ? t('stopRecording') : t('recordDream')}
-            onClick={handleRecordClick}
-            disabled={isLoading}
-          >
-            <div className={`${styles.orbLayer} ${styles.orbLayer1}`}></div>
-            <div className={`${styles.orbLayer} ${styles.orbLayer2}`}></div>
-            {isRecording 
-              ? <StopIcon sx={{ fontSize: 60, color: 'white', zIndex: 2 }} /> 
-              : <img src={emblemSrc} alt="Record Dream Emblem" className={styles.emblem} />
-            }
-          </button>
+          // 3. Используем RecordingOrb и передаем необходимые пропсы
+          <RecordingOrb 
+            isRecording={isRecording} 
+            amplitude={amplitude}
+            onClick={isLoading ? undefined : handleRecordClick} 
+          />
         )}
       </main>
       <footer className={styles.footer}>
@@ -167,4 +161,5 @@ const RecordingPage = () => {
     </div>
   );
 };
+
 export default RecordingPage;

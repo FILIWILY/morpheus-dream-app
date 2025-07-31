@@ -2,21 +2,17 @@ import React, { useState, useMemo, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './InterpretationPage.module.css';
 
-// Импортируем все необходимые компоненты
 import DreamTags from '../components/DreamTags';
 import InterpretationSection from '../components/InterpretationSection';
 import LensTabs from '../components/LensTabs';
 
-// Импортируем контексты
 import { LocalizationContext } from '../context/LocalizationContext';
 import { useProfile } from '../context/ProfileContext';
 
-// Импортируем MUI компоненты и иконки
 import { Box, Button, Typography, CircularProgress, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LockIcon from '@mui/icons-material/Lock';
 
-// Константы
 const LENS_ACCENT_COLORS = {
     psychoanalytic: '#C850FF',
     esoteric: '#00D4FF',
@@ -24,7 +20,6 @@ const LENS_ACCENT_COLORS = {
     folkloric: '#34E49D',
 };
 
-// Вспомогательный компонент для заблокированной Астрологии
 const AstrologyLock = () => {
     const navigate = useNavigate();
     return (
@@ -37,8 +32,6 @@ const AstrologyLock = () => {
     );
 };
 
-
-// Основной компонент страницы
 const InterpretationPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -47,7 +40,6 @@ const InterpretationPage = () => {
 
     const interpretationData = location.state?.interpretationData;
 
-    // Надежная проверка данных, чтобы страница не "падала"
     if (!interpretationData || !interpretationData.lenses) {
         return (
             <div className={styles.pageWrapper} style={{ padding: '32px' }}>
@@ -98,7 +90,6 @@ const InterpretationPage = () => {
     return (
         <div className={styles.pageWrapper}>
             <header className={styles.header}>
-                {/* ✅ Правильная кнопка "назад" без рамки */}
                 <IconButton edge="start" color="inherit" onClick={() => navigate(-1)}>
                     <ArrowBackIcon />
                 </IconButton>
