@@ -3,40 +3,48 @@ import styles from './LensTabs.module.css';
 
 const LensTabs = ({ lenses, activeLens, setActiveLens, accentColor }) => {
     const tabsRef = useRef([]);
-    // Состояние для хранения стилей индикатора (его ширина и отступ слева)
-    const [indicatorStyle, setIndicatorStyle] = useState({});
 
     useEffect(() => {
-        const activeIndex = Object.keys(lenses).findIndex(key => key === activeLens);
-        const activeTabNode = tabsRef.current[activeIndex];
-        
-        // Если активная вкладка найдена, вычисляем ее положение и размеры
-        if (activeTabNode) {
-            setIndicatorStyle({
-                left: activeTabNode.offsetLeft,
-                width: activeTabNode.offsetWidth,
-                backgroundColor: accentColor, 
-            });
-        }
-    }, [activeLens, lenses, accentColor]); // Пересчитываем при смене вкладки или цвета
+        // Logic for setting active tab style might still be needed if not handled purely by CSS borders
+        // For now, removing the old indicator logic entirely.
+    }, [activeLens, lenses, accentColor]);
+
+    const lensKeys = Object.keys(lenses);
+    // Split lenses into two rows. Assuming a maximum of 4 lenses, 2 per row.
+    // This can be made more dynamic if needed, but for the provided example, this works.
+    const row1LensKeys = lensKeys.slice(0, 2);
+    const row2LensKeys = lensKeys.slice(2, 4); // Handles cases with less than 4 or more than 2 in the second row
 
     return (
         <div className={styles.tabsContainer}>
-            {Object.keys(lenses).map((key, index) => (
-                <button
-                    key={key}
-                    // Сохраняем ссылку на элемент кнопки в массив
-                    ref={el => tabsRef.current[index] = el}
-                    className={`${styles.tabButton} ${activeLens === key ? styles.active : ''}`}
-                    onClick={() => setActiveLens(key)}
-                    // Активной вкладке задаем акцентный цвет текста
-                    style={{ color: activeLens === key ? accentColor : 'var(--text-secondary)' }}
-                >
-                    {lenses[key].title}
-                </button>
-            ))}
-            {/* Тот самый анимированный индикатор-подчеркивание */}
-            <div className={styles.indicator} style={indicatorStyle}></div>
+            <div className={styles.tabsRow}>
+                {row1LensKeys.map((key, index) => (
+                    <button
+                        key={key}
+                        ref={el => tabsRef.current[index] = el}
+                        className={`${styles.tabBtn} ${activeLens === key ? styles.active : ''}`}
+                        onClick={() => setActiveLens(key)}
+                        style={{ color: activeLens === key ? accentColor : 'var(--text-secondary)' }}
+                    >
+                        {lenses[key].title}
+                    </button>
+                ))}
+            </div>
+            {row2LensKeys.length > 0 && (
+                <div className={styles.tabsRow}>
+                    {row2LensKeys.map((key, index) => (
+                        <button
+                            key={key}
+                            ref={el => tabsRef.current[row1LensKeys.length + index] = el} // Adjust index for second row
+                            className={`${styles.tabBtn} ${activeLens === key ? styles.active : ''}`}
+                            onClick={() => setActiveLens(key)}
+                            style={{ color: activeLens === key ? accentColor : 'var(--text-secondary)' }}
+                        >
+                            {lenses[key].title}
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

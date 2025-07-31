@@ -190,7 +190,7 @@ const RecordingOrb = ({ isRecording, amplitude, onClick }) => {
         depthTest: false,
     });
 
-    const iconGeometry = new THREE.PlaneGeometry(3.2, 3.2);
+    const iconGeometry = new THREE.PlaneGeometry(3.2, 3.2, 1, 1);
     const iconMesh = new THREE.Mesh(iconGeometry, iconMaterial);
     scene.add(iconMesh); // Добавляем иконку отдельно на сцену
 

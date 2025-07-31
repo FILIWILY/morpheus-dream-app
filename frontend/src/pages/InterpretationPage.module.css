@@ -7,12 +7,12 @@
 .header {
     display: flex;
     align-items: center;
-    padding: 12px 0;
+    padding: 12px 12px; /* Добавляем горизонтальный отступ для выравнивания */
     gap: 12px; /* Уменьшаем гэп */
 }
 
 .pageTitle {
-    font-size: 20px;
+    font-size: 18px; /* Уменьшаем кегль */
     font-weight: 600;
     margin: 0;
 }
@@ -22,8 +22,10 @@
     flex-direction: column;
     gap: 16px; /* Уменьшаем отступ между блоками */
     background-color: rgba(0, 0, 0, 0.7); /* Менее прозрачный черный фон */
-    padding: 12px; /* Уменьшаем внутренние отступы */
+    padding: 14px; /* Уменьшаем внутренние отступы */
     border-radius: 12px; /* Скругляем углы */
+    backdrop-filter: blur(5px); /* Добавляем эффект блюра */
+    -webkit-backdrop-filter: blur(5px); /* Префикс для Safari */
 }
 
 /* ✅ Новый контейнер для сплошного текста */
@@ -53,15 +55,6 @@
     color: var(--text-primary);
     margin: 0;
     text-align: justify;
-}
-
-.summaryAndTagsContainer {
-    background-color: rgb(0, 0, 0); /* Полностью черный фон */
-    padding: 12px; /* Такие же внутренние отступы, как у основного контента */
-    border-radius: 12px; /* Скругление углов */
-    display: flex;
-    flex-direction: column;
-    gap: 16px; /* Отступ между DreamTags и InterpretationSection */
 }
 
 /* ✅ Стили для заглушки с замком */

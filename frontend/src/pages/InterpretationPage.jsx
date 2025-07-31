@@ -97,12 +97,10 @@ const InterpretationPage = () => {
             </header>
 
             <main className={styles.content}>
-                <div className={styles.summaryAndTagsContainer}> {/* Новый контейнер для объединения */} 
-                    <DreamTags tags={interpretationData.keyImages} accentColor={activeAccentColor} /> {/* Передаем accentColor */} 
-                    <InterpretationSection title={t('snapshotSummary')} accentColor={activeAccentColor}> {/* Передаем accentColor */} 
-                        <p>{interpretationData.snapshotSummary}</p>
-                    </InterpretationSection>
-                </div>
+                <DreamTags tags={interpretationData.keyImages} accentColor={activeAccentColor} />
+                <InterpretationSection title={t('snapshotSummary')} accentColor={activeAccentColor}>
+                    <p>{interpretationData.snapshotSummary}</p>
+                </InterpretationSection>
                 
                 {lenses.length > 0 && (
                     <LensTabs 
