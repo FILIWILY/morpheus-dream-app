@@ -1,5 +1,5 @@
 .pageWrapper {
-    padding: 0 16px 120px 16px;
+    padding: 0 8px 120px 8px; /* Уменьшаем горизонтальный отступ еще больше */
     max-width: 680px;
     margin: 0 auto;
 }
@@ -20,7 +20,10 @@
 .content {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 16px; /* Уменьшаем отступ между блоками */
+    background-color: rgba(0, 0, 0, 0.7); /* Менее прозрачный черный фон */
+    padding: 12px; /* Уменьшаем внутренние отступы */
+    border-radius: 12px; /* Скругляем углы */
 }
 
 /* ✅ Новый контейнер для сплошного текста */
@@ -49,7 +52,18 @@
     line-height: 1.6;
     color: var(--text-primary);
     margin: 0;
+    text-align: justify;
 }
+
+.summaryAndTagsContainer {
+    background-color: rgb(0, 0, 0); /* Полностью черный фон */
+    padding: 12px; /* Такие же внутренние отступы, как у основного контента */
+    border-radius: 12px; /* Скругление углов */
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* Отступ между DreamTags и InterpretationSection */
+}
+
 /* ✅ Стили для заглушки с замком */
 .lockContainer {
     margin-top: 24px;

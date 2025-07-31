@@ -3,20 +3,22 @@
 }
 
 .title {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: var(--text-secondary);
-    margin: 0 0 8px 0;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
 }
 
 .content {
     font-size: 16px;
     line-height: 1.6;
-    color: var(--text-primary);
+    color: white;
+    text-align: justify;
 }
 
 .content p {
     margin: 0;
+    text-align: justify;
 }

@@ -96,7 +96,15 @@ app.post('/processDreamText', ensureUser, async (req, res) => {
     return res.status(400).json({ error: "Поля text и date обязательны." });
   }
   try {
-    const interpretation = await interpretDreamWithAI(text, lang);
+    let interpretation;
+    if (process.env.USE_MOCK_API === 'true') {
+        const mockDataPath = path.join(process.cwd(), 'mock-interpretation.json');
+        const mockData = fs.readFileSync(mockDataPath, 'utf-8');
+        interpretation = JSON.parse(mockData);
+    } else {
+        interpretation = await interpretDreamWithAI(text, lang);
+    }
+
     const dreamDate = date === 'today' ? new Date().toISOString().split('T')[0] : date;
     const newDreamEntry = { id: uuidv4(), date: dreamDate, originalText: text, ...interpretation };
     const db = readDB();

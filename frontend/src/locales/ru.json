@@ -14,7 +14,7 @@
   "cancel": "Отмена",
   "dreamInterpretation": "Толкование Сна",
   "snapshotSummary": "Краткое Содержание",
-  "keySymbolBreakdown": "Разбор Ключевых Символов",
+  "keySymbolBreakdown": "Ключевые образы",
   "explanation": "Объяснение",
   "practicalTakeaway": "Практический Совет",
   "comparisonStatistic": "Статистика для Сравнения",
@@ -28,5 +28,18 @@
   "whenDidYouDream": "Когда вам приснился этот сон?",
   "today": "Сегодня",
   "selectDate": "Выбрать дату",
-  "confirmDate": "Подтвердить дату"
+  "confirmDate": "Подтвердить дату",
+  "lenses": {
+    "psychoanalytic": "Психоанализ",
+    "esoteric": "Эзотерика",
+    "astrology": "Астрология",
+    "folkloric": "Фольклор"
+  },
+  "folkloricLenses": {
+    "miller": "Сонник Миллера",
+    "tsvetkov": "Сонник Цветкова",
+    "vanga": "Сонник Ванги",
+    "chinese": "Китайский сонник",
+    "muslim": "Мусульманский сонник"
+  }
 }
