@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
-import { Container, Typography, TextField, Button, Box, Alert, CircularProgress, AppBar, Toolbar, IconButton } from '@mui/material';
+import { LocalizationContext } from '../context/LocalizationContext';
+import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
+import { Container, Typography, TextField, Button, Box, Alert, CircularProgress, AppBar, Toolbar, IconButton, List, ListItem, ListItemText } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import styles from './ProfilePage.module.css';
 
@@ -39,28 +41,65 @@ const formatTime = (value) => {
 const ProfilePage = () => {
     const navigate = useNavigate();
     const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
-    
+    const { locale: lang } = useContext(LocalizationContext);
+
+    // Локальное состояние для полей формы
     const [birthDate, setBirthDate] = useState('');
     const [birthTime, setBirthTime] = useState('');
-    const [birthPlace, setBirthPlace] = useState('');
+    
+    // Состояние для автокомплита
+    const {
+        ready,
+        value: birthPlaceValue,
+        suggestions: { status, data: suggestionsData },
+        setValue: setBirthPlaceValue,
+        clearSuggestions,
+    } = usePlacesAutocomplete({
+        requestOptions: {
+            language: lang,
+            types: ['(cities)'],
+        },
+        debounce: 300,
+    });
+
+    const [placeId, setPlaceId] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
+    // Заполняем форму данными из профиля при загрузке
     useEffect(() => {
         if (profile) {
             setBirthDate(profile.birthDate || '');
             setBirthTime(profile.birthTime || '');
-            setBirthPlace(profile.birthPlace || '');
+            setBirthPlaceValue(profile.birthPlace || '', false); // Устанавливаем значение без вызова API
         }
-    }, [profile]);
+    }, [profile, setBirthPlaceValue]);
+
+    const handleInputChange = (e) => {
+        setBirthPlaceValue(e.target.value);
+        setPlaceId(null); // Сбрасываем placeId при ручном вводе
+    };
+
+    const handleSelectSuggestion = ({ description, place_id }) => {
+        setBirthPlaceValue(description, false); // Обновляем поле ввода
+        setPlaceId(place_id); // Сохраняем place_id
+        clearSuggestions(); // Очищаем список предложений
+    };
 
     const handleSave = async () => {
         setIsSaving(true);
         setError('');
         setSuccess('');
+
+        const profileData = {
+            birthDate,
+            birthTime,
+            birthPlace: placeId ? { description: birthPlaceValue, placeId } : birthPlaceValue,
+        };
+
         try {
-            await updateProfile({ birthDate, birthTime, birthPlace });
+            await updateProfile(profileData);
             setSuccess('Данные успешно сохранены!');
         } catch (err) {
             setError('Не удалось сохранить данные.');
@@ -98,7 +137,7 @@ const ProfilePage = () => {
                     value={birthDate}
                     onChange={(e) => setBirthDate(formatDate(e.target.value))}
                     inputProps={{ maxLength: 10, placeholder: "23.05.1990" }}
-                    sx={textFieldStyles} // ✅ Применяем стили
+                    sx={textFieldStyles}
                 />
                 <TextField
                     label="Время рождения (чч:мм, необязательно)"
@@ -107,17 +146,33 @@ const ProfilePage = () => {
                     value={birthTime}
                     onChange={(e) => setBirthTime(formatTime(e.target.value))}
                     inputProps={{ maxLength: 5, placeholder: "14:30" }}
-                    sx={textFieldStyles} // ✅ Применяем стили
+                    sx={textFieldStyles}
                 />
-                <TextField
-                    label="Место рождения (Город, Страна)"
-                    variant="outlined"
-                    fullWidth
-                    value={birthPlace}
-                    onChange={(e) => setBirthPlace(e.target.value)}
-                    inputProps={{ placeholder: "Москва, Россия" }}
-                    sx={textFieldStyles} // ✅ Применяем стили
-                />
+                <Box>
+                    <TextField
+                        label="Место рождения (Город, Страна)"
+                        variant="outlined"
+                        fullWidth
+                        value={birthPlaceValue}
+                        onChange={handleInputChange}
+                        disabled={!ready}
+                        inputProps={{ placeholder: "Начните вводить город..." }}
+                        sx={textFieldStyles}
+                    />
+                    {status === 'OK' && (
+                        <List sx={{ bgcolor: 'var(--background-secondary)', mt: 1, p: 0 }}>
+                            {suggestionsData.map((suggestion) => (
+                                <ListItem
+                                    button
+                                    key={suggestion.place_id}
+                                    onClick={() => handleSelectSuggestion(suggestion)}
+                                >
+                                    <ListItemText primary={suggestion.description} sx={{ color: 'var(--text-primary)'}} />
+                                </ListItem>
+                            ))}
+                        </List>
+                    )}
+                </Box>
                 
                 {error && <Alert severity="error">{error}</Alert>}
                 {success && <Alert severity="success">{success}</Alert>}
@@ -129,5 +184,6 @@ const ProfilePage = () => {
         </Container>
     );
 };
+
 
 export default ProfilePage;

@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
+import axios from 'axios';
 import { interpretDreamWithAI } from './services/openai.js';
 
 const app = express();
@@ -61,10 +62,54 @@ app.get('/profile', ensureUser, (req, res) => {
 });
 
 // Обновление профиля
-app.put('/profile', ensureUser, (req, res) => {
+app.put('/profile', ensureUser, async (req, res) => {
     const { birthDate, birthTime, birthPlace } = req.body;
     const db = readDB();
-    db.users[req.userId].profile = { birthDate, birthTime, birthPlace };
+    const userProfile = db.users[req.userId].profile || {};
+
+    // Обновляем дату и время
+    userProfile.birthDate = birthDate;
+    userProfile.birthTime = birthTime;
+
+    // Если передан placeId, получаем координаты
+    if (birthPlace && birthPlace.placeId) {
+        try {
+            const apiKey = process.env.GOOGLE_GEOCODING_API_KEY;
+            const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+                params: {
+                    place_id: birthPlace.placeId,
+                    key: apiKey,
+                    language: 'ru' // Можно сделать динамическим в будущем
+                }
+            });
+
+            const { data } = response;
+            if (data.status === 'OK' && data.results.length > 0) {
+                const location = data.results[0].geometry.location;
+                userProfile.birthPlace = data.results[0].formatted_address;
+                userProfile.birthLatitude = location.lat;
+                userProfile.birthLongitude = location.lng;
+            } else {
+                // Если геокодирование не удалось, сохраняем только текстовое описание
+                userProfile.birthPlace = birthPlace.description;
+                delete userProfile.birthLatitude;
+                delete userProfile.birthLongitude;
+            }
+        } catch (error) {
+            console.error('Error fetching geocoding data:', error);
+            // В случае ошибки сохраняем текстовое описание
+            userProfile.birthPlace = birthPlace.description;
+            delete userProfile.birthLatitude;
+            delete userProfile.birthLongitude;
+        }
+    } else {
+        // Сохраняем как есть (для обратной совместимости)
+        userProfile.birthPlace = birthPlace;
+        delete userProfile.birthLatitude;
+        delete userProfile.birthLongitude;
+    }
+
+    db.users[req.userId].profile = userProfile;
     writeDB(db);
     res.status(200).json(db.users[req.userId].profile);
 });

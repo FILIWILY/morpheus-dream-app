@@ -5,6 +5,8 @@ import styles from './InterpretationPage.module.css';
 import DreamTags from '../components/DreamTags';
 import InterpretationSection from '../components/InterpretationSection';
 import LensTabs from '../components/LensTabs';
+import PsychoanalyticInsight from '../components/PsychoanalyticInsight';
+import TarotSpread from '../components/TarotSpread';
 
 import { LocalizationContext } from '../context/LocalizationContext';
 import { useProfile } from '../context/ProfileContext';
@@ -15,7 +17,7 @@ import LockIcon from '@mui/icons-material/Lock';
 
 const LENS_ACCENT_COLORS = {
     psychoanalytic: '#C850FF',
-    esoteric: '#00D4FF',
+    tarot: '#FFC700',
     astrology: '#4D7BFF',
     folkloric: '#34E49D',
 };
@@ -55,36 +57,73 @@ const InterpretationPage = () => {
     }
     
     const lenses = Object.keys(interpretationData.lenses);
-    const [activeLensKey, setActiveLensKey] = useState(lenses.length > 0 ? lenses[0] : null);
+        const [activeLensKey, setActiveLensKey] = useState(lenses.length > 0 ? lenses[0] : null);
+    const [isTarotRevealed, setIsTarotRevealed] = useState(false);
 
     const activeLensData = activeLensKey ? interpretationData.lenses[activeLensKey] : null;
-    const paragraphs = activeLensData?.paragraphs ? Object.values(activeLensData.paragraphs) : [];
-    
     const activeAccentColor = useMemo(() => LENS_ACCENT_COLORS[activeLensKey] || '#C850FF', [activeLensKey]);
     const isAstrologyDataMissing = !profile?.birthDate || !profile?.birthPlace;
 
     const renderLensContent = () => {
-        if (activeLensKey === 'astrology') {
-            if (isProfileLoading) {
-                return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
-            }
-            if (isAstrologyDataMissing) {
-                return <AstrologyLock />;
-            }
+        if (!activeLensData) return null;
+
+        switch (activeLensKey) {
+            case 'astrology':
+                if (isProfileLoading) {
+                    return <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>;
+                }
+                if (isAstrologyDataMissing) {
+                    return <AstrologyLock />;
+                }
+                break;
+            
+            case 'psychoanalytic':
+                const schools = activeLensData.schools ? Object.values(activeLensData.schools) : [];
+                return (
+                    <div className={styles.lensContentFlow}>
+                        <PsychoanalyticInsight insights={activeLensData.insights} accentColor={activeAccentColor} />
+                        {schools.map(school => (
+                            <div key={school.title} className={styles.flowParagraph}>
+                                <h3 className={styles.flowTitle} style={{ color: activeAccentColor }}>
+                                    {school.title}
+                                </h3>
+                                <p className={styles.flowText}>{school.content}</p>
+                            </div>
+                        ))}
+                    </div>
+                );
+
+            case 'tarot':
+                return <TarotSpread 
+                            spread={activeLensData.spread} 
+                            summary={activeLensData.summary} 
+                            accentColor={activeAccentColor}
+                            isRevealed={isTarotRevealed}
+                            onReveal={() => setIsTarotRevealed(true)} 
+                        />;
+
+            default:
+                break;
+        }
+        
+        // Fallback for old structure lenses like folkloric
+        const paragraphs = activeLensData.paragraphs ? Object.values(activeLensData.paragraphs) : [];
+        if (paragraphs.length > 0) {
+            return (
+                <div className={styles.lensContentFlow}>
+                    {paragraphs.map(paragraph => (
+                        <div key={paragraph.title} className={styles.flowParagraph}>
+                            <h3 className={styles.flowTitle} style={{ color: activeAccentColor }}>
+                                {paragraph.title}
+                            </h3>
+                            <p className={styles.flowText}>{paragraph.content}</p>
+                        </div>
+                    ))}
+                </div>
+            );
         }
 
-        return (
-            <div className={styles.lensContentFlow}>
-                {paragraphs.map(paragraph => (
-                    <div key={paragraph.title} className={styles.flowParagraph}>
-                        <h3 className={styles.flowTitle} style={{ color: activeAccentColor }}>
-                            {paragraph.title}
-                        </h3>
-                        <p className={styles.flowText}>{paragraph.content}</p>
-                    </div>
-                ))}
-            </div>
-        );
+        return null;
     };
 
     return (
