@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 import StarryBackground from './components/StarryBackground';
 import Layout from './components/Layout';
@@ -10,6 +10,7 @@ import InterpretationPage from './pages/InterpretationPage';
 import LanguagePage from './pages/LanguagePage';
 import WelcomePage from './pages/WelcomePage';
 import ProfilePage from './pages/ProfilePage';
+import PrivateRoute from './components/PrivateRoute'; // Импортируем PrivateRoute
 
 function App() {
   return (
@@ -18,16 +19,25 @@ function App() {
       
       <Routes>
         <Route path="/welcome" element={<WelcomePage />} />
-
-        <Route path="/" element={<Layout />}>
+        <Route path="/profile" element={<ProfilePage />} />
+        
+        <Route 
+          path="/" 
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        >
           <Route index element={<RecordingPage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         
+        <Route path="interpretation/:id" element={<InterpretationPage />} />
         <Route path="interpretation" element={<InterpretationPage />} />
+        <Route path="*" element={<Navigate to="/welcome" replace />} />
         <Route path="language" element={<LanguagePage />} />
-        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </>
   );

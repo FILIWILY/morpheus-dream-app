@@ -1,0 +1,35 @@
+.recommendationsContainer {
+    margin-top: 24px;
+    padding: 16px;
+    background-color: var(--background-secondary);
+    border-radius: 12px;
+}
+
+.mainTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.recommendationCard {
+    margin-bottom: 16px;
+    border-radius: 8px !important;
+    border: 1px solid var(--border-color-light) !important;
+    background-color: var(--background-primary) !important;
+}
+
+.recommendationCard:last-child {
+    margin-bottom: 0;
+}
+
+.recommendationTitle {
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 8px !important;
+}
+
+.recommendationContent {
+    color: var(--text-secondary) !important;
+    line-height: 1.6;
+}

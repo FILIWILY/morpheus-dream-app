@@ -1,30 +1,72 @@
-# Frontend API Interactions
+# Frontend API and Data Structures
 
-This document outlines how the frontend application interacts with the backend API.
+This document outlines the key data structures the frontend expects to receive from the backend for rendering the main pages and components.
 
-## API Client
-All API calls from the frontend are made using an `axios` instance, which is configured in `frontend/src/services/api.js`.
+## Main Interpretation Object
 
-## Base URL and Proxying
-During local development, frontend requests are made to the `/api` path. This path is then expected to be proxied to the backend server's address (e.g., `http://localhost:8081`). This proxying is typically configured via `vite.config.js` and uses the `API_URL` environment variable from `frontend/.env`.
+This is the primary object used to render the `InterpretationPage`. It's fetched from the `/api/interpretation/:id` endpoint.
 
-## Authentication (X-Telegram-User-ID Header)
-An `axios` interceptor in `frontend/src/services/api.js` automatically adds an `X-Telegram-User-ID` header to all outgoing requests. This header is crucial for the backend to identify and manage user-specific data.
+**File Location**: `frontend/src/pages/InterpretationPage.jsx`
 
-- If the application is running within a Telegram Web App context (`window.Telegram?.WebApp.initDataUnsafe?.user?.id`), the actual Telegram user ID is used.
-- Otherwise, a default test user ID (`'12345-test-user'`) is used for development purposes.
-
-## Frontend Components and Backend Endpoint Interactions
-
-| Frontend Component(s) | Description of Interaction                                                                                                                                                                                                                                        | Corresponding Backend Endpoint(s) |
-| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- |
-| `RecordingPage.jsx`   | Handles user input for dreams. It sends textual dream descriptions to the backend for AI interpretation. While there's a placeholder for audio processing, it's currently not implemented.
-    - **Sends**: Dream text, language, and date.
-    - **Receives**: AI-generated dream interpretation with various lenses, which is then passed to `InterpretationPage`. | `POST /processDreamText`<br>`POST /processDreamAudio` (future) |
-| `HistoryPage.jsx`     | Responsible for fetching and displaying a user's past dream interpretations. It also provides functionality to delete selected dreams from the history.
-    - **Sends**: Requests for dream history; specific dream IDs for deletion.
-    - **Receives**: List of historical dreams; confirmation of deletion.                                                  | `GET /dreams`<br>`DELETE /dreams`   |
-| `ProfilePage.jsx`     | Manages the user's personal profile information, specifically birth details (date, time, and place). This data is used by the backend for more accurate astrological dream interpretations.
-    - **Sends**: Updated birth date, birth time, and birth place.
-    - **Receives**: Current or updated user profile data.                                                                    | `GET /profile`<br>`PUT /profile`    |
-| `InterpretationPage.jsx` | This page receives the interpreted dream data (usually passed from `RecordingPage` via React Router's `location.state`). It then renders the dream's title, key images, summary, and the detailed interpretations across the four lenses (Psychoanalytic, Esoteric, Astrology, Folkloric). | (Data received via client-side routing, no direct API call from this component for initial data) |
+```javascript
+// Example structure of the 'interpretation' object
+const interpretation = {
+  id: "dream_1699882594165",
+  date: "2023-11-13T13:36:34.165Z",
+  dream: "Текст сна...",
+  title: "Сгенерированный ИИ заголовок",
+  keyImages: ["образ1", "образ2"],
+  snapshotSummary: "Краткое резюме от ИИ",
+  lenses: {
+    psychoanalytic: { /* ... */ },
+    tarot: { /* ... */ },
+    culturology: { /* ... */ },
+    astrology: {
+      title: "Астрология",
+      // Rendered in the "Dream Atmosphere" / "Celestial Map" block
+      celestialMap: {
+        moonPhase: {
+          name: "Полнолуние",
+          text: "AI-generated text explaining the moon phase's influence on the dream."
+        },
+        moonSign: {
+          name: "Скорпион",
+          // Note: The frontend uses the same synthesized text for both phase and sign
+          text: "The same AI-generated text that synthesizes both phase and sign."
+        }
+      },
+      // Rendered in the "Top Transits" slider
+      topTransits: {
+        explanation: "Static text explaining what transits are...",
+        insights: [
+          {
+            p1: "pluto",         // Planet 1 symbol
+            p2: "moon",          // Planet 2 symbol
+            aspect: "square",    // Aspect symbol
+            power: 8,            // Score 1-10 for the visualizer
+            tagline: "Плутон в квадрате к Луне", // Short text for the card face
+            title: "Влияние: Плутон и Луна",   // Title for the expanded view
+            interpretation: "AI-generated interpretation of the transit, linked to the dream.",
+            lesson: "AI-generated lesson for the transit, linked to the dream."
+          },
+          // ... more transits
+        ]
+      },
+      // Rendered in the "Cosmic Passport" block
+      cosmicPassport: {
+        sun: {
+          title: "Солнце в знаке Дева",
+          tagline: "AI-generated text linking the user's sun sign to the dream's plot."
+        },
+        moon: {
+          title: "Луна в знаке Дева",
+          // Note: The frontend uses the same synthesized text for both sun and moon
+          tagline: "The same AI-generated text synthesizing the influence of both Sun and Moon."
+        }
+      },
+      // Rendered as the final summary paragraph
+      summary: "Overall AI-generated summary for all astrological factors."
+    }
+  }
+};
+```

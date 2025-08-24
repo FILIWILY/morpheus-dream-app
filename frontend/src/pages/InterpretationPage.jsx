@@ -1,12 +1,15 @@
-import React, { useState, useMemo, useContext } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useContext, useEffect } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './InterpretationPage.module.css';
 
 import DreamTags from '../components/DreamTags';
 import InterpretationSection from '../components/InterpretationSection';
 import LensTabs from '../components/LensTabs';
 import PsychoanalyticInsight from '../components/PsychoanalyticInsight';
+import PsychoanalyticRecommendations from '../components/PsychoanalyticRecommendations';
 import TarotSpread from '../components/TarotSpread';
+import CulturologyLens from '../components/CulturologyLens';
+import AstrologyLens from '../components/AstrologyLens'; // Импортируем новый компонент
 
 import { LocalizationContext } from '../context/LocalizationContext';
 import { useProfile } from '../context/ProfileContext';
@@ -14,12 +17,13 @@ import { useProfile } from '../context/ProfileContext';
 import { Box, Button, Typography, CircularProgress, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LockIcon from '@mui/icons-material/Lock';
+import api from '../services/api';
 
 const LENS_ACCENT_COLORS = {
-    psychoanalytic: '#C850FF',
+    psychoanalytic: '#4D7BFF',
     tarot: '#FFC700',
-    astrology: '#4D7BFF',
-    folkloric: '#34E49D',
+    astrology: '#C850FF',
+    culturology: '#34E49D', // New color for the new lens
 };
 
 const AstrologyLock = () => {
@@ -37,17 +41,110 @@ const AstrologyLock = () => {
 const InterpretationPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { id: routeDreamId } = useParams();
     const { t } = useContext(LocalizationContext);
     const { profile, isLoading: isProfileLoading } = useProfile();
 
-    const interpretationData = location.state?.interpretationData;
+    const [interpretationData, setInterpretationData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [activeLensKey, setActiveLensKey] = useState(null);
+    const [isTarotRevealed, setIsTarotRevealed] = useState(false);
 
-    if (!interpretationData || !interpretationData.lenses) {
+    const handleRevealTarot = async () => {
+        // Prevent revealing if already revealed or no data
+        if (isTarotRevealed || !interpretationData?.id) return;
+
+        try {
+            // Persist the revealed state to the backend
+            await api.put(`/dreams/${interpretationData.id}/lenses/tarot`, { 
+                isRevealed: true 
+            });
+
+            // Update local state to trigger the animation
+            setIsTarotRevealed(true);
+            
+            // Optionally, update the full interpretationData object to ensure consistency
+            setInterpretationData(prevData => ({
+                ...prevData,
+                lenses: {
+                    ...prevData.lenses,
+                    tarot: {
+                        ...prevData.lenses.tarot,
+                        state: {
+                            ...prevData.lenses.tarot.state,
+                            isRevealed: true,
+                        }
+                    },
+                },
+            }));
+
+        } catch (error) {
+            console.error('Failed to update tarot reveal state:', error);
+            // Even if the API call fails, we might want to reveal locally to not block the user
+            setIsTarotRevealed(true);
+        }
+    };
+
+    useEffect(() => {
+        const fetchDream = async () => {
+            if (!routeDreamId) {
+                setError('Dream ID not found.');
+                setIsLoading(false);
+                return;
+            }
+            setIsLoading(true);
+            try {
+                const resp = await api.get(`/dreams/${routeDreamId}`);
+                setInterpretationData(resp.data);
+            } catch (e) {
+                console.error('Failed to fetch dream by id:', e);
+                setError('Failed to load interpretation.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDream();
+    }, [routeDreamId]);
+
+    const activeAccentColor = useMemo(() => {
+        if (!activeLensKey) return 'var(--text-secondary)'; // neutral
+        return LENS_ACCENT_COLORS[activeLensKey] || 'var(--accent-primary)';
+    }, [activeLensKey]);
+
+    // Keep local UI state in sync with fetched dream data (e.g., after reload)
+    useEffect(() => {
+        if (!interpretationData) return;
+        setActiveLensKey(interpretationData.activeLens ?? null);
+        setIsTarotRevealed(!!interpretationData?.lenses?.tarot?.state?.isRevealed);
+    }, [interpretationData]);
+
+    const handleAstrologyStateChange = (newAstrologyData) => {
+        setInterpretationData(prevData => ({
+            ...prevData,
+            lenses: {
+                ...prevData.lenses,
+                astrology: newAstrologyData,
+            },
+        }));
+    };
+
+
+    if (isLoading) {
+        return (
+            <Box className={styles.pageWrapper} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error || !interpretationData || !interpretationData.lenses) {
         return (
             <div className={styles.pageWrapper} style={{ padding: '32px' }}>
-                <Typography variant="h5" sx={{ mb: 2 }}>Ошибка</Typography>
+                <Typography variant="h5" sx={{ mb: 2 }}>{error || 'Ошибка'}</Typography>
                 <Typography sx={{ mb: 2 }}>
-                    Не удалось загрузить данные сна. Вероятно, вы перезагрузили страницу.
+                    Не удалось загрузить данные сна. Пожалуйста, попробуйте вернуться.
                 </Typography>
                 <Button variant="contained" onClick={() => navigate('/history')}>
                     Вернуться к истории
@@ -57,11 +154,7 @@ const InterpretationPage = () => {
     }
     
     const lenses = Object.keys(interpretationData.lenses);
-        const [activeLensKey, setActiveLensKey] = useState(lenses.length > 0 ? lenses[0] : null);
-    const [isTarotRevealed, setIsTarotRevealed] = useState(false);
-
     const activeLensData = activeLensKey ? interpretationData.lenses[activeLensKey] : null;
-    const activeAccentColor = useMemo(() => LENS_ACCENT_COLORS[activeLensKey] || '#C850FF', [activeLensKey]);
     const isAstrologyDataMissing = !profile?.birthDate || !profile?.birthPlace;
 
     const renderLensContent = () => {
@@ -75,7 +168,11 @@ const InterpretationPage = () => {
                 if (isAstrologyDataMissing) {
                     return <AstrologyLock />;
                 }
-                break;
+                return <AstrologyLens 
+                    data={activeLensData} 
+                    dreamId={interpretationData.id}
+                    onStateChange={handleAstrologyStateChange} 
+                />;
             
             case 'psychoanalytic':
                 const schools = activeLensData.schools ? Object.values(activeLensData.schools) : [];
@@ -90,6 +187,7 @@ const InterpretationPage = () => {
                                 <p className={styles.flowText}>{school.content}</p>
                             </div>
                         ))}
+                        <PsychoanalyticRecommendations recommendations={activeLensData.recommendations} accentColor={activeAccentColor} />
                     </div>
                 );
 
@@ -99,14 +197,17 @@ const InterpretationPage = () => {
                             summary={activeLensData.summary} 
                             accentColor={activeAccentColor}
                             isRevealed={isTarotRevealed}
-                            onReveal={() => setIsTarotRevealed(true)} 
+                            onReveal={handleRevealTarot} 
                         />;
+
+            case 'culturology':
+                return <CulturologyLens data={activeLensData} accentColor={activeAccentColor} />;
 
             default:
                 break;
         }
         
-        // Fallback for old structure lenses like folkloric
+        // Fallback for other potential old structures
         const paragraphs = activeLensData.paragraphs ? Object.values(activeLensData.paragraphs) : [];
         if (paragraphs.length > 0) {
             return (
@@ -141,11 +242,23 @@ const InterpretationPage = () => {
                     <p>{interpretationData.snapshotSummary}</p>
                 </InterpretationSection>
                 
-                {lenses.length > 0 && (
+                 {lenses.length > 0 && (
                     <LensTabs 
                         lenses={interpretationData.lenses} 
                         activeLens={activeLensKey}
-                        setActiveLens={setActiveLensKey}
+                        setActiveLens={async (key) => {
+                            setActiveLensKey(key);
+                            try {
+                                // Persist active lens selection
+                                const response = await api.put(`/dreams/${interpretationData.id}/activeLens`, { activeLens: key });
+                                const newActiveLens = response.data?.activeLens ?? key;
+                                setInterpretationData(prev => ({ ...prev, activeLens: newActiveLens }));
+                            } catch (e) {
+                                console.error('Failed to save active lens:', e);
+                                // Keep local state even if persistence failed
+                                setInterpretationData(prev => ({ ...prev, activeLens: key }));
+                            }
+                        }}
                         accentColor={activeAccentColor}
                     />
                 )}

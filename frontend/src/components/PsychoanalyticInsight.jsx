@@ -30,9 +30,6 @@ const PsychoanalyticInsight = ({ insights, accentColor }) => {
                         <Typography variant="body2" className={styles.insightDescription}>
                             {insight.description}
                         </Typography>
-                        <Typography variant="body2" className={styles.insightRecommendation}>
-                            {insight.recommendation}
-                        </Typography>
                     </Box>
                 </Box>
             ))}

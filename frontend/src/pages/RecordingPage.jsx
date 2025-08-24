@@ -45,7 +45,7 @@ const RecordingPage = () => {
       formData.append('audiofile', audioBlob, `dream-recording-${Date.now()}.webm`);
       try {
         const response = await api.post('/processDreamAudio', formData);
-        navigate('/interpretation', { state: { interpretationData: response.data } });
+        navigate(`/interpretation/${response.data.id}`);
       } catch (err) {
         setError(err.response?.data?.error || err.message || t('unknownError'));
       } finally {
@@ -92,7 +92,7 @@ const RecordingPage = () => {
         lang: locale,
         date: date,
       });
-      navigate('/interpretation', { state: { interpretationData: response.data } });
+      navigate(`/interpretation/${response.data.id}`);
     } catch (err) {
       setError(err.response?.data?.error || err.message || t('unknownError'));
     } finally {

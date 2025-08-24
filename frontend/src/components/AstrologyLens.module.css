@@ -1,0 +1,433 @@
+/* frontend/src/components/AstrologyLens.module.css */
+
+.astrologyLens {
+    color: #e0e0e0;
+}
+
+.mainTitle {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.atmosphereBlock {
+    margin-bottom: 32px;
+}
+
+.insightRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.insightPoint {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 7px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.textBlock {
+    flex: 1;
+}
+
+.blockTitle {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.subTitle {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 0 4px 0;
+}
+
+.subTitleLabel {
+    color: #ffffff;
+}
+
+.subTitleValue {
+    font-weight: normal;
+    color: var(--lens-accent-color);
+}
+
+.passportTagline {
+    font-size: 0.9rem;
+    color: var(--secondary-text-color);
+    line-height: 1.5;
+    margin-top: 4px; /* Небольшой отступ от заголовка */
+}
+
+.textBlock p {
+    margin: 0;
+    font-size: 14px;
+    color: #b0b0b0;
+    line-height: 1.5;
+}
+
+.analysisSection {
+    margin-top: 24px;
+}
+
+.insightBlock {
+    background-color: rgba(187, 134, 252, 0.08);
+    border-left: 3px solid var(--lens-accent-color, #C850FF);
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 0 8px 8px 0;
+}
+
+.insightTitle {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0 0 8px 0;
+    text-align: left;
+}
+
+.summaryBlock {
+    background-color: rgba(3, 218, 197, 0.08);
+    border-left: 3px solid #03dac5;
+    padding: 16px;
+    margin-top: 0;
+    border-radius: 8px;
+}
+
+.p {
+    white-space: pre-wrap;
+}
+
+.block {
+    margin-bottom: 32px;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.iconImage {
+    width: 48px;
+    height: 48px;
+    margin-right: 16px;
+}
+
+.iconEmoji {
+    font-size: 40px;
+    width: 48px;
+    height: 48px;
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.titleWithTooltip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.helpIconContainer {
+    position: relative;
+    cursor: pointer;
+    color: #888;
+    display: flex;
+    align-items: center;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    z-index: 10;
+    width: 280px;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.topTransitsBlock {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.transitCard {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    backdrop-filter: blur(10px);
+    height: 100%;
+    text-align: center;
+}
+
+.transitCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.cardBody {
+    text-align: left;
+}
+
+.cardBody p {
+    font-size: 14px;
+    color: #b0b0b0;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.markdown {
+    font-size: 14px;
+    color: #b0b0b0;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.markdown p {
+    margin-bottom: 8px;
+}
+
+.markdown strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.lessonTitle {
+    margin-top: 16px;
+    padding-top: 8px;
+}
+
+.recommendationSection {
+    background-color: rgba(3, 218, 197, 0.08);
+    margin: 16px -16px -16px -16px;
+    padding: 16px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-top: 1px solid rgba(3, 218, 197, 0.2);
+}
+
+.insightSection h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.recommendationSection h4 {
+    color: #03dac5;
+}
+
+.passportSection {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.passportGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.celestialIcon {
+    font-size: 24px;
+    margin-right: 8px;
+}
+
+.zodiacIcon {
+    font-size: 24px;
+    color: var(--lens-accent-color, #C850FF);
+}
+
+/* --- Interactive Planetary Influence Styles --- */
+.placeholderBlock {
+    cursor: grab;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.placeholderContent {}
+
+.placeholderText {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.placeholderSubtext {
+    font-size: 16px;
+    color: #aaa;
+}
+
+.mySwiper {
+    width: 100%;
+    padding-top: 20px;
+}
+
+.swiperContainer {
+    margin-bottom: 24px;
+}
+
+.swiper-wrapper {
+    align-items: stretch !important;
+}
+
+.swiperSlide {
+    background-position: center;
+    background-size: cover;
+    width: 300px;
+    display: flex;
+}
+
+.crystalsContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 0 0 40px 0;
+    transition: all 0.3s ease;
+}
+
+.crystalsContainer.flash {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 15px var(--lens-accent-color, #C850FF));
+}
+
+.crystalIcon .crystalPath {
+    transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.crystalIcon.filled .crystalPath {
+    stroke: var(--lens-accent-color, #C850FF);
+    stroke-width: 2.5;
+}
+
+.unlockedContainer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 1s ease-in-out;
+}
+
+.unlockedContainer.unlocked {
+    max-height: 2000px;
+}
+
+.unlockedContent {
+   padding-top: 20px;
+}
+
+.transitIcons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    font-size: 28px;
+}
+
+.planetIcon {
+    color: #fff;
+}
+
+.aspectIcon {
+    color: var(--lens-accent-color, #C850FF);
+    font-size: 24px;
+}
+
+.transitTagline {
+    text-align: center;
+    font-style: italic;
+    color: #ccc;
+    margin-bottom: 12px;
+}
+
+.powerPill {
+    background-color: var(--lens-accent-color, #C850FF);
+    color: #fff;
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+    margin: 0 auto 16px;
+}
+
+.synthesizingContainer {
+    text-align: center;
+    margin: 20px 0;
+    color: #ccc;
+    font-style: italic;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.synthesizingText {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+}
+
+.dots span {
+    opacity: 0;
+    animation: blink 1.4s infinite;
+}
+
+.dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.animationContainer {
+    min-height: 100px; 
+}
+
+.fadeOut {
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes blink {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}

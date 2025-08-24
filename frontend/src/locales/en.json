@@ -33,9 +33,9 @@
     "psychoanalytic": "Psychoanalysis",
     "esoteric": "Esoterica",
     "astrology": "Astrology",
-    "folkloric": "Folklore"
+    "culturology": "Culturology"
   },
-  "folkloricLenses": {
+  "culturologyLenses": {
     "miller": "Miller's Dream Book",
     "tsvetkov": "Tsvetkov's Dream Book",
     "vanga": "Vanga's Dream Book",

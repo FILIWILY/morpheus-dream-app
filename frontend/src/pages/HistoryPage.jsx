@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Container, AppBar, Toolbar, Typography, IconButton, List, ListItem,
@@ -9,54 +9,67 @@ import AddIcon from '@mui/icons-material/Add';
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LocalizationContext } from '../context/LocalizationContext';
+import api from '../services/api'; // Import the api service
 
-// ✅ ВОЗВРАЩАЕМ ПОЛНУЮ ВЕРСИЮ ОБЪЕКТА С 4 ЛИНЗАМИ
-const DUMMY_DREAM = {
-  id: "dummy-dream-01",
-  date: "2025-07-11",
-  title: "Путешествие в мир кода (Тест)",
-  keyImages: ["Компонент", "Стили", "Промис", "Рефакторинг"],
-  snapshotSummary: "Этот сон символизирует творческий процесс разработки. Каждый элемент представляет собой этап создания приложения, от идеи до финальной реализации, полной гармонии и функциональности.",
-  lenses: {
-    psychoanalytic: {
-      title: "Психоанализ",
-      paragraphs: {
-        freud: { title: "По Фрейду", content: "Компоненты во сне отражают ваше Супер-Эго — стремление к структуре и порядку. Желание провести рефакторинг — это работа вашего Эго, пытающегося примирить идеальный код с реальностью." },
-        jung: { title: "По Юнгу", content: "Код символизирует коллективное бессознательное всех разработчиков. Путь через 'промисы' — это индивидуация, поиск собственной идентичности в мире асинхронного программирования." }
-      }
-    },
-    esoteric: {
-      title: "Эзотерика",
-      paragraphs: {
-        miller: { title: "Сонник Миллера", content: "Видеть во сне красивый код — к успешному завершению проектов и финансовому благополучию. Сломанные компоненты, напротив, предупреждают о возможных трудностях и препятствиях." },
-        taro: { title: "Архетипы Таро", content: "Процесс разработки напоминает аркан 'Маг' (I), где вы, как творец, манипулируете элементами (компонентами). Рефакторинг связан с арканом 'Умеренность' (XIV), требующим баланса и терпения." }
-      }
-    },
-    astrology: {
-      title: "Астрология",
-      paragraphs: {
-        astrological: { title: "Астрологический подход", content: "Транзит Сатурна через ваш натальный Меркурий может вызывать трудности с логикой (баги в коде), в то время как гармоничный аспект Юпитера к Венере способствует творческому вдохновению в дизайне." },
-        numerology: { title: "Нумерология", content: "Количество строк кода, версии библиотек, номера портов — все это несет в себе нумерологический смысл. Число '1' символизирует начало нового проекта, а '9' — его успешное завершение." }
-      }
-    },
-    folkloric: {
-      title: "Фольклор",
-      paragraphs: {
-        danielis: { title: "Somniale Danielis", content: "Писать код во сне — к получению важного известия. Если код исполняется без ошибок — жди добрых вестей, если же с ошибками — готовься к испытаниям." },
-        slavic: { title: "Славянские поверья", content: "Чистый и работающий код — в доме будет достаток и порядок. 'Спагетти-код' же снится к запутанным делам и семейным ссорам. Сделайте резервную копию." }
-      }
-    }
-  }
-};
+// const DUMMY_DREAM = {
+//   id: "dummy-dream-01",
+//   date: "2025-07-11",
+//   title: "Путешествие в мир кода (Тест)",
+//   keyImages: ["Компонент", "Стили", "Промис", "Рефакторинг"],
+//   snapshotSummary: "Этот сон символизирует творческий процесс разработки. Каждый элемент представляет собой этап создания приложения, от идеи до финальной реализации, полной гармонии и функциональности.",
+//   lenses: {
+//     psychoanalytic: {
+//       title: "Психоанализ",
+//       paragraphs: {
+//         freud: { title: "По Фрейду", content: "Компоненты во сне отражают ваше Супер-Эго — стремление к структуре и порядку. Желание провести рефакторинг — это работа вашего Эго, пытающегося примирить идеальный код с реальностью." },
+//         jung: { title: "По Юнгу", content: "Код символизирует коллективное бессознательное всех разработчиков. Путь через 'промисы' — это индивидуация, поиск собственной идентичности в мире асинхронного программирования." }
+//       }
+//     },
+//     esoteric: {
+//       title: "Эзотерика",
+//       paragraphs: {
+//         miller: { title: "Сонник Миллера", content: "Видеть во сне красивый код — к успешному завершению проектов и финансовому благополучию. Сломанные компоненты, напротив, предупреждают о возможных трудностях и препятствиях." },
+//         taro: { title: "Архетипы Таро", content: "Процесс разработки напоминает аркан 'Маг' (I), где вы, как творец, манипулируете элементами (компонентами). Рефакторинг связан с арканом 'Умеренность' (XIV), требующим баланса и терпения." }
+//       }
+//     },
+//     astrology: {
+//       title: "Астрология",
+//       paragraphs: {
+//         astrological: { title: "Астрологический подход", content: "Транзит Сатурна через ваш натальный Меркурий может вызывать трудности с логикой (баги в коде), в то время как гармоничный аспект Юпитера к Венере способствует творческому вдохновению в дизайне." },
+//         numerology: { title: "Нумерология", content: "Количество строк кода, версии библиотек, номера портов — все это несет в себе нумерологический смысл. Число '1' символизирует начало нового проекта, а '9' — его успешное завершение." }
+//       }
+//     },
+//     folkloric: {
+//       title: "Фольклор",
+//       paragraphs: {
+//         danielis: { title: "Somniale Danielis", content: "Писать код во сне — к получению важного известия. Если код исполняется без ошибок — жди добрых вестей, если же с ошибками — готовься к испытаниям." },
+//         slavic: { title: "Славянские поверья", content: "Чистый и работающий код — в доме будет достаток и порядок. 'Спагетти-код' же снится к запутанным делам и семейным ссорам. Сделайте резервную копию." }
+//       }
+//     }
+//   }
+// };
 
 const HistoryPage = () => {
   const navigate = useNavigate();
   const { t } = useContext(LocalizationContext);
 
-  const [dreams, setDreams] = useState([DUMMY_DREAM]);
+  const [dreams, setDreams] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedDreams, setSelectedDreams] = useState(new Set());
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchDreams = async () => {
+      try {
+        const response = await api.get('/dreams');
+        setDreams(response.data || []);
+      } catch (error) {
+        console.error('Failed to fetch dreams:', error);
+        setDreams([]); // Reset dreams on error
+      }
+    };
+    fetchDreams();
+  }, []);
 
   const handleItemClick = (dream) => {
     if (isEditMode) {
@@ -64,7 +77,7 @@ const HistoryPage = () => {
       newSelection.has(dream.id) ? newSelection.delete(dream.id) : newSelection.add(dream.id);
       setSelectedDreams(newSelection);
     } else {
-      navigate('/interpretation', { state: { interpretationData: dream } });
+      navigate(`/interpretation/${dream.id}`, { state: { interpretationData: dream } });
     }
   };
 
@@ -73,12 +86,18 @@ const HistoryPage = () => {
     setSelectedDreams(new Set());
   };
   
-  const handleDeleteDreams = () => {
-    const newDreams = dreams.filter(dream => !selectedDreams.has(dream.id));
-    setDreams(newDreams);
-    setIsEditMode(false);
-    setSelectedDreams(new Set());
-    setIsConfirmOpen(false);
+  const handleDeleteDreams = async () => {
+    const dreamIdsToDelete = Array.from(selectedDreams);
+    try {
+      await api.delete('/dreams', { data: { dreamIds: dreamIdsToDelete } });
+      const newDreams = dreams.filter(dream => !selectedDreams.has(dream.id));
+      setDreams(newDreams);
+      setIsEditMode(false);
+      setSelectedDreams(new Set());
+      setIsConfirmOpen(false);
+    } catch (error) {
+      console.error('Failed to delete dreams:', error);
+    }
   };
 
   return (
@@ -108,7 +127,7 @@ const HistoryPage = () => {
         <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
             {dreams.length === 0 ? (
                 <Typography sx={{ textAlign: 'center', color: 'var(--text-secondary)', mt: 4 }}>
-                    Тестовый сон удален. Перезагрузите страницу, чтобы он появился снова.
+                    У вас пока нет записанных снов.
                 </Typography>
             ) : (
                 <List>

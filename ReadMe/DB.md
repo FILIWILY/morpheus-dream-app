@@ -69,8 +69,46 @@ The `db.json` file stores a single root JSON object. All user data is nested und
           "lenses": {
             "psychoanalytic": { /* ... interpretation details ... */ },
             "esoteric": { /* ... interpretation details ... */ },
-            "astrology": { /* ... interpretation details ... */ },
-            "folkloric": { /* ... interpretation details ... */ }
+            "astrology": {
+              "title": "Астрология",
+              "celestialMap": {
+                "moonPhase": {
+                  "name": "Полнолуние",
+                  "text": "AI-generated text about the moon's influence, synthesized for both phase and sign."
+                },
+                "moonSign": {
+                  "name": "Скорпион",
+                  "text": "Same AI-generated text as above."
+                }
+              },
+              "topTransits": {
+                "explanation": "Static text explaining what transits are.",
+                "insights": [
+                  {
+                    "p1": "pluto",
+                    "p2": "moon",
+                    "aspect": "square",
+                    "power": 8,
+                    "tagline": "Плутон в квадрате к Луне",
+                    "title": "Влияние: Плутон и Луна",
+                    "interpretation": "AI-generated interpretation of the transit.",
+                    "lesson": "AI-generated lesson for the transit."
+                  }
+                ]
+              },
+              "cosmicPassport": {
+                "sun": {
+                  "title": "Солнце в знаке Дева",
+                  "tagline": "AI-generated text about the user's sun sign."
+                },
+                "moon": {
+                  "title": "Луна в знаке Дева",
+                  "tagline": "Same AI-generated text, synthesized for both sun and moon."
+                }
+              },
+              "summary": "Overall AI-generated astrological summary."
+            },
+            "culturology": { /* ... interpretation details ... */ }
           }
         }
       ],

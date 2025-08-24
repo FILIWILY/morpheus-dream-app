@@ -33,9 +33,9 @@
     "psychoanalytic": "Психоанализ",
     "esoteric": "Эзотерика",
     "astrology": "Астрология",
-    "folkloric": "Фольклор"
+    "culturology": "Культурология"
   },
-  "folkloricLenses": {
+  "culturologyLenses": {
     "miller": "Сонник Миллера",
     "tsvetkov": "Сонник Цветкова",
     "vanga": "Сонник Ванги",

@@ -1,12 +1,3 @@
 {
-  "users": {
-    "12345-test-user": {
-      "dreams": [],
-      "profile": {
-        "birthDate": "",
-        "birthTime": "",
-        "birthPlace": ""
-      }
-    }
-  }
+  "users": {}
 }

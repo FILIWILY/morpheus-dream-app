@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
-import { Typography, TextField, Button, Box, Alert } from '@mui/material';
+import { LocalizationContext } from '../context/LocalizationContext';
+import usePlacesAutocomplete from 'use-places-autocomplete';
+import { Typography, TextField, Button, Box, Alert, List, ListItem, ListItemText } from '@mui/material';
 import styles from './WelcomePage.module.css';
 
 // Стили для полей ввода на темном фоне
@@ -52,11 +54,37 @@ const formatTime = (value) => {
 const WelcomePage = () => {
     const navigate = useNavigate();
     const { updateProfile } = useProfile();
+    const { locale: lang } = useContext(LocalizationContext);
     const [birthDate, setBirthDate] = useState('');
     const [birthTime, setBirthTime] = useState('');
-    const [birthPlace, setBirthPlace] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [placeId, setPlaceId] = useState(null);
+
+    const {
+        ready,
+        value: birthPlace,
+        suggestions: { status, data: suggestionsData },
+        setValue: setBirthPlace,
+        clearSuggestions,
+    } = usePlacesAutocomplete({
+        requestOptions: {
+            language: lang,
+            types: ['(cities)'],
+        },
+        debounce: 300,
+    });
+
+    const handleInputChange = (e) => {
+        setBirthPlace(e.target.value);
+        setPlaceId(null); 
+    };
+
+    const handleSelectSuggestion = ({ description, place_id }) => {
+        setBirthPlace(description, false);
+        setPlaceId(place_id); 
+        clearSuggestions();
+    };
 
     const handleSave = async () => {
         if (!birthDate || !birthPlace) {
@@ -66,7 +94,12 @@ const WelcomePage = () => {
         setIsLoading(true);
         setError('');
         try {
-            await updateProfile({ birthDate, birthTime, birthPlace });
+            const profileData = {
+                birthDate,
+                birthTime,
+                birthPlace: placeId ? { description: birthPlace, placeId } : birthPlace,
+            };
+            await updateProfile(profileData);
             localStorage.setItem('hasCompletedWelcomeFlow', 'true');
             navigate('/');
         } catch (err) {
@@ -96,11 +129,9 @@ const WelcomePage = () => {
                     variant="outlined"
                     fullWidth
                     value={birthDate}
-                    // ✅ Применяем форматирование при каждом изменении
                     onChange={(e) => setBirthDate(formatDate(e.target.value))}
                     placeholder="23.05.1990"
                     sx={textFieldStyles}
-                    // Ограничиваем общую длину поля
                     inputProps={{ maxLength: 10 }}
                 />
                 <TextField
@@ -108,22 +139,36 @@ const WelcomePage = () => {
                     variant="outlined"
                     fullWidth
                     value={birthTime}
-                    // ✅ Применяем форматирование при каждом изменении
                     onChange={(e) => setBirthTime(formatTime(e.target.value))}
                     placeholder="14:30"
                     sx={textFieldStyles}
-                    // Ограничиваем общую длину поля
                     inputProps={{ maxLength: 5 }}
                 />
-                <TextField
-                    label="Место рождения (Город, Страна)"
-                    variant="outlined"
-                    fullWidth
-                    value={birthPlace}
-                    onChange={(e) => setBirthPlace(e.target.value)}
-                    placeholder="Москва, Россия"
-                    sx={textFieldStyles}
-                />
+                <Box>
+                    <TextField
+                        label="Место рождения (Город, Страна)"
+                        variant="outlined"
+                        fullWidth
+                        value={birthPlace}
+                        onChange={handleInputChange}
+                        disabled={!ready}
+                        placeholder="Начните вводить город..."
+                        sx={textFieldStyles}
+                    />
+                    {status === 'OK' && (
+                        <List sx={{ bgcolor: 'var(--background-secondary)', mt: 1, p: 0, borderRadius: '8px' }}>
+                            {suggestionsData.map((suggestion) => (
+                                <ListItem
+                                    button
+                                    key={suggestion.place_id}
+                                    onClick={() => handleSelectSuggestion(suggestion)}
+                                >
+                                    <ListItemText primary={suggestion.description} sx={{ color: 'var(--text-primary)'}} />
+                                </ListItem>
+                            ))}
+                        </List>
+                    )}
+                </Box>
                 
                 {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
 

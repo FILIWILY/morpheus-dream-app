@@ -7,10 +7,10 @@
   --text-secondary: #8A8A93;
   --accent-primary: #C850FF;
   --border-color: rgba(255, 255, 255, 0.1);
-  --accent-psychoanalysis: #C850FF;
-  --accent-esoteric: #00D4FF;
-  --accent-astrology: #4D7BFF;
-  --accent-folkloric: #34E49D;
+  --accent-psychoanalytic: #4D7BFF;
+  --accent-tarot: #FFC700;
+  --accent-astrology: #C850FF;
+  --accent-culturology: #34E49D;
   
   font-family: 'Inter', sans-serif;
   color: var(--text-primary);

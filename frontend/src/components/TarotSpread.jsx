@@ -27,60 +27,45 @@ import CardJudgement from '../assets/tarot/major_arcana_judgement.png';
 import CardWorld from '../assets/tarot/major_arcana_world.png';
 
 const cardImageMap = {
-    "Шут": CardFool,
-    "Маг": CardMagician,
-    "Верховная Жрица": CardPriestess,
-    "Императрица": CardEmpress,
-    "Император": CardEmperor,
-    "Иерофант": CardHierophant,
-    "Влюбленные": CardLovers,
-    "Колесница": CardChariot,
-    "Сила": CardStrength,
-    "Отшельник": CardHermit,
-    "Колесо Фортуны": CardFortune,
-    "Справедливость": CardJustice,
-    "Повешенный": CardHanged,
-    "Смерть": CardDeath,
-    "Умеренность": CardTemperance,
-    "Дьявол": CardDevil,
-    "Башня": CardTower,
-    "Звезда": CardStar,
-    "Луна": CardMoon,
-    "Солнце": CardSun,
-    "Суд": CardJudgement,
-    "Мир": CardWorld,
+    // Russian Names
+    "Дурак": CardFool, "Маг": CardMagician, "Верховная Жрица": CardPriestess, "Императрица": CardEmpress, "Император": CardEmperor, "Иерофант": CardHierophant, "Влюбленные": CardLovers, "Колесница": CardChariot, "Сила": CardStrength, "Отшельник": CardHermit, "Колесо Фортуны": CardFortune, "Справедливость": CardJustice, "Повешенный": CardHanged, "Смерть": CardDeath, "Умеренность": CardTemperance, "Дьявол": CardDevil, "Башня": CardTower, "Звезда": CardStar, "Луна": CardMoon, "Солнце": CardSun, "Суд": CardJudgement, "Мир": CardWorld,
+    // English Names
+    "The Fool": CardFool, "The Magician": CardMagician, "The High Priestess": CardPriestess, "The Empress": CardEmpress, "The Emperor": CardEmperor, "The Hierophant": CardHierophant, "The Lovers": CardLovers, "The Chariot": CardChariot, "Strength": CardStrength, "The Hermit": CardHermit, "Wheel of Fortune": CardFortune, "Justice": CardJustice, "The Hanged Man": CardHanged, "Death": CardDeath, "Temperance": CardTemperance, "The Devil": CardDevil, "The Tower": CardTower, "The Star": CardStar, "The Moon": CardMoon, "The Sun": CardSun, "Judgement": CardJudgement, "The World": CardWorld
 };
-
 
 const TarotSpread = ({ spread, summary, accentColor, isRevealed, onReveal }) => {
     const [visibleCards, setVisibleCards] = useState([]);
 
     useEffect(() => {
-        if (isRevealed) {
-            // Instantly show all cards if already revealed, or animate one by one
-            if (visibleCards.length === 0) {
-                const timeouts = spread.map((_, index) => 
-                    setTimeout(() => {
-                        setVisibleCards(prev => [...prev, index]);
-                    }, index * 400)
-                );
-                return () => timeouts.forEach(clearTimeout);
-            }
+        if (!spread || !isRevealed) {
+            setVisibleCards([]);
+            return;
         }
+        const timers = spread.map((_, index) => 
+            setTimeout(() => {
+                setVisibleCards(prev => [...prev, index]);
+            }, index * 300)
+        );
+
+        return () => timers.forEach(clearTimeout);
     }, [isRevealed, spread]);
 
+    // This initial state is now simplified: if there's no spread, nothing is shown.
+    // The parent component (InterpretationPage) will handle the loading state.
     if (!spread || spread.length === 0) {
-        return <Typography>Данные для расклада Таро отсутствуют.</Typography>;
+        return null; // Or a loading spinner, handled by parent
     }
-
+    
+    // The "Draw cards" button is now simplified to "Reveal cards"
+    // as the drawing happens on the backend.
     if (!isRevealed) {
         return (
-            <Box className={styles.initialState}>
-                <Typography variant="h5" className={styles.initialTitle}>Готовы вытянуть карты?</Typography>
-                <Button variant="contained" onClick={onReveal} sx={{ backgroundColor: accentColor, '&:hover': { backgroundColor: accentColor }}}>
-                    Вытянуть 5 карт
-                </Button>
-            </Box>
+             <Box className={styles.initialState}>
+                 <Typography variant="h5" className={styles.initialTitle}>Ваши карты готовы</Typography>
+                 <Button variant="contained" onClick={onReveal} sx={{ backgroundColor: accentColor, '&:hover': { backgroundColor: accentColor }}}>
+                     Открыть карты
+                 </Button>
+             </Box>
         );
     }
 

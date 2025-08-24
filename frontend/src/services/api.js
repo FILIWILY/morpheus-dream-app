@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
-  timeout: 5000, // ✅ Добавляем тайм-аут в 5 секунд
+  baseURL: '/api', // Все запросы будут идти к /api, который проксируется Vite
+  timeout: 180000, // Увеличиваем таймаут до 180 секунд
 });
 
 api.interceptors.request.use(
