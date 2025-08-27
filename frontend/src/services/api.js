@@ -42,3 +42,16 @@ export default api; // Оставляем экспорт по умолчанию
 /* 
   Profile Management
 */
+export const getProfile = async () => {
+  try {
+    const response = await api.get('/profile');
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      console.log('Profile not found, returning null.');
+      return null;
+    }
+    console.error('Error fetching profile:', error);
+    throw error;
+  }
+};

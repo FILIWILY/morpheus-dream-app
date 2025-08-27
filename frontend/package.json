@@ -22,7 +22,6 @@
     "gsap": "^3.13.0",
     "i18n-js": "^4.4.3",
     "lucide-react": "^0.523.0",
-    "morpheus-dream-app": "file:..",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",
