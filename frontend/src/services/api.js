@@ -7,27 +7,20 @@ const api = axios.create({
   timeout: 180000, // Увеличиваем таймаут до 180 секунд
 });
 
-// For local development with DANGEROUSLY_BYPASS_AUTH=true,
-// we need to manually add the user ID header that the backend expects.
-// In a real Telegram Web App environment, this header is not used;
-// instead, the frontend would send the initData string.
-if (import.meta.env.DEV) {
-  const testUserId = '12345-test-user';
-  api.defaults.headers.common['X-Telegram-User-ID'] = testUserId;
-  console.log(`[DEV MODE] API client configured to use test user ID: ${testUserId}`);
-}
-
-
+// Centralized request interceptor for authentication
 api.interceptors.request.use(
   (config) => {
     const tg = window.Telegram?.WebApp;
-    const userId = tg?.initDataUnsafe?.user?.id;
 
-    if (userId) {
-      config.headers['X-Telegram-User-ID'] = userId;
-    } else {
+    // For production, use the initData string for cryptographic verification.
+    if (tg && tg.initData) {
+      config.headers['X-Telegram-Init-Data'] = tg.initData;
+    } 
+    // For local development, bypass auth with a test user ID.
+    else if (import.meta.env.DEV) {
       config.headers['X-Telegram-User-ID'] = '12345-test-user';
     }
+
     return config;
   },
   (error) => {

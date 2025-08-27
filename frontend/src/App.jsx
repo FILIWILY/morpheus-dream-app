@@ -34,7 +34,6 @@ function App() {
       if (tg && tg.initData) {
         console.log('[App] Telegram environment detected.');
         tg.ready();
-        api.defaults.headers.common['X-Telegram-Init-Data'] = tg.initData;
         setView('app');
       }
       else if (isDev) {
