@@ -71,3 +71,32 @@
     padding: 12px;
     word-wrap: break-word;
 }
+
+.debug {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    text-align: left;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.debug h3 {
+    margin: 0 0 10px 0;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.debugInfo p {
+    margin: 5px 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #ccc;
+    word-break: break-all;
+}
+
+.debugInfo strong {
+    color: #fff;
+}

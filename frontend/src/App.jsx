@@ -48,6 +48,7 @@ function App() {
   const [view, setView] = useState('loading'); // 'loading', 'app', 'placeholder'
   const [i18nInstance, setI18nInstance] = useState(i18n);
   const [error, setError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState(null);
 
   useEffect(() => {
     const isDev = import.meta.env.DEV;
@@ -100,6 +101,20 @@ function App() {
         
         console.log('[App] 🎯 Final decision - Is Telegram:', isTelegramEnvironment);
         
+        // Сохраняем диагностическую информацию
+        const debugData = {
+          url: window.location.href,
+          referrer,
+          userAgent,
+          hasTelegramWebApp,
+          hasTelegramParams,
+          hasTelegramReferrer,
+          isTelegramUserAgent,
+          hasTelegramProxy,
+          isTelegramEnvironment
+        };
+        setDebugInfo(debugData);
+        
         if (isTelegramEnvironment) {
           console.log('[App] ✅ Telegram environment detected (combined methods)');
           
@@ -147,7 +162,7 @@ function App() {
   if (view === 'placeholder') {
     return (
       <I18nContext.Provider value={i18nInstance}>
-        <Placeholder error={error} />
+        <Placeholder error={error} debugInfo={debugInfo} />
       </I18nContext.Provider>
     );
   }
