@@ -15,17 +15,24 @@ export const ProfileProvider = ({ children }) => {
   useEffect(() => {
     // Эта функция будет вызвана только один раз при старте приложения
     const fetchProfile = async () => {
+      console.log('[ProfileContext] Starting profile fetch...');
       try {
         const { data } = await api.get('/profile');
+        console.log('[ProfileContext] Profile fetched successfully:', data);
         setProfile(data);
       } catch (error) {
         // Если профиль не найден (ошибка 404) или сервер не отвечает,
         // мы просто устанавливаем null.
         // Это говорит приложению, что пользователь новый, и НЕ вызывает сбоя.
-        console.error("Could not fetch profile, assuming new user:", error.message);
+        console.error("[ProfileContext] Could not fetch profile, assuming new user:", {
+          status: error.response?.status,
+          message: error.message,
+          data: error.response?.data
+        });
         setProfile(null); 
       } finally {
         setIsLoading(false);
+        console.log('[ProfileContext] Profile fetch completed');
       }
     };
 

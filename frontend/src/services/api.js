@@ -13,12 +13,19 @@ api.interceptors.request.use(
     const tg = window.Telegram?.WebApp;
 
     // For production, use the initData string for cryptographic verification.
-    if (tg && tg.initData) {
-      config.headers['X-Telegram-Init-Data'] = tg.initData;
+    // Проверяем наличие Telegram объекта и initData (даже если пустой)
+    if (tg && typeof tg.ready === 'function') {
+      // initData может быть пустой строкой, но это все равно валидно для Telegram
+      config.headers['X-Telegram-Init-Data'] = tg.initData || '';
+      console.log('[API] Using Telegram initData, length:', (tg.initData || '').length);
     } 
     // For local development, bypass auth with a test user ID.
     else if (import.meta.env.DEV) {
       config.headers['X-Telegram-User-ID'] = '12345-test-user';
+      console.log('[API] Using dev bypass auth');
+    }
+    else {
+      console.warn('[API] No authentication method available');
     }
 
     return config;

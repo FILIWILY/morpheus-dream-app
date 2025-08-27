@@ -29,9 +29,20 @@ function App() {
     const initializeApp = () => {
       const tg = window.Telegram?.WebApp;
 
-      if (tg && tg.initData) {
+      // Проверяем наличие Telegram Web App объекта (более надежная проверка)
+      if (tg && typeof tg.ready === 'function') {
         console.log('[App] Telegram environment detected.');
+        console.log('[App] initData available:', !!tg.initData);
+        console.log('[App] initData length:', tg.initData ? tg.initData.length : 0);
+        
+        // Вызываем ready() для уведомления Telegram о готовности приложения
         tg.ready();
+        
+        // Расширяем приложение на всю высоту
+        if (tg.expand) {
+          tg.expand();
+        }
+        
         setView('app');
       }
       else if (isDev) {
@@ -44,7 +55,8 @@ function App() {
       }
     };
 
-    const timer = setTimeout(initializeApp, 150);
+    // Увеличиваем задержку для более надежной инициализации
+    const timer = setTimeout(initializeApp, 500);
 
     return () => clearTimeout(timer);
   }, []);
