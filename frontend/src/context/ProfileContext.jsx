@@ -20,10 +20,10 @@ export const ProfileProvider = ({ children }) => {
         setProfile(data);
       } catch (error) {
         // Если профиль не найден (ошибка 404) или сервер не отвечает,
-        // мы просто устанавливаем пустой объект.
+        // мы просто устанавливаем null.
         // Это говорит приложению, что пользователь новый, и НЕ вызывает сбоя.
         console.error("Could not fetch profile, assuming new user:", error.message);
-        setProfile({}); 
+        setProfile(null); 
       } finally {
         setIsLoading(false);
       }

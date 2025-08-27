@@ -1,13 +1,13 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
 import { Box, CircularProgress } from '@mui/material';
 
-const PrivateRoute = ({ children }) => {
-  const { profile, isLoading } = useProfile();
+const PrivateRoute = () => {
+  const { profile, loading } = useProfile();
   const location = useLocation();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
@@ -15,8 +15,8 @@ const PrivateRoute = ({ children }) => {
     );
   }
 
-  // Если профиль не существует (пустой объект), перенаправляем на страницу приветствия.
-  if (!profile || Object.keys(profile).length === 0) {
+  // Если профиль не существует (null), перенаправляем на страницу приветствия.
+  if (!profile) {
     return <Navigate to="/welcome" state={{ from: location }} replace />;
   }
 
@@ -25,7 +25,7 @@ const PrivateRoute = ({ children }) => {
     return <Navigate to="/profile" state={{ from: location }} replace />;
   }
   
-  return children;
+  return <Outlet />;
 };
 
 export default PrivateRoute;

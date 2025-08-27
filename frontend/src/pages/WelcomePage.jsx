@@ -109,9 +109,21 @@ const WelcomePage = () => {
         }
     };
 
-    const handleSkip = () => {
-        localStorage.setItem('hasCompletedWelcomeFlow', 'true');
-        navigate('/');
+    const handleSkip = async () => {
+        setIsLoading(true);
+        try {
+            // Создаем пустой профиль, чтобы пользователь не попадал сюда снова
+            await updateProfile({
+                birthDate: '',
+                birthTime: '',
+                birthPlace: '',
+            });
+            navigate('/');
+        } catch (err) {
+            setError("Не удалось пропустить шаг. Попробуйте сохранить данные или перезагрузите страницу.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
