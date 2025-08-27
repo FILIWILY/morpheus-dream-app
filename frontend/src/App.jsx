@@ -14,6 +14,7 @@ import { getProfile, api } from './services/api';
 import i18n from './services/i18n'; // Используем существующий i18n
 import Placeholder from './components/Placeholder';
 import React from 'react'; // Added missing import for React
+import { detectTelegramEnvironment, initializeTelegramWebApp, isValidProductionEnvironment } from './utils/telegramDetection.js';
 
 // Глобальный обработчик ошибок
 class ErrorBoundary extends React.Component {
@@ -55,93 +56,48 @@ function App() {
     
     const initializeApp = () => {
       try {
-        const tg = window.Telegram?.WebApp;
+        console.log('[App] 🚀 Starting app initialization...');
         
-        // Получаем информацию о текущем окружении
-        const url = new URL(window.location.href);
-        const referrer = document.referrer;
-        const userAgent = navigator.userAgent;
+        // Используем новую систему определения Telegram окружения
+        const telegramEnv = detectTelegramEnvironment();
         
-        console.log('[App] 🔍 Comprehensive Telegram detection...');
-        console.log('[App] URL:', window.location.href);
-        console.log('[App] Referrer:', referrer);
-        console.log('[App] User agent:', userAgent);
-        console.log('[App] URL params:', Object.fromEntries(url.searchParams.entries()));
+        console.log('[App] 🔍 Telegram environment detection result:', {
+          isTelegram: telegramEnv.isTelegram,
+          method: telegramEnv.method,
+          hasInitData: !!telegramEnv.initData,
+          hasUser: !!telegramEnv.user
+        });
         
-        // Метод 1: Стандартная проверка Telegram WebApp объекта
-        const hasTelegramWebApp = tg && typeof tg.ready === 'function';
-        console.log('[App] Method 1 - Telegram WebApp object:', hasTelegramWebApp);
+        // Сохраняем диагностическую информацию для отображения в Placeholder
+        setDebugInfo(telegramEnv.debugInfo);
         
-        // Метод 2: Проверка URL параметров (Telegram может передавать специальные параметры)
-        const hasTelegramParams = url.searchParams.has('tgWebAppData') || 
-                                 url.searchParams.has('tgWebAppVersion') ||
-                                 url.searchParams.has('tgWebAppPlatform') ||
-                                 url.hash.includes('tgWebAppData');
-        console.log('[App] Method 2 - Telegram URL params:', hasTelegramParams);
-        
-        // Метод 3: Проверка referrer (может содержать t.me или telegram)
-        const hasTelegramReferrer = referrer.includes('t.me') || 
-                                   referrer.includes('telegram') ||
-                                   referrer.includes('web.telegram.org');
-        console.log('[App] Method 3 - Telegram referrer:', hasTelegramReferrer);
-        
-        // Метод 4: Проверка User Agent (iOS Safari может содержать специфические признаки)
-        const isTelegramUserAgent = userAgent.includes('TelegramWebview') ||
-                                   userAgent.includes('Telegram') ||
-                                   (userAgent.includes('Safari') && (hasTelegramParams || hasTelegramReferrer));
-        console.log('[App] Method 4 - Telegram User Agent:', isTelegramUserAgent);
-        
-        // Метод 5: Проверка наличия window.TelegramWebviewProxy (iOS specific)
-        const hasTelegramProxy = typeof window.TelegramWebviewProxy !== 'undefined';
-        console.log('[App] Method 5 - Telegram iOS Proxy:', hasTelegramProxy);
-        
-        // Комбинированная проверка - считаем Telegram окружением если хотя бы один метод сработал
-        const isTelegramEnvironment = hasTelegramWebApp || hasTelegramParams || 
-                                     hasTelegramReferrer || isTelegramUserAgent || hasTelegramProxy;
-        
-        console.log('[App] 🎯 Final decision - Is Telegram:', isTelegramEnvironment);
-        
-        // Сохраняем диагностическую информацию
-        const debugData = {
-          url: window.location.href,
-          referrer,
-          userAgent,
-          hasTelegramWebApp,
-          hasTelegramParams,
-          hasTelegramReferrer,
-          isTelegramUserAgent,
-          hasTelegramProxy,
-          isTelegramEnvironment
-        };
-        setDebugInfo(debugData);
-        
-        if (isTelegramEnvironment) {
-          console.log('[App] ✅ Telegram environment detected (combined methods)');
+        if (telegramEnv.isTelegram) {
+          console.log('[App] ✅ Telegram environment detected');
           
-          // Если есть стандартный WebApp объект, используем его
-          if (hasTelegramWebApp) {
-            console.log('[App] Using standard Telegram WebApp API');
-            console.log('[App] initData available:', !!tg.initData);
-            console.log('[App] initData length:', tg.initData ? tg.initData.length : 0);
-            
-            tg.ready();
-            if (tg.expand) {
-              tg.expand();
-            }
-          } else {
-            console.log('[App] Using alternative Telegram detection (iOS Safari mode)');
+          // Инициализируем WebApp API если доступен
+          if (telegramEnv.webApp) {
+            const initialized = initializeTelegramWebApp(telegramEnv);
+            console.log('[App] WebApp initialization:', initialized ? 'success' : 'failed');
           }
           
-          setView('app');
+          // Проверяем валидность для production
+          if (isValidProductionEnvironment(telegramEnv)) {
+            setView('app');
+          } else {
+            console.warn('[App] ⚠️ Invalid production environment');
+            setView('placeholder');
+            setError('Invalid Telegram environment for production');
+          }
         }
         else if (isDev) {
-          console.log('[App] Development mode detected. Bypassing Telegram check.');
+          console.log('[App] 🔧 Development mode - bypassing Telegram check');
           setView('app');
         }
         else {
-          console.log('[App] ❌ Not in Telegram environment. Showing placeholder.');
+          console.log('[App] ❌ Not in Telegram environment');
           setView('placeholder');
         }
+        
       } catch (err) {
         console.error('[App] Error during initialization:', err);
         setError(err.message);
@@ -149,8 +105,8 @@ function App() {
       }
     };
 
-    // Увеличиваем задержку для более надежной инициализации
-    const timer = setTimeout(initializeApp, 500);
+    // Даем время на инициализацию Telegram WebApp API
+    const timer = setTimeout(initializeApp, 300);
 
     return () => clearTimeout(timer);
   }, []);

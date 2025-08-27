@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { detectTelegramEnvironment, getTelegramAuthData } from '../utils/telegramDetection.js';
 
 const API_BASE_URL = '/api'; // Vite proxy will handle this
 
@@ -10,41 +11,30 @@ const api = axios.create({
 // Centralized request interceptor for authentication
 api.interceptors.request.use(
   (config) => {
-    const tg = window.Telegram?.WebApp;
-    const url = new URL(window.location.href);
-    const referrer = document.referrer;
+    // Используем новую систему определения Telegram окружения
+    const telegramEnv = detectTelegramEnvironment();
+    const authData = getTelegramAuthData(telegramEnv);
     
-    // Проверяем различные способы определения Telegram окружения
-    const hasTelegramWebApp = tg && typeof tg.ready === 'function';
-    const hasTelegramParams = url.searchParams.has('tgWebAppData') || url.hash.includes('tgWebAppData');
-    const hasTelegramReferrer = referrer.includes('t.me') || referrer.includes('telegram');
-    const isTelegramEnvironment = hasTelegramWebApp || hasTelegramParams || hasTelegramReferrer;
+    console.log('[API] Telegram environment check:', {
+      isTelegram: telegramEnv.isTelegram,
+      method: telegramEnv.method,
+      hasInitData: !!telegramEnv.initData,
+      initDataLength: telegramEnv.initData ? telegramEnv.initData.length : 0
+    });
 
-    // For production, use the initData string for cryptographic verification.
-    if (hasTelegramWebApp && tg.initData !== undefined) {
-      // Стандартный режим с Telegram WebApp API
-      config.headers['X-Telegram-Init-Data'] = tg.initData || '';
-      console.log('[API] Using standard Telegram WebApp initData, length:', (tg.initData || '').length);
+    if (telegramEnv.isTelegram) {
+      // Отправляем initData на сервер для валидации
+      config.headers['X-Telegram-Init-Data'] = telegramEnv.initData || '';
+      console.log('[API] Using Telegram initData, length:', telegramEnv.initData ? telegramEnv.initData.length : 0);
     }
-    else if (isTelegramEnvironment) {
-      // iOS Safari режим - Telegram окружение без стандартного API
-      config.headers['X-Telegram-Init-Data'] = '';
-      console.log('[API] Using Telegram environment (iOS Safari mode) with empty initData');
-    }
-    // For local development, bypass auth with a test user ID.
+    // For local development, bypass auth with a test user ID
     else if (import.meta.env.DEV) {
       config.headers['X-Telegram-User-ID'] = '12345-test-user';
       console.log('[API] Using dev bypass auth');
     }
     else {
-      console.warn('[API] No authentication method available');
-      console.warn('[API] Environment check:', {
-        hasTelegramWebApp,
-        hasTelegramParams,
-        hasTelegramReferrer,
-        url: window.location.href,
-        referrer
-      });
+      console.warn('[API] No valid authentication method available');
+      console.warn('[API] Debug info:', telegramEnv.debugInfo);
     }
 
     return config;

@@ -39,16 +39,23 @@ export async function verifyTelegramAuth(req, res, next) {
 
     // 3. Handle empty initData (can happen in legitimate Telegram environments)
     if (initDataString === '') {
-        console.warn('[AUTH] Empty initData received. This can happen in some Telegram environments.');
-        // For empty initData, we'll create a temporary user ID based on timestamp
-        // This is not ideal but better than blocking legitimate users
-        const tempUserId = `temp_${Date.now()}`;
+        console.warn('[AUTH] Empty initData received. This can happen in legitimate Telegram environments (iOS Safari mode).');
+        
+        // В production режиме пустой initData может быть валидным для определенных сценариев
+        // Создаем временный пользователь с более стабильным ID на основе IP и User-Agent
+        const userAgent = req.headers['user-agent'] || '';
+        const ip = req.ip || req.connection.remoteAddress || 'unknown';
+        const fingerprint = crypto.createHash('md5').update(`${ip}_${userAgent}`).digest('hex').substring(0, 8);
+        const tempUserId = `telegram_guest_${fingerprint}`;
+        
+        console.log('[AUTH] Creating guest user with fingerprint:', fingerprint);
+        
         try {
             await db.findOrCreateUser(tempUserId);
             req.userId = tempUserId;
             return next();
         } catch (error) {
-            console.error('Error creating temporary user:', error);
+            console.error('Error creating guest user:', error);
             return res.status(500).json({ error: 'Internal server error' });
         }
     }
