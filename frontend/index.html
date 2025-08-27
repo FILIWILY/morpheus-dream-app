@@ -6,6 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Dream Interpreter</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=initMap" onerror="console.warn('Google Places API failed to load')"></script>
+    <script>
+      // Fallback for Google Places API
+      window.initMap = function() {
+        console.log('[GooglePlaces] API loaded successfully');
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -59,3 +59,15 @@
     background-color: #0077b3;
     transform: scale(1.05);
 }
+
+.error {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    word-wrap: break-word;
+}
