@@ -1,49 +1,66 @@
-# Backend Environment Variables
+# Управление переменными окружения (.env)
 
-`backend/.env`:
-- `PORT`: The port on which the backend server will run. Default is `9000`.
-  - Used in: `backend/src/server.js`
-- `OPENAI_API_KEY`: Your API key for accessing the OpenAI service.
-  - Used in: `backend/src/services/openai.js`
-- `USE_MOCK_API`: Set to `true` to use the mock interpretation data from `mock-interpretation.json` instead of making a real call to the OpenAI API. Useful for frontend development and testing without incurring API costs.
-  - Used in: `backend/src/server.js`
-- `GOOGLE_GEOCODING_API_KEY`: Your API key for the Google Geocoding API. This is required to convert a user's birthplace (city name) into geographic coordinates (latitude and longitude), which are essential for calculating the natal chart.
-  - Used in: `backend/src/server.js`
-- `DATABASE_URL`: The connection string for your PostgreSQL database. This is required when not in mock mode.
-  - Format: `postgresql://USER:PASSWORD@HOST:PORT/DATABASE`
-  - Used in: `backend/src/services/database.js`
-- `TELEGRAM_BOT_TOKEN`: Your secret token for the Telegram Bot. This is required for validating user data in production.
-  - Used in: `backend/src/middleware/auth.js`
-- `DANGEROUSLY_BYPASS_AUTH`: Set to `true` to skip Telegram's cryptographic validation. FOR DEVELOPMENT USE ONLY.
-  - Used in: `backend/src/middleware/auth.js`
+В проекте используется два подхода к управлению переменными окружения, в зависимости от режима запуска.
 
-Example `backend/.env`:
-```
-PORT=9000
+---
+
+### 1. Режим Docker Compose (Основной)
+
+Для запуска всего приложения через `docker-compose up` используется **единый `.env` файл**, который должен находиться в **корневой директории** проекта. Этот файл является основным источником конфигурации для всех сервисов: базы данных, бэкенда и фронтенда.
+
+**Инструкция:**
+1.  Найдите в корне проекта файл `.env.example`.
+2.  Скопируйте его и переименуйте копию в `.env`.
+3.  Заполните все значения (ключи API, токен бота и т.д.).
+
+Содержимое файла `.env.example`:
+
+```plaintext
+# Environment variables for Docker Compose
+# Copy this file to .env in the project root and fill in your actual values.
+
+# --- PostgreSQL Database Settings ---
+POSTGRES_USER=di_admin
+POSTGRES_PASSWORD=didi1234didi
+POSTGRES_DB=di
+# This is the port on your local machine that will connect to the container's port 5432.
+POSTGRES_PORT=5433
+
+# --- Backend Service Settings ---
+# This is the port on your local machine that will connect to the backend container's port 9000.
+BACKEND_PORT=9000
+# Set to 'false' for production/staging or 'true' for local development with db.json
+USE_MOCK_API=false
+
+# --- Frontend Service Settings ---
+# This is the port on your local machine that will connect to the frontend Nginx container's port 80.
+FRONTEND_PORT=8080
+# This key is passed to Vite during the build process inside the Docker container.
+VITE_GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
+
+# --- AI Provider API Keys ---
 OPENAI_API_KEY=your_openai_api_key_here
-USE_MOCK_API=true
-GOOGLE_GEOCODING_API_KEY=your_google_api_key_here
-# Example for a local PostgreSQL database:
-DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/morpheus_db"
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+# Set to true to use OpenAI, false to use DeepSeek
+USE_OPENAI=true
 
-# --- Telegram Settings ---
+# --- Google Geocoding API Key ---
+GOOGLE_GEOCODING_API_KEY=your_google_api_key_here
+
+# --- Telegram Bot Settings ---
 TELEGRAM_BOT_TOKEN=your_secret_bot_token_here
-# Set to true for local development to bypass Telegram's initData validation
+# Set to 'true' ONLY for local testing outside of the Telegram client.
+# MUST be 'false' or unset in production.
 DANGEROUSLY_BYPASS_AUTH=true
 ```
 
-# AI Provider Settings
-# Set to true to use OpenAI, false to use DeepSeek
-USE_OPENAI=true
-DEEPSEEK_API_KEY=your_deepseek_api_key_here
+---
 
-# Frontend Environment Variables
+### 2. Режим локальной разработки (Legacy)
 
-`frontend/.env`:
-- `API_URL`: The URL of the backend API. During local development, this should point to your local backend server (e.g., `http://localhost:9000`).
-  - Used in: `frontend/src/services/api.js` (presumably, will verify in the next step)
+Этот режим используется, если вы хотите запустить фронтенд и бэкенд отдельно, без Docker, с помощью команд `npm run dev`. В этом случае используются **два отдельных `.env` файла**:
 
-Example `frontend/.env`:
-```
-API_URL="http://localhost:9000"
-```
+-   `backend/.env`: Содержит переменные **только для бэкенда** (`DATABASE_URL`, `OPENAI_API_KEY` и т.д.).
+-   `frontend/.env`: Содержит переменные **только для фронтенда** (`VITE_GOOGLE_PLACES_API_KEY`).
+
+**Важно:** При запуске через `docker-compose`, эти два файла **полностью игнорируются**.
