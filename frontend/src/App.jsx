@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ProfileContext } from './context/ProfileContext';
+import { ProfileProvider } from './context/ProfileContext'; // Импортируем провайдер
 import WelcomePage from './pages/WelcomePage';
 import RecordingPage from './pages/RecordingPage';
 import InterpretationPage from './pages/InterpretationPage';
@@ -20,8 +20,6 @@ export const I18nContext = React.createContext(i18n);
 
 
 function App() {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [view, setView] = useState('loading'); // 'loading', 'app', 'placeholder'
   const [i18nInstance, setI18nInstance] = useState(i18n);
 
@@ -51,28 +49,7 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (view !== 'app') {
-      setLoading(false);
-      return;
-    }
-
-    const fetchProfileData = async () => {
-      setLoading(true);
-      try {
-        const profileData = await getProfile();
-        setProfile(profileData);
-      } catch (error) {
-        console.error('Failed to fetch profile:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfileData();
-  }, [view]);
-
-  if (view === 'loading' || (view === 'app' && loading)) {
+  if (view === 'loading') {
     return null; 
   }
 
@@ -86,7 +63,7 @@ function App() {
 
   return (
     <I18nContext.Provider value={i18nInstance}>
-      <ProfileContext.Provider value={{ profile, setProfile, loading }}>
+      <ProfileProvider>
         <Router>
           <Routes>
             <Route path="/welcome" element={<WelcomePage />} />
@@ -101,7 +78,7 @@ function App() {
             </Route>
           </Routes>
         </Router>
-      </ProfileContext.Provider>
+      </ProfileProvider>
     </I18nContext.Provider>
   );
 }
