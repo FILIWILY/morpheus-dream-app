@@ -33,3 +33,63 @@
     color: var(--text-secondary) !important;
     line-height: 1.6;
 }
+
+.summaryBlock {
+    /* Use CSS variable passed from the component */
+    --accent-color-with-opacity: rgba(77, 123, 255, 0.1);
+    background-color: var(--accent-color-with-opacity);
+    border-left: 3px solid var(--lens-accent-color, #4D7BFF);
+    
+    padding: 16px; /* Adjusted padding */
+    margin-top: 24px;
+    border-radius: 8px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.expandIcon {
+    color: var(--text-primary) !important;
+    transition: transform 0.3s ease !important;
+}
+
+.expandIcon.expanded {
+    transform: rotate(180deg);
+}
+
+.summaryTitle {
+    font-weight: 700 !important;
+    color: var(--text-primary);
+    font-size: 1.1rem !important;
+    margin-left: 8px; /* Space between icon and title */
+}
+
+/* Collapsible content styles */
+.collapsibleContent {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out, padding-top 0.4s ease-in-out;
+}
+
+.collapsibleContent.expanded {
+    max-height: 1000px; /* Large enough value to fit any content */
+    padding-top: 16px; /* Add space when expanded */
+}
+
+.summaryContent {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 1rem !important;
+}
+
+.summaryContent p {
+    margin: 0 0 1em 0; /* Standard paragraph spacing */
+}
+
+.summaryContent p:last-child {
+    margin-bottom: 0;
+}

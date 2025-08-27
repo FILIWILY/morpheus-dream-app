@@ -1,63 +1,70 @@
 .tabsContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  margin-bottom: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  background: rgb(0, 0, 0); /* Полностью черный фон */
-  z-index: 10;
-  box-sizing: border-box;
-  width: 100%;
-  padding: 0;
-  margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 16px;
+    /* gap is removed, borders will handle spacing */
+    background-color: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    /* padding is removed to make buttons flush with the border */
+    overflow: hidden; /* This will clip the button corners to match the container's radius */
 }
 
 .tabsRow {
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  width: 100%;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    width: 100%;
+    /* gap is removed, borders will handle spacing */
 }
 
-.tabsRow:last-child {
-  border-bottom: none;
+/* Horizontal separator between rows */
+.tabsRow + .tabsRow {
+    border-top: 1px solid var(--border-color);
 }
 
 .tabBtn {
-  background: none;
-  border: none;
-  color: var(--text-secondary); 
-  padding: 10px 4px; /* Внутренний отступ текста кнопки */
-  font-size: 16px; 
-  font-weight: 500;
-  cursor: pointer;
-  border-bottom: 3px solid transparent; /* Для подчеркивания активной кнопки */
-  border-right: 1px solid rgba(255, 255, 255, 0.1); /* Внутренняя правая граница */
-  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
-  white-space: nowrap;
-  text-align: center;
-  flex-grow: 1;
-  flex-shrink: 1;
-  flex-basis: 0;
-  min-width: 0;
-  box-sizing: border-box;
-  text-decoration: none;
-}
-
-.tabsRow .tabBtn:last-child {
-  border-right: none;
+    /* Removed the default border */
+    border: none;
+    /* Add a bottom border to reserve space and prevent layout shifts */
+    border-bottom: 3px solid transparent;
+    border-radius: 0; /* Tabs shouldn't have rounded corners for a clean line */
+    padding: 16px 8px; /* Adjusted padding for a better look */
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    flex-grow: 1;
+    text-align: center;
 }
 
 .tabBtn:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
+    background-color: var(--background-secondary); /* Subtle hover for inactive tabs */
+    color: var(--text-primary);
 }
 
 .tabBtn.active {
-  border-bottom-color: currentColor; /* Подчеркивание цветом текста */
-  background-color: rgba(255, 255, 255, 0.03);
-  color: var(--accent-color); /* Сохраняем акцентный цвет */
+    background-color: transparent; /* Active tab should not have a background fill */
+    border-bottom-color: currentColor; /* Use the accent color for the border */
+    color: currentColor; /* Use the accent color for the active text (already set inline) */
+    font-weight: 700; /* Make active tab font bolder */
+}
+
+/* Ensure active tab doesn't change on hover */
+.tabBtn.active:hover {
+    background-color: transparent;
+}
+
+.fullWidth {
+    width: 100%;
+}
+
+.halfWidth {
+    width: 50%;
+}
+
+/* Vertical separator between half-width buttons */
+.halfWidth + .halfWidth {
+    border-left: 1px solid var(--border-color);
 }

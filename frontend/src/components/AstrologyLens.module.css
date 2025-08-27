@@ -344,6 +344,8 @@
 
 .unlockedContainer.unlocked {
     max-height: 2000px;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .unlockedContent {
@@ -430,4 +432,27 @@
 @keyframes fadeOut {
     from { opacity: 1; }
     to { opacity: 0; }
+}
+
+/* Styles for the new reveal button */
+.revealButtonContainer {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.revealButton {
+    background-color: var(--accent-primary);
+    color: var(--background-primary);
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.revealButton:hover {
+    background-color: #0056b3; /* A slightly darker shade for hover */
 }

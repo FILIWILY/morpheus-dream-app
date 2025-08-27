@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styles from './TarotSpread.module.css';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, IconButton } from '@mui/material';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 // Import card images with correct paths and filenames
 import CardFool from '../assets/tarot/major_arcana_fool.png';
@@ -34,68 +36,138 @@ const cardImageMap = {
 };
 
 const TarotSpread = ({ spread, summary, accentColor, isRevealed, onReveal }) => {
-    const [visibleCards, setVisibleCards] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(-1); // -1: initial, 0-4: cards, 5: summary
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [touchStartX, setTouchStartX] = useState(0);
+    const [touchEndX, setTouchEndX] = useState(0);
+
+    // Combine spread and summary into a single array for easier indexing
+    const sliderItems = [...spread, { position: 'Общий Смысл', cardName: null, interpretation: summary }];
 
     useEffect(() => {
-        if (!spread || !isRevealed) {
-            setVisibleCards([]);
-            return;
+        if (isRevealed && currentIndex === -1) {
+            setCurrentIndex(0);
         }
-        const timers = spread.map((_, index) => 
-            setTimeout(() => {
-                setVisibleCards(prev => [...prev, index]);
-            }, index * 300)
-        );
+        if (!isRevealed) {
+            setCurrentIndex(-1);
+        }
+    }, [isRevealed, currentIndex]);
 
-        return () => timers.forEach(clearTimeout);
-    }, [isRevealed, spread]);
+    const changeSlide = (newIndex) => {
+        setIsAnimating(true);
+        setTimeout(() => {
+            setCurrentIndex(newIndex);
+            setIsAnimating(false);
+        }, 300); // Animation duration
+    };
 
-    // This initial state is now simplified: if there's no spread, nothing is shown.
-    // The parent component (InterpretationPage) will handle the loading state.
+    const handleNext = () => {
+        if (currentIndex < sliderItems.length - 1) {
+            changeSlide(currentIndex + 1);
+        }
+    };
+
+    const handlePrev = () => {
+        if (currentIndex > 0) {
+            changeSlide(currentIndex - 1);
+        }
+    };
+
+    const handleTouchStart = (e) => {
+        setTouchStartX(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e) => {
+        setTouchEndX(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        // Swipe left
+        if (touchStartX - touchEndX > 75) {
+            handleNext();
+        }
+
+        // Swipe right
+        if (touchStartX - touchEndX < -75) {
+            handlePrev();
+        }
+    };
+
     if (!spread || spread.length === 0) {
-        return null; // Or a loading spinner, handled by parent
+        return null;
     }
-    
-    // The "Draw cards" button is now simplified to "Reveal cards"
-    // as the drawing happens on the backend.
-    if (!isRevealed) {
+
+    if (currentIndex === -1) {
         return (
              <Box className={styles.initialState}>
-                 <Typography variant="h5" className={styles.initialTitle}>Ваши карты готовы</Typography>
+                 <Typography variant="h6" className={styles.initialTagline}>5 карт</Typography>
                  <Button variant="contained" onClick={onReveal} sx={{ backgroundColor: accentColor, '&:hover': { backgroundColor: accentColor }}}>
-                     Открыть карты
+                     Сделать расклад
                  </Button>
              </Box>
         );
     }
 
+    const currentItem = sliderItems[currentIndex];
+
     return (
-        <Box className={styles.spreadContainer}>
-            <Box className={styles.cardsGrid}>
-                {spread.map((item, index) => (
-                    <Box key={index} className={`${styles.cardContainer} ${visibleCards.includes(index) ? styles.visible : ''}`}>
-                        <Typography variant="h6" className={styles.positionTitle} style={{ color: accentColor }}>
-                            {item.position}
-                        </Typography>
-                        <Box className={styles.card}>
-                            <img src={cardImageMap[item.cardName] || CardFool} alt={item.cardName} className={styles.cardImage} />
-                            <Typography variant="subtitle1" className={styles.cardName}>{item.cardName}</Typography>
-                        </Box>
-                        <Typography variant="body2" className={styles.interpretationText}>
-                            {item.interpretation}
-                        </Typography>
-                    </Box>
-                ))}
+        <Box 
+            className={styles.spreadContainer}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            {/* Tap Zones */}
+            {currentIndex > 0 && <div className={styles.tapZoneLeft} onClick={handlePrev} />}
+            {currentIndex < sliderItems.length - 1 && <div className={styles.tapZoneRight} onClick={handleNext} />}
+
+            <Box className={styles.titleContainer}>
+                {currentIndex > 0 && (
+                     <IconButton onClick={handlePrev} className={styles.navArrow} style={{ color: accentColor }}>
+                        <ArrowBackIosNewIcon />
+                    </IconButton>
+                )}
+                <Typography variant="h6" className={styles.positionTitle} style={{ color: accentColor }}>
+                    {currentItem.position}
+                </Typography>
+                {currentIndex < sliderItems.length - 1 && (
+                    <IconButton onClick={handleNext} className={`${styles.navArrow} ${styles.nextArrow}`} style={{ color: accentColor }}>
+                        <ArrowForwardIosIcon />
+                    </IconButton>
+                )}
             </Box>
 
-            {visibleCards.length === spread.length && (
-                 <Box className={styles.summaryContainer}>
-                    <Typography variant="h5" className={styles.summaryTitle}>Общий смысл</Typography>
-                    <Typography variant="body1" className={styles.summaryText}>
-                        {summary}
+            <Box className={`${styles.cardContent} ${isAnimating ? styles.fading : ''}`}>
+                
+                {/* Mini-spread for the summary slide */}
+                {currentIndex === sliderItems.length - 1 && (
+                    <Box className={styles.miniSpreadContainer}>
+                        {spread.map((card, cardIndex) => (
+                            <Box key={cardIndex} className={styles.miniCard}>
+                                <img src={cardImageMap[card.cardName]} alt={card.cardName} className={styles.miniCardImage} />
+                                <Typography variant="caption" className={styles.miniCardName}>
+                                    {card.cardName}
+                                </Typography>
+                            </Box>
+                        ))}
+                    </Box>
+                )}
+
+                {currentItem.cardName && (
+                    <Box className={styles.card}>
+                        <img src={cardImageMap[currentItem.cardName]} alt={currentItem.cardName} className={styles.cardImage} />
+                    </Box>
+                )}
+                
+                <Box className={styles.textContent}>
+                    {currentItem.cardName && (
+                         <Typography variant="subtitle1" className={styles.cardName}>{currentItem.cardName}</Typography>
+                    )}
+                    <Typography variant="body2" className={styles.interpretationText}>
+                        {currentItem.interpretation}
                     </Typography>
                 </Box>
-            )}
+            </Box>
         </Box>
     );
 };

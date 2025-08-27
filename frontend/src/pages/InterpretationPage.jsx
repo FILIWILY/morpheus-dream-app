@@ -2,13 +2,12 @@ import React, { useState, useMemo, useContext, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './InterpretationPage.module.css';
 
-import DreamTags from '../components/DreamTags';
 import InterpretationSection from '../components/InterpretationSection';
 import LensTabs from '../components/LensTabs';
 import PsychoanalyticInsight from '../components/PsychoanalyticInsight';
 import PsychoanalyticRecommendations from '../components/PsychoanalyticRecommendations';
+import PsychoanalyticSchools from '../components/PsychoanalyticSchools'; // Import the new component
 import TarotSpread from '../components/TarotSpread';
-import CulturologyLens from '../components/CulturologyLens';
 import AstrologyLens from '../components/AstrologyLens'; // Импортируем новый компонент
 
 import { LocalizationContext } from '../context/LocalizationContext';
@@ -23,7 +22,6 @@ const LENS_ACCENT_COLORS = {
     psychoanalytic: '#4D7BFF',
     tarot: '#FFC700',
     astrology: '#C850FF',
-    culturology: '#34E49D', // New color for the new lens
 };
 
 const AstrologyLock = () => {
@@ -175,19 +173,15 @@ const InterpretationPage = () => {
                 />;
             
             case 'psychoanalytic':
-                const schools = activeLensData.schools ? Object.values(activeLensData.schools) : [];
                 return (
                     <div className={styles.lensContentFlow}>
                         <PsychoanalyticInsight insights={activeLensData.insights} accentColor={activeAccentColor} />
-                        {schools.map(school => (
-                            <div key={school.title} className={styles.flowParagraph}>
-                                <h3 className={styles.flowTitle} style={{ color: activeAccentColor }}>
-                                    {school.title}
-                                </h3>
-                                <p className={styles.flowText}>{school.content}</p>
-                            </div>
-                        ))}
-                        <PsychoanalyticRecommendations recommendations={activeLensData.recommendations} accentColor={activeAccentColor} />
+                        {/* Replace the old mapping with the new interactive component */}
+                        <PsychoanalyticSchools 
+                            schools={activeLensData.schools} 
+                            accentColor={activeAccentColor} 
+                        />
+                        <PsychoanalyticRecommendations recommendation={activeLensData.recommendation} accentColor={activeAccentColor} />
                     </div>
                 );
 
@@ -199,9 +193,6 @@ const InterpretationPage = () => {
                             isRevealed={isTarotRevealed}
                             onReveal={handleRevealTarot} 
                         />;
-
-            case 'culturology':
-                return <CulturologyLens data={activeLensData} accentColor={activeAccentColor} />;
 
             default:
                 break;
@@ -237,7 +228,6 @@ const InterpretationPage = () => {
             </header>
 
             <main className={styles.content}>
-                <DreamTags tags={interpretationData.keyImages} accentColor={activeAccentColor} />
                 <InterpretationSection title={t('snapshotSummary')} accentColor={activeAccentColor}>
                     <p>{interpretationData.snapshotSummary}</p>
                 </InterpretationSection>

@@ -50,13 +50,50 @@ npm run dev:reset
 ### Backend
 - **Framework**: Node.js with Express
 - **API Provides endpoints for dream interpretation.
-- **External Integrations**: Connects to the OpenAI API (`backend/src/services/openai.js`) to generate dream interpretations.
-- **Environment Variables**: Uses `dotenv` for configuration (e.g., `PORT`, `OPENAI_API_KEY`).
-- **Data Storage**: `db.json` is actively used for persistence of user profiles and dreams.
-- **Core Logic**:
-    - `server.js`: Sets up the Express server, handles routes, and manages interactions with the OpenAI service.
-    - `openai.js`: Contains the logic for constructing prompts and interacting with the OpenAI API for dream interpretation, formatting the response into the required JSON structure with various "lenses" (Psychoanalytic, Esoteric, Astrology, Folkloric).
+- **Data Storage**: Uses PostgreSQL for production and staging, with a fallback to a `db.json` file for local mock development. See `ReadMe/DB.md` for more details.
+- **Authentication**: Implements secure, cryptographically-verified authentication for users via the Telegram Web App protocol. A bypass is available for local development. See `ReadMe/API_backend.md` for details.
+- **External Integrations**: Connects to AI providers (OpenAI, DeepSeek) to generate dream interpretations.
+- **Environment Variables**: Uses `dotenv` for configuration. See `.env.example` for the full list of required variables.
+
+## Deployment
+
+The recommended method for running this application in production is using Docker. The project includes a `Dockerfile` for the backend and a `docker-compose.yml` file to orchestrate all services.
+
+For detailed instructions on how to build and run the application with Docker, please see the **[Deployment Guide](ReadMe/Deployment.md)**.
 
 ## Environment Variables
 
-Refer to `example.env.txt` for details on environment variables required for both frontend and backend.
+Refer to `.env.example` in the project root for the environment variables required for the Docker setup. The old `backend/.env` is now only used for running the backend service natively without Docker.
+
+## Запуск проекта в режиме Production (с помощью Docker)
+
+Для запуска приложения в режиме, приближенном к продакшену, используется Docker и Docker Compose. Это позволяет упаковать приложение и все его зависимости (базу данных, Node.js, Nginx) в изолированные контейнеры.
+
+### Требования
+- Установленный Docker Desktop.
+
+### Настройка
+1.  **Создайте файл `.env`** в корневой директории проекта. Скопируйте в него содержимое из `.env.example` и заполните все необходимые ключи API (`OPENAI_API_KEY`, `GOOGLE_GEOCODING_API_KEY` и т.д.) и токен Telegram-бота.
+2.  **Убедитесь, что Docker Desktop запущен.**
+
+### Первый запуск
+Откройте терминал в корневой папке проекта и выполните команду:
+```bash
+docker-compose up --build
+```
+-   `--build`: Эта опция заставит Docker собрать образы для фронтенда и бэкенда заново. Это необходимо при первом запуске или после внесения изменений в код или `Dockerfile`.
+
+### Последующие запуски
+Для всех последующих запусков (например, после перезагрузки компьютера) достаточно выполнить:
+```bash
+docker-compose up
+```
+
+### Остановка
+Чтобы остановить все контейнеры, нажмите `Ctrl + C` в терминале, где запущен `docker-compose`.
+
+---
+
+## Запуск проекта в режиме Dev (локально)
+
+Этот режим предназначен для активной разработки и отладки.

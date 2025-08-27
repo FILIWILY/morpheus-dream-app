@@ -15,7 +15,6 @@ const interpretation = {
   date: "2023-11-13T13:36:34.165Z",
   dream: "Текст сна...",
   title: "Сгенерированный ИИ заголовок",
-  keyImages: ["образ1", "образ2"],
   snapshotSummary: "Краткое резюме от ИИ",
   lenses: {
     psychoanalytic: { /* ... */ },

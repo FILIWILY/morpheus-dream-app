@@ -1,7 +1,7 @@
 # Файлы зависимостей
-node_modules/
-/frontend/node_modules/
-/backend/node_modules/
+/node_modules
+/frontend/node_modules
+/backend/node_modules
 
 # Логи и временные файлы
 npm-debug.log*
@@ -23,5 +23,22 @@ Thumbs.db
 
 # Секретные данные (ОЧЕНЬ ВАЖНО)
 .env
-*.env.localb a c k e n d / d b . j s o n backend/db.json 
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Production
+/build
+/dist
+/.dist
+
+# Mock database file
+backend/db.json
+
+# Ignore example environment files
+.env.example
+
+# Ignore documentation folder
+/ReadMe/ 
  

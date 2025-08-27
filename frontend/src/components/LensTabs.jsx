@@ -1,51 +1,48 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import styles from './LensTabs.module.css';
 
 const LensTabs = ({ lenses, activeLens, setActiveLens, accentColor }) => {
     const tabsRef = useRef([]);
-    const desiredOrder = ['psychoanalytic', 'tarot', 'astrology', 'culturology'];
+    const desiredOrder = ['psychoanalytic', 'tarot', 'astrology'];
 
     useEffect(() => {
-        // Logic for setting active tab style might still be needed if not handled purely by CSS borders
-        // For now, removing the old indicator logic entirely.
+        // This effect can be kept for potential future logic if needed,
+        // but for now, it's empty as styling is handled by CSS.
     }, [activeLens, lenses, accentColor]);
 
     const lensKeys = Object.keys(lenses).sort((a, b) => {
         const indexA = desiredOrder.indexOf(a);
         const indexB = desiredOrder.indexOf(b);
-        if (indexA === -1 && indexB === -1) return 0; // оба элемента не в списке
-        if (indexA === -1) return 1; // a не в списке, идет в конец
-        if (indexB === -1) return -1; // b не в списке, идет в конец
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
         return indexA - indexB;
     });
-    
-    // Split lenses into two rows. Assuming a maximum of 4 lenses, 2 per row.
-    // This can be made more dynamic if needed, but for the provided example, this works.
-    const row1LensKeys = lensKeys.slice(0, 2);
-    const row2LensKeys = lensKeys.slice(2, 4); // Handles cases with less than 4 or more than 2 in the second row
+
+    const psychoanalyticKey = lensKeys.find(key => key === 'psychoanalytic');
+    const otherKeys = lensKeys.filter(key => key !== 'psychoanalytic');
 
     return (
         <div className={styles.tabsContainer}>
-            <div className={styles.tabsRow}>
-                {row1LensKeys.map((key, index) => (
-                    <button
-                        key={key}
-                        ref={el => tabsRef.current[index] = el}
-                        className={`${styles.tabBtn} ${activeLens === key ? styles.active : ''}`}
-                        onClick={() => setActiveLens(key)}
-                        style={{ color: activeLens === key ? accentColor : 'var(--text-secondary)' }}
-                    >
-                        {lenses[key].title}
-                    </button>
-                ))}
-            </div>
-            {row2LensKeys.length > 0 && (
+            {psychoanalyticKey && (
                 <div className={styles.tabsRow}>
-                    {row2LensKeys.map((key, index) => (
+                    <button
+                        key={psychoanalyticKey}
+                        ref={el => tabsRef.current[0] = el}
+                        className={`${styles.tabBtn} ${styles.fullWidth} ${activeLens === psychoanalyticKey ? styles.active : ''}`}
+                        onClick={() => setActiveLens(psychoanalyticKey)}
+                        style={{ color: activeLens === psychoanalyticKey ? accentColor : 'var(--text-secondary)' }}
+                    >
+                        {lenses[psychoanalyticKey].title}
+                    </button>
+                </div>
+            )}
+            {otherKeys.length > 0 && (
+                <div className={styles.tabsRow}>
+                    {otherKeys.map((key, index) => (
                         <button
                             key={key}
-                            ref={el => tabsRef.current[row1LensKeys.length + index] = el} // Adjust index for second row
-                            className={`${styles.tabBtn} ${activeLens === key ? styles.active : ''}`}
+                            ref={el => tabsRef.current[index + 1] = el}
+                            className={`${styles.tabBtn} ${styles.halfWidth} ${activeLens === key ? styles.active : ''}`}
                             onClick={() => setActiveLens(key)}
                             style={{ color: activeLens === key ? accentColor : 'var(--text-secondary)' }}
                         >

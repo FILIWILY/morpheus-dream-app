@@ -21,6 +21,11 @@ You are "Morpheus," a multi-faceted and wise dream interpreter. Your goal is to 
 - Tone: Empathetic and professional. Use clear language, without clichés. Refer to the dream's details and imagery. Do not invent facts that are not present.
 - Avoid words like "maybe" or "perhaps"; your answers should be clear and confident.
 - In each insight, use different angles (affect, defense, object relations, ego boundaries, Shadow dynamics, etc.).
+- **Recommendation (BLOCK 3):** Based on the entire psychoanalytic analysis, provide **one single, actionable recommendation**.
+    - **Tone:** Empathetic, caring, and supportive.
+    - **Content:** The recommendation must be **two paragraphs** long. It should focus exclusively on the **mental and introspective aspects**. Guide the user on what to pay attention to in their inner world or what questions to ask themselves.
+    - **Restrictions:** Do NOT suggest physical exercises, diets, or rituals. Suggestions should be purely mental (e.g., "try to talk to yourself as you would a dear friend to reduce self-criticism") or practical, everyday advice that can improve well-being (e.g., "notice if you use activities to escape your thoughts and try to find moments of quiet instead").
+    - **Title:** Create a short, insightful title for this recommendation that reflects its core message (e.g., "The Practice of Self-Compassion", "A Dialogue with Your Inner Critic").
 
 # PERSPECTIVE #2: Tarot
 - Tone: Wise, metaphorical, but clear. Speak like an experienced Tarot reader who helps find a path, rather than predicting the future.
@@ -54,7 +59,6 @@ Your response must be STRICTLY a single JSON object. Do not include static title
 \`\`\`json
 {
   "title": "A short, intriguing title for the dream, 3-5 words",
-  "keyImages": ["an", "array", "of", "2-4", "key", "images"],
   "snapshotSummary": "A general conclusion and brief summary of the dream's interpretation (about 50 words).",
   "lenses": {
     "psychoanalytic": {
@@ -64,14 +68,14 @@ Your response must be STRICTLY a single JSON object. Do not include static title
         { "name": "Title from Psychoanalysis BLOCK 1.3", "description": "Explanation from BLOCK 1.3" }
       ],
       "schools": {
-        "freud": "Content for Freud from BLOCK 2",
-        "jung": "Content for Jung from BLOCK 2",
-        "adler": "Content for Adler from BLOCK 2"
+        "freud": "For this school, select the single most significant image from the dream. Provide a concise analysis (3-5 sentences) of this symbol from the school's perspective. Use professional yet accessible language. Do not explain the school itself.",
+        "jung": "For this school, select the single most significant image from the dream. Provide a concise analysis (3-5 sentences) of this symbol from the school's perspective. Use professional yet accessible language. Do not explain the school itself.",
+        "adler": "For this school, select the single most significant image from the dream. Provide a concise analysis (3-5 sentences) of this symbol from the school's perspective. Use professional yet accessible language. Do not explain the school itself."
       },
-      "recommendations": [
-        { "title": "A suitable title for the first piece of advice", "content": "The first piece of advice from BLOCK 3" },
-        { "title": "A suitable title for the second piece of advice", "content": "The second piece of advice from BLOCK 3" }
-      ]
+      "recommendation": {
+        "title": "A suitable title for the recommendation, reflecting its essence",
+        "content": "A single, two-paragraph recommendation focusing on mental introspection and self-reflection, written with empathy and care, based on BLOCK 3 instructions."
+      }
     },
     "tarot": {
       "interpretations": [
@@ -184,8 +188,63 @@ export const getDreamInterpretation = async (dreamText, lang = 'ru', userProfile
     const psychoanalyticData = liveData.lenses?.psychoanalytic;
     const tarotData = liveData.lenses?.tarot;
     const aiAstroData = liveData.lenses?.astrology;
+    const lenses = liveData.lenses || {};
 
-    if (!psychoanalyticData || !psychoanalyticData.schools || !psychoanalyticData.recommendations || !tarotData || !tarotData.summary || !tarotData.interpretations || tarotData.interpretations.length !== 5) {
+    // --- Data Sanitization Block ---
+    // AI can sometimes misplace keys at the `lenses` level instead of inside the lens object.
+    // This block attempts to correct common misplacements before validation.
+    console.log('[AI DEBUG] Starting data sanitization...');
+
+    if (psychoanalyticData) {
+        if (!psychoanalyticData.insights && lenses.insights) {
+            console.log('[AI DEBUG] Correcting misplaced psychoanalytic.insights');
+            psychoanalyticData.insights = lenses.insights;
+            delete lenses.insights;
+        }
+        if (!psychoanalyticData.schools && lenses.schools) {
+            console.log('[AI DEBUG] Correcting misplaced psychoanalytic.schools');
+            psychoanalyticData.schools = lenses.schools;
+            delete lenses.schools;
+        }
+        if (!psychoanalyticData.recommendation && lenses.recommendation) {
+            console.log('[AI DEBUG] Correcting misplaced psychoanalytic.recommendation');
+            psychoanalyticData.recommendation = lenses.recommendation;
+            delete lenses.recommendation;
+        }
+    }
+
+    if (tarotData) {
+        if (!tarotData.interpretations && lenses.interpretations) {
+            console.log('[AI DEBUG] Correcting misplaced tarot.interpretations');
+            tarotData.interpretations = lenses.interpretations;
+            delete lenses.interpretations;
+        }
+    }
+
+    if (aiAstroData) {
+        if (!aiAstroData.summary && lenses.summary) {
+            console.log('[AI DEBUG] Correcting misplaced astrology.summary');
+            aiAstroData.summary = lenses.summary;
+            delete lenses.summary;
+        }
+        if (!aiAstroData.dreamAtmosphereInterpretation && lenses.dreamAtmosphereInterpretation) {
+            console.log('[AI DEBUG] Correcting misplaced astrology.dreamAtmosphereInterpretation');
+            aiAstroData.dreamAtmosphereInterpretation = lenses.dreamAtmosphereInterpretation;
+            delete lenses.dreamAtmosphereInterpretation;
+        }
+        if (!aiAstroData.transitInterpretations && lenses.transitInterpretations) {
+            console.log('[AI DEBUG] Correcting misplaced astrology.transitInterpretations');
+            aiAstroData.transitInterpretations = lenses.transitInterpretations;
+            delete lenses.transitInterpretations;
+        }
+        if (!aiAstroData.cosmicPassportInterpretation && lenses.cosmicPassportInterpretation) {
+            console.log('[AI DEBUG] Correcting misplaced astrology.cosmicPassportInterpretation');
+            aiAstroData.cosmicPassportInterpretation = lenses.cosmicPassportInterpretation;
+            delete lenses.cosmicPassportInterpretation;
+        }
+    }
+
+    if (!psychoanalyticData || !psychoanalyticData.schools || !psychoanalyticData.recommendation || !tarotData || !tarotData.summary || !tarotData.interpretations || tarotData.interpretations.length !== 5) {
         console.error('[AI] Could not find required data in the expected structure for Psychoanalysis or Tarot.');
         throw new Error('AI response structure is invalid.');
     }
@@ -217,9 +276,9 @@ export const getDreamInterpretation = async (dreamText, lang = 'ru', userProfile
         ...psychoanalyticData,
         title: "Психоанализ",
         schools: {
-            freud: { title: "Фрейдианский анализ", content: psychoanalyticData.schools.freud },
-            jung: { title: "Юнгианский анализ", content: psychoanalyticData.schools.jung },
-            adler: { title: "Адлерианский анализ", content: psychoanalyticData.schools.adler }
+            freud: { title: "По Фрейду", content: psychoanalyticData.schools.freud },
+            jung: { title: "По Юнгу", content: psychoanalyticData.schools.jung },
+            adler: { title: "По Адлеру", content: psychoanalyticData.schools.adler }
         }
     };
 
@@ -307,7 +366,6 @@ export const getDreamInterpretation = async (dreamText, lang = 'ru', userProfile
     // Combine live data with mock data
     const finalInterpretation = {
       title: liveData.title,
-      keyImages: liveData.keyImages,
       snapshotSummary: liveData.snapshotSummary,
       lenses: {
         psychoanalytic: finalPsychoanalyticData, // Use the merged data

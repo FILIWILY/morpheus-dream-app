@@ -1,0 +1,102 @@
+@keyframes glow {
+    0% { filter: drop-shadow(0 0 1px currentColor); }
+    50% { filter: drop-shadow(0 0 5px currentColor); }
+    100% { filter: drop-shadow(0 0 1px currentColor); }
+}
+
+@keyframes slow-blink {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+.container {
+    position: relative;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 8px 0; /* Reduced top and bottom margins further */
+}
+
+.selector {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+
+.selectorItem {
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.2s;
+    padding: 0 8px;
+}
+
+.selectorItem.blinking {
+    animation: slow-blink 2.5s infinite ease-in-out;
+}
+
+.selectorItem.active {
+    font-weight: 700;
+}
+
+/* New explanation block styles */
+.explanationToggle {
+    display: flex;
+    align-items: center; /* Vertically align icon and text */
+    cursor: pointer;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+}
+
+.explanationTitle {
+    font-weight: 500 !important;
+    font-size: 1rem !important; /* Increased font size */
+    margin-left: 8px; /* Space between icon and text */
+}
+
+.expandIcon {
+    transition: transform 0.3s ease !important;
+    color: var(--text-secondary) !important;
+    padding: 4px !important; /* Make icon smaller */
+}
+
+.expandIcon.expanded {
+    transform: rotate(180deg);
+}
+
+.explanationContent {
+    margin-bottom: 16px;
+    border-left: 3px solid var(--border-color);
+    padding-left: 12px;
+}
+
+.explanationText {
+    font-style: italic;
+    font-size: 0.9rem !important;
+    color: var(--text-secondary);
+}
+
+
+.content {
+    opacity: 1;
+    transition: opacity 0.15s ease-in-out; /* Faster animation */
+    text-align: justify;
+}
+
+.content.fading {
+    opacity: 0;
+}
+
+.contentText {
+    font-size: 1rem !important;
+    line-height: 1.6;
+    color: var(--text-primary); /* Changed to white */
+}

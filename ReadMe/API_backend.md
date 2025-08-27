@@ -6,14 +6,56 @@ This document outlines the main API endpoints provided by the backend server.
 `http://localhost:8081` (in development)
 
 ## Authentication
-All requests to these endpoints require an `X-Telegram-User-ID` header. If the user ID is not found in the `db.json` file, a new user entry is automatically created.
+Authentication is required for all endpoints and is handled based on the environment:
 
-## Endpoints
+### Production Mode (`DANGEROUSLY_BYPASS_AUTH=false`)
+In production, the backend authenticates every request by cryptographically verifying user data sent by the Telegram client.
+
+-   **Header**: `X-Telegram-Init-Data`
+-   **Content**: The full `initData` string provided by the Telegram Web App (`window.Telegram.WebApp.initData`).
+-   **Process**: The backend uses the `TELEGRAM_BOT_TOKEN` to validate the signature of the `initData` string. If the signature is valid, the user's `telegram_id` is extracted from the data and used for the request. If the signature is invalid or the header is missing, the request is rejected with a `401` or `403` error.
+
+### Local Development Mode (`DANGEROUSLY_BYPASS_AUTH=true`)
+For ease of testing outside the Telegram client (e.g., in a local browser), authentication can be bypassed.
+
+-   **Header**: `X-Telegram-User-ID`
+-   **Content**: Any string or number representing a user ID.
+-   **Process**: The cryptographic check is skipped. The backend trusts the provided user ID. If the user does not exist in the database, a new entry is created. **This mode must never be used in production.**
+
+Все эндпоинты, кроме `/`, требуют аутентификации.
+
+### Аутентификация (Telegram Web App)
+
+Сервер использует механизм проверки подлинности данных от Telegram Web App.
+
+- **Production (`DANGEROUSLY_BYPASS_AUTH=false`)**:
+  - Клиент (фронтенд) должен передавать заголовок `X-Telegram-Init-Data`, содержащий строку `initData` от Telegram.
+  - Сервер валидирует эту строку с помощью `TELEGRAM_BOT_TOKEN` для подтверждения подлинности пользователя.
+  - В случае успеха в объект `req` добавляется `req.userId`, содержащий Telegram ID пользователя.
+
+- **Local Development (`DANGEROUSLY_BYPASS_AUTH=true`)**:
+  - Для удобной локальной разработки в обход Telegram, клиент должен передавать заголовок `X-Telegram-User-ID` с любым тестовым идентификатором (например, `12345-test-user`).
+  - Сервер пропустит полную проверку и будет использовать этот ID для всех операций с базой данных.
+  - **Внимание:** Этот режим **категорически нельзя** включать на продакшене.
+
+### Эндпоинты
+
+#### `GET /`
+- **Описание**: Простая проверка работоспособности сервера.
+- **Запрос**: Нет тела.
+- **Заголовки**: Нет.
+- **Ответ**:
+    - **Успех (200 OK)**: JSON объект с сообщением "Server is running".
+    ```json
+    {
+        "message": "Server is running"
+    }
+    ```
 
 ### `GET /profile`
 - **Description**: Retrieves the profile data for the authenticated user.
 - **Request**: No body.
-- **Headers**: `X-Telegram-User-ID: <user_id>`
+- **Headers**: `X-Telegram-Init-Data` (Production) or `X-Telegram-User-ID` (Development).
 - **Response**: 
     - **Success (200 OK)**: JSON object containing user's profile (`birthDate`, `birthTime`, `birthPlace`).
     ```json
@@ -40,7 +82,7 @@ All requests to these endpoints require an `X-Telegram-User-ID` header. If the u
         "birthPlace": "City, Country"
     }
     ```
-- **Headers**: `X-Telegram-User-ID: <user_id>`
+- **Headers**: `X-Telegram-Init-Data` (Production) or `X-Telegram-User-ID` (Development).
 - **Response**: 
     - **Success (200 OK)**: The updated JSON object of the user's profile.
     ```json
@@ -54,14 +96,14 @@ All requests to these endpoints require an `X-Telegram-User-ID` header. If the u
 ### `GET /dreams`
 ### `GET /dreams/:dreamId`
 - **Description**: Retrieves a single dream by id (used to restore state on page reload/direct link).
-- **Headers**: `X-Telegram-User-ID: <user_id>`
-- **Response**: Full dream object as stored in `db.json` (see DB_Structure.md).
+- **Headers**: `X-Telegram-Init-Data` (Production) or `X-Telegram-User-ID` (Development).
+- **Response**: Full dream object as stored in the database.
 
 - **Description**: Retrieves the history of interpreted dreams for the authenticated user.
 - **Request**: No body.
-- **Headers**: `X-Telegram-User-ID: <user_id>`
+- **Headers**: `X-Telegram-Init-Data` (Production) or `X-Telegram-User-ID` (Development).
 - **Response**: 
-    - **Success (200 OK)**: An array of dream objects, ordered from most recent to oldest. Each dream object includes `id`, `date`, `originalText`, `title`, `keyImages`, `snapshotSummary`, and `lenses` (containing psychoanalytic, esoteric, astrology, and folkloric interpretations).
+    - **Success (200 OK)**: An array of dream objects, ordered from most recent to oldest. Each dream object includes `id`, `date`, `originalText`, and the full `interpretation` object (`title`, `snapshotSummary`, and `lenses`).
     ```json
     [
         {
@@ -69,7 +111,6 @@ All requests to these endpoints require an `X-Telegram-User-ID` header. If the u
             "date": "YYYY-MM-DD",
             "originalText": "Dream description...",
             "title": "Dream Title",
-            "keyImages": ["image1", "image2"],
             "snapshotSummary": "Summary of the dream...",
             "lenses": {
                 "psychoanalytic": {
@@ -93,7 +134,7 @@ All requests to these endpoints require an `X-Telegram-User-ID` header. If the u
         "dreamIds": ["uuid1", "uuid2"]
     }
     ```
-- **Headers**: `X-Telegram-User-ID: <user_id>`
+- **Headers**: `X-Telegram-Init-Data` (Production) or `X-Telegram-User-ID` (Development).
 - **Response**: 
     - **Success (200 OK)**:
     ```json
@@ -109,7 +150,7 @@ All requests to these endpoints require an `X-Telegram-User-ID` header. If the u
     ```
 
 ### `POST /processDreamText`
-- **Description**: Processes a textual dream description using the OpenAI API for interpretation. The interpretation is then saved to the user's dream history. A 5-card Tarot spread is automatically generated and included in the interpretation.
+- **Description**: Processes a textual dream description using the configured AI provider for interpretation. The interpretation is then saved to the user's dream history. A 5-card Tarot spread is automatically generated and included in the interpretation.
 - **Request Body**: JSON object with the dream `text`, `lang` (language of the dream, e.g., 'en', 'ru'), and `date` (date of the dream in YYYY-MM-DD format, or 'today').
     ```json
     {
@@ -118,16 +159,15 @@ All requests to these endpoints require an `X-Telegram-User-ID` header. If the u
         "date": "2023-10-26"
     }
     ```
-- **Headers**: `X-Telegram-User-ID: <user_id>`
+- **Headers**: `X-Telegram-Init-Data` (Production) or `X-Telegram-User-ID` (Development).
 - **Response**: 
-    - **Success (200 OK)**: The new dream entry, including its generated ID, date, original text, and the full AI interpretation. The response now includes enriched lenses.
+    - **Success (200 OK)**: The new dream entry, including its generated ID, date, original text, and the full AI interpretation.
     ```json
     {
         "id": "uuid3",
         "date": "2023-10-26",
         "originalText": "I dreamt about flying...",
         "title": "Soaring Dreams",
-        "keyImages": ["flying", "clouds"],
         "snapshotSummary": "A dream about flying often symbolizes a sense of freedom and control over one's life. It can also represent escaping from reality or overcoming obstacles.",
         "activeLens": null,
         "lenses": {
@@ -197,7 +237,7 @@ All requests to these endpoints require an `X-Telegram-User-ID` header. If the u
 ### `POST /processDreamAudio`
 - **Description**: Placeholder endpoint for processing dream audio. This functionality is not yet implemented.
 - **Request Body**: Expected to be a `FormData` object containing an audio file.
-- **Headers**: `X-Telegram-User-ID: <user_id>`
+- **Headers**: `X-Telegram-Init-Data` (Production) or `X-Telegram-User-ID` (Development).
 - **Response**: 
     - **Error (501 Not Implemented)**:
     ```json

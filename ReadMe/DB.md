@@ -1,143 +1,55 @@
-## Database Implementation Details
+# Database Architecture and Management
 
-This document describes the current database persistence mechanism used in the backend of the Morpheus Dream App. It is a file-based JSON storage solution, primarily managed through direct file I/O operations.
+This document details the database architecture for the Morpheus Dream App, which uses PostgreSQL for production and a `db.json` file for mock development.
 
-### Location
-- The database file, `db.json`, is located in the `backend/` directory of the project.
+## Production Database: PostgreSQL
 
-### Core Logic (backend/src/server.js)
+For production and staging environments, the application uses a PostgreSQL database. The schema is designed to be relational for core data while leveraging the power of `JSONB` for flexible, semi-structured data.
 
-The persistence logic is encapsulated within two main helper functions in `backend/src/server.js`:
+### Schema Definition (`init.sql`)
 
-1.  **`DB_PATH` Constant**
-    ```javascript
-    const DB_PATH = path.join(process.cwd(), 'db.json');
-    ```
-    - **Purpose**: Defines the absolute path to the `db.json` file. `process.cwd()` refers to the current working directory of the Node.js process (which is `backend/` when `npm run dev --prefix backend` is executed).
+The database schema is defined in `backend/init.sql`. This script is designed to be idempotent, meaning it can be run multiple times without causing errors. It automatically creates the necessary tables, indexes, and relationships.
 
-2.  **`readDB()` Function**
-    ```javascript
-    const readDB = () => {
-      if (!fs.existsSync(DB_PATH)) {
-        writeDB({ users: {} });
-        return { users: {} };
-      }
-      try {
-        const dbRaw = fs.readFileSync(DB_PATH, 'utf-8');
-        return JSON.parse(dbRaw);
-      } catch (e) {
-        console.error("Error reading or parsing db.json:", e);
-        return { users: {} };
-      }
-    };
-    ```
-    - **Purpose**: Reads the entire content of the `db.json` file into memory.
-    - **Behavior**:
-        - **Initialization**: If `db.json` does not exist, it is created with a default empty structure `{"users": {}}`. This ensures the application starts without errors even if the file is missing.
-        - **File Reading**: Uses Node.js's `fs.readFileSync(DB_PATH, 'utf-8')` to synchronously read the file content as a UTF-8 string.
-        - **JSON Parsing**: The raw string content is then parsed into a JavaScript object using `JSON.parse()`.
-        - **Error Handling**: Includes a `try-catch` block to gracefully handle potential errors during file reading or JSON parsing, returning an empty `users` object in case of an error.
+When using Docker Compose (`docker-compose up`), this script is **automatically executed** the first time the database container is created, so no manual setup is required.
 
-3.  **`writeDB(data)` Function**
-    ```javascript
-    const writeDB = (data) => {
-      fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
-    };
-    ```
-    - **Purpose**: Writes the current in-memory JavaScript object representing the database state back to the `db.json` file.
-    - **Behavior**:
-        - **JSON Stringification**: The JavaScript `data` object is converted into a formatted JSON string using `JSON.stringify(data, null, 2)`. The `null, 2` arguments ensure the JSON is pretty-printed with 2-space indentation, making it readable.
-        - **File Writing**: Uses Node.js's `fs.writeFileSync()` to synchronously write (and overwrite) the entire JSON string content to the `db.json` file.
+#### `users` Table
+Stores essential information about each user.
 
-### Data Structure (db.json)
+| Column | Type | Description |
+|---|---|---|
+| `telegram_id` | `TEXT PRIMARY KEY` | The user's ID from Telegram, used for authentication and as the primary identifier. |
+| `created_at` | `TIMESTAMP WITH TIME ZONE` | Timestamp of user registration. |
+| `birth_date` | `DATE` | User's birth date for astrology calculations. |
+| `birth_time` | `TIME` | User's birth time for astrology calculations. |
+| `birth_place` | `VARCHAR(255)` | User's birth place for astrology calculations. |
+| `birth_latitude` | `REAL` | Geocoded latitude of the birth place. |
+| `birth_longitude` | `REAL` | Geocoded longitude of the birth place. |
+| `"natalChart"` | `JSONB` | Stores the calculated natal chart data as a JSON object. |
 
-The `db.json` file stores a single root JSON object. All user data is nested under a `users` key.
+#### `dreams` Table
+Stores each dream and its full interpretation.
 
-```json
-{
-  "users": {
-    "[X-Telegram-User-ID]": {
-      "dreams": [
-        // Array of dream interpretation objects
-        {
-          "id": "<UUID>",
-          "date": "YYYY-MM-DD",
-          "originalText": "<User's dream description>",
-          "title": "<AI-generated dream title>",
-          "keyImages": ["<image1>", "<image2>"], // Key images from the dream
-          "snapshotSummary": "<Brief summary of interpretation>",
-          "lenses": {
-            "psychoanalytic": { /* ... interpretation details ... */ },
-            "esoteric": { /* ... interpretation details ... */ },
-            "astrology": {
-              "title": "Астрология",
-              "celestialMap": {
-                "moonPhase": {
-                  "name": "Полнолуние",
-                  "text": "AI-generated text about the moon's influence, synthesized for both phase and sign."
-                },
-                "moonSign": {
-                  "name": "Скорпион",
-                  "text": "Same AI-generated text as above."
-                }
-              },
-              "topTransits": {
-                "explanation": "Static text explaining what transits are.",
-                "insights": [
-                  {
-                    "p1": "pluto",
-                    "p2": "moon",
-                    "aspect": "square",
-                    "power": 8,
-                    "tagline": "Плутон в квадрате к Луне",
-                    "title": "Влияние: Плутон и Луна",
-                    "interpretation": "AI-generated interpretation of the transit.",
-                    "lesson": "AI-generated lesson for the transit."
-                  }
-                ]
-              },
-              "cosmicPassport": {
-                "sun": {
-                  "title": "Солнце в знаке Дева",
-                  "tagline": "AI-generated text about the user's sun sign."
-                },
-                "moon": {
-                  "title": "Луна в знаке Дева",
-                  "tagline": "Same AI-generated text, synthesized for both sun and moon."
-                }
-              },
-              "summary": "Overall AI-generated astrological summary."
-            },
-            "culturology": { /* ... interpretation details ... */ }
-          }
-        }
-      ],
-      "profile": {
-        "birthDate": "YYYY-MM-DD",
-        "birthTime": "HH:MM",
-        "birthPlace": "<City, Country>"
-      }
-    },
-    // ... other users ...
-  }
-}
-```
+| Column | Type | Description |
+|---|---|---|
+| `id` | `UUID PRIMARY KEY` | Unique identifier for the dream. |
+| `user_id` | `TEXT` | Foreign key referencing `users.telegram_id`. Ensures dreams are linked to a user. |
+| `dream_date` | `TIMESTAMP WITH TIME ZONE` | The date and time the dream occurred, as specified by the user. |
+| `dream_text` | `TEXT NOT NULL` | The raw text of the dream. |
+| `interpretation` | `JSONB NOT NULL` | The complete JSON object received from the AI, including `title`, `snapshotSummary`, and all `lenses`. |
+| `active_lens` | `VARCHAR(50)` | Stores which lens the user last viewed for this dream. |
+| `created_at` | `TIMESTAMPTZ` | Timestamp of when the dream was saved. |
 
-### Operational Flow
+---
 
-1.  **Server Startup**: When the backend server initializes, `readDB()` is called to load the existing data or create `db.json` if it doesn't exist.
-2.  **API Requests**: For any API endpoint that requires user data (e.g., `/profile`, `/dreams`, `/processDreamText`):
-    - The `ensureUser` middleware retrieves the `X-Telegram-User-ID` from the request headers.
-    - `readDB()` is called to load the latest state of `db.json` into memory.
-    - The relevant user's data (dreams, profile) is accessed and modified in the in-memory JavaScript object.
-    - After any modification, `writeDB()` is immediately called to persist the *entire* updated object back to `db.json`.
+## Development Database (`db.json`)
 
-### Characteristics
+For local development and testing, the application can be configured to use a simple JSON file database (`backend/db.json`). This avoids the need to constantly write to the production database.
 
--   **Type**: Flat-file JSON database.
--   **Concurrency**: Simple, synchronous file operations. Not designed for high-concurrency environments as the entire file is read and written for each modification.
--   **Scalability**: Limited; performance degrades with increasing file size and number of users.
--   **Persistence**: Data is persistent across server restarts as long as the `db.json` file is not deleted.
--   **Querying**: No advanced querying capabilities; data must be loaded into memory and filtered programmatically.
+### Usage
 
-This implementation is suitable for development and very small-scale applications but would necessitate a migration to a more robust database solution (e.g., MongoDB, PostgreSQL) for production environments to handle scalability, concurrency, and data integrity more effectively.
+This mode is controlled by the `USE_MOCK_API` environment variable.
+
+-   `USE_MOCK_API=true`: The data access layer will read from and write to `backend/db.json`.
+-   `USE_MOCK_API=false`: The data access layer will connect to the PostgreSQL database specified by `DATABASE_URL`.
+
+The structure of `db.json` mirrors the production schema in a nested format.

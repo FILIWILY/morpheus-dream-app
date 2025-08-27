@@ -315,7 +315,8 @@ const PlanetaryInfluence = ({ data, topTransits, explanation, onStateUpdate }) =
                 onStateUpdate({ viewedInsights, isSummaryUnlocked: newSummaryUnlocked });
             }, 500);
         } else if (animationState === 'synthesizing') {
-            timer = setTimeout(() => setAnimationState('unlocked'), 3000);
+            // Wait for synthesis, then transition to a state where the user can reveal the summary
+            timer = setTimeout(() => setAnimationState('readyToUnlock'), 3000);
         }
         return () => clearTimeout(timer);
     }, [animationState, onStateUpdate, viewedInsights]);
@@ -326,10 +327,11 @@ const PlanetaryInfluence = ({ data, topTransits, explanation, onStateUpdate }) =
         onStateUpdate({ viewedInsights: newViewedInsights, isSummaryUnlocked, currentIndex: swiper.activeIndex });
     };
 
-    const showCrystals = animationState !== 'synthesizing' && animationState !== 'unlocked';
+    const showCrystals = animationState !== 'synthesizing' && animationState !== 'unlocked' && animationState !== 'readyToUnlock';
     const showFlash = animationState === 'flashing';
     const isFading = animationState === 'fading';
     const isSynthesizing = animationState === 'synthesizing';
+    const isReadyToUnlock = animationState === 'readyToUnlock';
     const isUnlocked = animationState === 'unlocked';
     
     return (
@@ -408,12 +410,23 @@ const PlanetaryInfluence = ({ data, topTransits, explanation, onStateUpdate }) =
                 )}
                 {isSynthesizing && <SynthesizingAnimation />}
                 
+                {isReadyToUnlock && (
+                    <div className={styles.revealButtonContainer}>
+                        <button 
+                            className={styles.revealButton} 
+                            onClick={() => setAnimationState('unlocked')}
+                        >
+                            Прочитать совет
+                        </button>
+                    </div>
+                )}
+
                 <div className={`${styles.unlockedContainer} ${isUnlocked ? styles.unlocked : ''}`}>
                     <div className={styles.unlockedContent}>
                         <div className={styles.summaryBlock}>
-                            <h3 className={styles.blockTitle}>{mockPlanetaryData.summary.title}</h3>
+                            <h3 className={styles.blockTitle}>Общий Совет Астропсихолога</h3>
                             <div className={styles.markdown}>
-                                <ReactMarkdown>{mockPlanetaryData.summary.content}</ReactMarkdown>
+                                <ReactMarkdown>{data.summary || mockPlanetaryData.summary.content}</ReactMarkdown>
                             </div>
                         </div>
                     </div>

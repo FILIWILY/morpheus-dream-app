@@ -8,10 +8,11 @@ import axios from 'axios';
 import { getDreamInterpretation } from './services/ai_provider.js';
 import { getDreamAtmosphere, calculateTopTransits, getCosmicPassport } from './services/astrology.js';
 import { calculateNatalChart } from './services/natalChart.js';
+import * as db from './services/database.js';
+import { verifyTelegramAuth } from './middleware/auth.js';
 
 const app = express();
 const PORT = process.env.PORT || 9000;
-const DB_PATH = path.join(process.cwd(), 'db.json');
 
 // --- Константы для Таро ---
 const MAJOR_ARCANA = [
@@ -29,23 +30,6 @@ app.use(cors());
 app.use(express.json());
 
 // --- Вспомогательные функции ---
-const readDB = () => {
-  if (!fs.existsSync(DB_PATH)) {
-    writeDB({ users: {} });
-    return { users: {} };
-  }
-  try {
-    const dbRaw = fs.readFileSync(DB_PATH, 'utf-8');
-    return JSON.parse(dbRaw);
-  } catch (e) {
-    console.error("Error reading or parsing db.json:", e);
-    return { users: {} };
-  }
-};
-
-const writeDB = (data) => {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
-};
 
 // --- Вспомогательные функции для Таро ---
 const shuffleAndPick = (arr, count) => {
@@ -61,39 +45,29 @@ const generateTarotSpread = () => {
     }));
 };
 
-const ensureUser = (req, res, next) => {
-  const userId = req.headers['x-telegram-user-id'];
-  if (!userId) {
-    return res.status(401).json({ error: 'X-Telegram-User-ID header is required' });
-  }
-  const db = readDB();
-  if (!db.users) db.users = {};
-  if (!db.users[userId]) {
-    db.users[userId] = { dreams: [], profile: {} };
-    writeDB(db);
-  }
-  req.userId = userId;
-  next();
-};
-
 // --- Маршруты API ---
+// All routes will now be protected by the new authentication middleware.
+app.use(verifyTelegramAuth);
 
 // Получение профиля
-app.get('/profile', ensureUser, (req, res) => {
-    const db = readDB();
-    const userProfile = db.users[req.userId]?.profile;
-    if (userProfile && Object.keys(userProfile).length > 0) {
-        res.status(200).json(userProfile);
-    } else {
-        res.status(404).json({ error: 'Profile not found or empty' });
+app.get('/profile', async (req, res) => {
+    try {
+        const userProfile = await db.getProfile(req.userId);
+        if (userProfile) {
+            res.status(200).json(userProfile);
+        } else {
+            res.status(404).json({ error: 'Profile not found or empty' });
+        }
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ error: 'Failed to fetch profile' });
     }
 });
 
 // Обновление профиля
-app.put('/profile', ensureUser, async (req, res) => {
+app.put('/profile', async (req, res) => {
     const { birthDate, birthTime, birthPlace } = req.body;
-    const db = readDB();
-    const userProfile = db.users[req.userId].profile || {};
+    let userProfile = (await db.getProfile(req.userId)) || {};
 
     // Обновляем дату и время
     userProfile.birthDate = birthDate;
@@ -162,52 +136,65 @@ app.put('/profile', ensureUser, async (req, res) => {
         console.log('No coordinates, skipping natal chart calculation.');
     }
 
-    db.users[req.userId].profile = userProfile;
-    writeDB(db);
-    res.status(200).json(db.users[req.userId].profile);
+    try {
+        const updatedProfile = await db.updateProfile(req.userId, userProfile);
+        res.status(200).json(updatedProfile);
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
 });
 
 // Получение истории снов
-app.get('/dreams', ensureUser, (req, res) => {
-  const db = readDB();
-  res.status(200).json(db.users[req.userId]?.dreams?.reverse() || []);
+app.get('/dreams', async (req, res) => {
+    try {
+        const dreams = await db.getDreams(req.userId);
+        res.status(200).json(dreams.slice().reverse()); // Maintain original reverse logic for now
+    } catch (error) {
+        console.error('Error fetching dreams:', error);
+        res.status(500).json({ error: 'Failed to fetch dreams' });
+    }
 });
 
 // Получение одного сна по id
-app.get('/dreams/:dreamId', ensureUser, (req, res) => {
+app.get('/dreams/:dreamId', async (req, res) => {
   const { dreamId } = req.params;
-  const db = readDB();
-  const userDreams = db.users[req.userId]?.dreams || [];
-  const dream = userDreams.find(d => d.id === dreamId);
-  if (!dream) {
-    return res.status(404).json({ error: 'Dream not found' });
+  try {
+      const dream = await db.getDreamById(req.userId, dreamId);
+      if (!dream) {
+        return res.status(404).json({ error: 'Dream not found' });
+      }
+      res.status(200).json(dream);
+  } catch (error) {
+      console.error(`Error fetching dream ${dreamId}:`, error);
+      res.status(500).json({ error: 'Failed to fetch dream' });
   }
-  res.status(200).json(dream);
 });
 
 // Удаление снов
-app.delete('/dreams', ensureUser, (req, res) => {
+app.delete('/dreams', async (req, res) => {
   const { dreamIds } = req.body;
   if (!dreamIds || !Array.isArray(dreamIds)) {
     return res.status(400).json({ error: 'dreamIds must be an array' });
   }
-  const db = readDB();
-  const userDreams = db.users[req.userId]?.dreams || [];
-  const updatedDreams = userDreams.filter(dream => !dreamIds.includes(dream.id));
-  db.users[req.userId].dreams = updatedDreams;
-  writeDB(db);
-  res.status(200).json({ message: 'Dreams deleted successfully' });
+  try {
+      await db.deleteDreams(req.userId, dreamIds);
+      res.status(200).json({ message: 'Dreams deleted successfully' });
+  } catch (error) {
+      console.error('Error deleting dreams:', error);
+      res.status(500).json({ error: 'Failed to delete dreams' });
+  }
 });
 
 // Обработка текстового сна
-app.post('/processDreamText', ensureUser, async (req, res) => {
+app.post('/processDreamText', async (req, res) => {
   const { text, lang, date } = req.body;
   if (!text || !date) {
     return res.status(400).json({ error: "Поля text и date обязательны." });
   }
   try {
     const tarotSpread = generateTarotSpread();
-    const userProfile = readDB().users[req.userId]?.profile;
+    const userProfile = await db.getProfile(req.userId);
     const dreamDate = date === 'today' ? new Date().toISOString().split('T')[0] : date;
 
     let interpretation;
@@ -256,9 +243,7 @@ app.post('/processDreamText', ensureUser, async (req, res) => {
 
     const newDreamEntry = { id: uuidv4(), date: dreamDate, originalText: text, activeLens: null, ...interpretation };
     
-    const db = readDB();
-    db.users[req.userId].dreams.push(newDreamEntry);
-    writeDB(db);
+    await db.saveDream(req.userId, newDreamEntry);
     res.status(200).json(newDreamEntry);
   } catch (error) {
     console.error('[Server] Ошибка при обработке сна:', error);
@@ -267,81 +252,58 @@ app.post('/processDreamText', ensureUser, async (req, res) => {
 });
 
 // Обновление состояния линзы
-app.put('/dreams/:dreamId/lenses/astrology', ensureUser, (req, res) => {
+app.put('/dreams/:dreamId/lenses/astrology', async (req, res) => {
     const { dreamId } = req.params;
-    const { viewedInsights, isSummaryUnlocked, currentIndex } = req.body;
-    const db = readDB();
-    const userDreams = db.users[req.userId]?.dreams || [];
-    const dreamIndex = userDreams.findIndex(dream => dream.id === dreamId);
-
-    if (dreamIndex === -1) {
-        return res.status(404).json({ error: 'Dream not found' });
-    }
-
-    // Создаем или обновляем состояние
-    if (!db.users[req.userId].dreams[dreamIndex].lenses.astrology.state) {
-        db.users[req.userId].dreams[dreamIndex].lenses.astrology.state = {};
-    }
+    const stateUpdate = req.body; // { viewedInsights, isSummaryUnlocked, currentIndex }
     
-    if (Array.isArray(viewedInsights)) {
-        db.users[req.userId].dreams[dreamIndex].lenses.astrology.state.viewedInsights = viewedInsights;
+    try {
+        const updatedLens = await db.updateLensState(req.userId, dreamId, 'astrology', stateUpdate);
+        res.status(200).json(updatedLens);
+    } catch (error) {
+        console.error(`Error updating astrology lens state for dream ${dreamId}:`, error);
+        if (error.message.includes("not found")) {
+            return res.status(404).json({ error: 'Dream not found' });
+        }
+        res.status(500).json({ error: 'Failed to update lens state' });
     }
-    if (typeof isSummaryUnlocked === 'boolean') {
-        db.users[req.userId].dreams[dreamIndex].lenses.astrology.state.isSummaryUnlocked = isSummaryUnlocked;
-    }
-    if (typeof currentIndex === 'number') {
-        db.users[req.userId].dreams[dreamIndex].lenses.astrology.state.currentIndex = currentIndex;
-    }
-
-    writeDB(db);
-    res.status(200).json(db.users[req.userId].dreams[dreamIndex].lenses.astrology);
 });
 
 // Обновление состояния линзы Таро (раскрыты ли карты)
-app.put('/dreams/:dreamId/lenses/tarot', ensureUser, (req, res) => {
+app.put('/dreams/:dreamId/lenses/tarot', async (req, res) => {
     const { dreamId } = req.params;
     const { isRevealed } = req.body;
-    const db = readDB();
-    const userDreams = db.users[req.userId]?.dreams || [];
-    const dreamIndex = userDreams.findIndex(dream => dream.id === dreamId);
-    if (dreamIndex === -1) {
-        return res.status(404).json({ error: 'Dream not found' });
-    }
 
-    const tarotLens = db.users[req.userId].dreams[dreamIndex].lenses?.tarot;
-    if (!tarotLens) {
-        return res.status(400).json({ error: 'Tarot lens not available for this dream' });
+    try {
+        const updatedLens = await db.updateLensState(req.userId, dreamId, 'tarot', { isRevealed });
+        res.status(200).json(updatedLens);
+    } catch (error) {
+        console.error(`Error updating tarot lens state for dream ${dreamId}:`, error);
+        if (error.message.includes("not found")) {
+            return res.status(404).json({ error: 'Dream not found' });
+        }
+        res.status(500).json({ error: 'Failed to update lens state' });
     }
-    if (!tarotLens.state) tarotLens.state = {};
-    if (typeof isRevealed === 'boolean') tarotLens.state.isRevealed = isRevealed;
-
-    writeDB(db);
-    res.status(200).json(tarotLens);
 });
 
 // Обновление активной линзы для сна
-app.put('/dreams/:dreamId/activeLens', ensureUser, (req, res) => {
+app.put('/dreams/:dreamId/activeLens', async (req, res) => {
     const { dreamId } = req.params;
     const { activeLens } = req.body;
     if (activeLens !== null && typeof activeLens !== 'string') {
         return res.status(400).json({ error: 'activeLens must be a string or null' });
     }
 
-    const db = readDB();
-    const userDreams = db.users[req.userId]?.dreams || [];
-    const dreamIndex = userDreams.findIndex(dream => dream.id === dreamId);
-
-    if (dreamIndex === -1) {
-        return res.status(404).json({ error: 'Dream not found' });
+    try {
+        await db.updateActiveLens(req.userId, dreamId, activeLens);
+        res.status(200).json({ activeLens });
+    } catch (error) {
+        console.error(`Error updating active lens for dream ${dreamId}:`, error);
+        res.status(500).json({ error: 'Failed to update active lens' });
     }
-
-    db.users[req.userId].dreams[dreamIndex].activeLens = activeLens;
-    writeDB(db);
-    res.status(200).json({ activeLens });
 });
 
 // Обработка аудио (заглушка)
-app.post('/processDreamAudio', ensureUser, (req, res) => {
+app.post('/processDreamAudio', (req, res) => {
     res.status(501).json({ message: "Обработка аудио еще не реализована" });
 });
 

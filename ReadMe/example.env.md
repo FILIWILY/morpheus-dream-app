@@ -9,6 +9,13 @@
   - Used in: `backend/src/server.js`
 - `GOOGLE_GEOCODING_API_KEY`: Your API key for the Google Geocoding API. This is required to convert a user's birthplace (city name) into geographic coordinates (latitude and longitude), which are essential for calculating the natal chart.
   - Used in: `backend/src/server.js`
+- `DATABASE_URL`: The connection string for your PostgreSQL database. This is required when not in mock mode.
+  - Format: `postgresql://USER:PASSWORD@HOST:PORT/DATABASE`
+  - Used in: `backend/src/services/database.js`
+- `TELEGRAM_BOT_TOKEN`: Your secret token for the Telegram Bot. This is required for validating user data in production.
+  - Used in: `backend/src/middleware/auth.js`
+- `DANGEROUSLY_BYPASS_AUTH`: Set to `true` to skip Telegram's cryptographic validation. FOR DEVELOPMENT USE ONLY.
+  - Used in: `backend/src/middleware/auth.js`
 
 Example `backend/.env`:
 ```
@@ -16,6 +23,13 @@ PORT=9000
 OPENAI_API_KEY=your_openai_api_key_here
 USE_MOCK_API=true
 GOOGLE_GEOCODING_API_KEY=your_google_api_key_here
+# Example for a local PostgreSQL database:
+DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/morpheus_db"
+
+# --- Telegram Settings ---
+TELEGRAM_BOT_TOKEN=your_secret_bot_token_here
+# Set to true for local development to bypass Telegram's initData validation
+DANGEROUSLY_BYPASS_AUTH=true
 ```
 
 # AI Provider Settings
