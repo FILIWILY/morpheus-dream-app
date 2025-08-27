@@ -10,14 +10,20 @@ import SettingsPage from './pages/SettingsPage';
 import LanguagePage from './pages/LanguagePage';
 import PrivateRoute from './components/PrivateRoute';
 import { getProfile, api } from './services/api';
-import { I18nextProvider } from 'react-i18next';
-import i18n from './services/i18n';
+import i18n from './services/i18n'; // Используем существующий i18n
 import Placeholder from './components/Placeholder';
+import React from 'react'; // Added missing import for React
+
+// Создаем I18nContext для передачи i18n экземпляра
+// Это замена I18nextProvider, которую я ошибочно пытался использовать
+export const I18nContext = React.createContext(i18n);
+
 
 function App() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('loading'); // 'loading', 'app', 'placeholder'
+  const [i18nInstance, setI18nInstance] = useState(i18n);
 
   useEffect(() => {
     const isDev = import.meta.env.DEV;
@@ -25,35 +31,28 @@ function App() {
     const initializeApp = () => {
       const tg = window.Telegram?.WebApp;
 
-      // Case 1: We are in a real Telegram environment.
       if (tg && tg.initData) {
         console.log('[App] Telegram environment detected.');
-        tg.ready(); // Inform Telegram client the app is ready
+        tg.ready();
         api.defaults.headers.common['X-Telegram-Init-Data'] = tg.initData;
         setView('app');
       }
-      // Case 2: We are in local development mode (outside Telegram).
       else if (isDev) {
         console.log('[App] Development mode detected. Bypassing Telegram check.');
-        // The api.js interceptor handles the X-Telegram-User-ID header.
         setView('app');
       }
-      // Case 3: We are in a browser in production (not dev, not Telegram).
       else {
         console.log('[App] Not in Telegram or DEV mode. Showing placeholder.');
         setView('placeholder');
       }
     };
 
-    // The Telegram script might take a fraction of a second to load.
-    // A timeout is a pragmatic and reliable way to wait for `window.Telegram` to be populated.
     const timer = setTimeout(initializeApp, 150);
 
-    return () => clearTimeout(timer); // Cleanup timer on component unmount
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    // This effect runs only when `view` is set to 'app'.
     if (view !== 'app') {
       setLoading(false);
       return;
@@ -75,20 +74,19 @@ function App() {
   }, [view]);
 
   if (view === 'loading' || (view === 'app' && loading)) {
-    // You can add a global loading spinner here if you want
     return null; 
   }
 
   if (view === 'placeholder') {
     return (
-      <I18nextProvider i18n={i18n}>
+      <I18nContext.Provider value={i18nInstance}>
         <Placeholder />
-      </I18nextProvider>
+      </I18nContext.Provider>
     );
   }
 
   return (
-    <I18nextProvider i18n={i18n}>
+    <I18nContext.Provider value={i18nInstance}>
       <ProfileContext.Provider value={{ profile, setProfile, loading }}>
         <Router>
           <Routes>
@@ -105,7 +103,7 @@ function App() {
           </Routes>
         </Router>
       </ProfileContext.Provider>
-    </I18nextProvider>
+    </I18nContext.Provider>
   );
 }
 
