@@ -35,4 +35,10 @@ api.interceptors.request.use(
   }
 );
 
-export default api;
+export { api }; // Экспортируем как именованный экспорт для App.jsx
+
+export default api; // Оставляем экспорт по умолчанию для остальных частей приложения
+
+/* 
+  Profile Management
+*/
