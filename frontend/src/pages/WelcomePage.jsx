@@ -54,7 +54,7 @@ const formatTime = (value) => {
 const WelcomePage = () => {
     const navigate = useNavigate();
     const { updateProfile } = useProfile();
-    const { locale: lang } = useContext(LocalizationContext);
+    const { locale: lang } = useContext(LocalizationContext) || { locale: 'ru' }; // ✅ Защита от неопределенного контекста
     const [birthDate, setBirthDate] = useState('');
     const [birthTime, setBirthTime] = useState('');
     const [error, setError] = useState('');

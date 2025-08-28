@@ -95,7 +95,8 @@ const Placeholder = ({ error, debugInfo }) => {
                 
                 {error ? (
                     <div className={styles.errorBlock}>
-                        <h4>Произошла ошибка инициализации</h4>
+                        {/* ✅ Меняем текст в зависимости от типа ошибки */}
+                        <h4>{error.includes("аутентификации") ? "Произошла ошибка инициализации" : "Произошла внутренняя ошибка"}</h4>
                         <p className={styles.error}>
                             {error}
                         </p>
