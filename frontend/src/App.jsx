@@ -33,7 +33,8 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      return <Placeholder error={this.state.error} />;
+      // Передаем debugInfo в Placeholder, если он есть
+      return <Placeholder error={this.state.error} debugInfo={this.props.debugInfo || {}} />;
     }
 
     return this.props.children;
@@ -53,67 +54,104 @@ function App() {
 
   useEffect(() => {
     const isDev = import.meta.env.DEV;
-    const tg = window.Telegram?.WebApp;
-
-    const initializeApp = () => {
-      console.log('[App] ✅ initializeApp function called.');
-      if (!tg) {
-        console.log('[App] ❌ Telegram WebApp object not found.');
-        if (!isDev) {
-          setView('placeholder');
-        } else {
-          console.log('[App] 🔧 Development mode, showing app.');
-          setView('app');
+    
+    // Функция для безопасного получения объекта WebApp
+    const getWebApp = () => {
+        try {
+            return window.Telegram?.WebApp;
+        } catch (e) {
+            console.error('[App] Ошибка доступа к window.Telegram.WebApp:', e);
+            return null;
         }
-        return;
+    };
+
+    const initializeApp = (tg) => {
+      console.log('[App] ✅ Инициализация приложения...');
+      if (!tg) {
+          console.error('[App] ❌ Объект Telegram WebApp не найден на этапе инициализации!');
+          setError('Объект Telegram WebApp не найден.');
+          setView('placeholder');
+          return;
       }
-      
-      console.log('[App] ✨ Telegram WebApp object found. Initializing now.');
+
       // Явно вызываем ready(), чтобы сообщить Telegram, что приложение готово.
       tg.ready();
       
       // Вызываем остальные методы для улучшения UX
       initializeTelegramWebApp({ webApp: tg, isTelegram: true });
       
+      console.log('[App] ✨ Приложение готово. Устанавливаем view = "app"');
       setView('app');
     };
+    
+    const startApp = () => {
+        console.log('[App] 🚀 Запуск startApp...');
+        const tg = getWebApp();
 
-    // Вешаем слушатель на событие `viewportChanged`. 
-    // Это событие надежно срабатывает после инициализации WebApp.
-    // Мы используем его как триггер, чтобы начать работу нашего приложения.
-    const onViewportChanged = () => {
-        console.log('[App] 📢 viewportChanged event fired. Initializing app.');
-        // Убираем слушатель после первого срабатывания, чтобы избежать повторной инициализации
-        tg.offEvent('viewportChanged', onViewportChanged);
-        initializeApp();
-    };
+        setDebugInfo({
+            isDev,
+            isTgObjectPresent: !!tg,
+            isInitDataPresent: !!tg?.initData,
+            initDataLength: tg?.initData?.length || 0,
+            platform: tg?.platform || 'unknown',
+            version: tg?.version || 'unknown',
+            colorScheme: tg?.colorScheme || 'unknown',
+        });
 
-    if (tg && tg.initData) {
-        // Если WebApp уже готово к моменту загрузки нашего скрипта, 
-        // немедленно запускаем инициализацию.
-        console.log('[App] 🚀 WebApp is already available. Initializing immediately.');
-        initializeApp();
-    } else if (tg) {
-        // Если WebApp есть, но, возможно, еще не полностью готово,
-        // мы подписываемся на событие viewportChanged.
-        console.log('[App] ⏳ WebApp is available, but might be initializing. Setting up viewportChanged listener.');
-        tg.onEvent('viewportChanged', onViewportChanged);
-    } else {
-        // Если объекта tg нет вообще, значит мы точно не в Telegram.
-        console.log('[App] ❌ Not in a Telegram environment.');
-        if (!isDev) {
-          setView('placeholder');
-        } else {
-          setView('app');
+        if (!tg) {
+            console.log('[App] ❌ Объект Telegram WebApp не найден.');
+            if (isDev) {
+                console.log('[App] 🔧 Режим разработки, пропускаем проверку и показываем приложение.');
+                initializeApp(tg); // Передаем tg, даже если он null, для консистентности
+            } else {
+                setError('Приложение должно быть открыто в Telegram.');
+                setView('placeholder');
+            }
+            return;
         }
-    }
 
-    // Функция очистки на случай размонтирования компонента
-    return () => {
-      if (tg) {
-        tg.offEvent('viewportChanged', onViewportChanged);
-      }
+        // Ключевая проверка: ждем initData
+        if (tg.initData) {
+            console.log(`[App] ✅ initData уже доступна (длина: ${tg.initData.length}). Запускаем инициализацию немедленно.`);
+            initializeApp(tg);
+        } else {
+            console.log('[App] ⏳ initData еще не доступна. Устанавливаем тайм-аут и слушатели для ожидания.');
+            let resolved = false;
+            const timeout = 5000; // 5 секунд
+
+            const resolutionHandler = () => {
+                if (resolved) return;
+                const currentTg = getWebApp();
+                if (currentTg && currentTg.initData) {
+                    resolved = true;
+                    console.log(`[App] ✅ initData получена через слушатель 'viewportChanged' (длина: ${currentTg.initData.length}).`);
+                    if (fallbackTimeout) clearTimeout(fallbackTimeout);
+                    currentTg.offEvent('viewportChanged', resolutionHandler);
+                    initializeApp(currentTg);
+                }
+            };
+            
+            const fallbackTimeout = setTimeout(() => {
+                if (resolved) return;
+                const currentTg = getWebApp();
+                if (currentTg && currentTg.initData) {
+                    resolved = true;
+                    console.log(`[App] ✅ initData получена через fallback тайм-аут (длина: ${currentTg.initData.length}).`);
+                    currentTg.offEvent('viewportChanged', resolutionHandler);
+                    initializeApp(currentTg);
+                } else {
+                    console.error(`[App] ❌ Critical Error: initData не появилась после ${timeout}мс.`);
+                    setError('Не удалось получить данные для аутентификации от Telegram.');
+                    setView('placeholder');
+                }
+            }, timeout);
+
+            tg.onEvent('viewportChanged', resolutionHandler);
+        }
     };
+    
+    startApp();
+
   }, []);
 
   if (view === 'loading') {
@@ -134,7 +172,7 @@ function App() {
   }
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary debugInfo={debugInfo}>
       <I18nContext.Provider value={i18nInstance}>
         <LocalizationProvider>
           <ProfileProvider>
