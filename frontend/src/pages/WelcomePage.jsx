@@ -60,35 +60,24 @@ const WelcomePage = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [placeId, setPlaceId] = useState(null);
-
-    // Безопасная инициализация Google Places API
-    let placesHook;
-    try {
-        placesHook = usePlacesAutocomplete({
-            requestOptions: {
-                language: lang,
-                types: ['(cities)'],
-            },
-            debounce: 300,
-        });
-    } catch (error) {
-        console.warn('[WelcomePage] Google Places API not available:', error);
-        placesHook = {
-            ready: false,
-            value: '',
-            suggestions: { status: 'ZERO_RESULTS', data: [] },
-            setValue: () => {},
-            clearSuggestions: () => {},
-        };
-    }
-
+    
+    // ✅ Полностью переработана логика для защиты от падения Google Places API
     const {
         ready,
         value: birthPlace,
         suggestions: { status, data: suggestionsData },
         setValue: setBirthPlace,
         clearSuggestions,
-    } = placesHook;
+    } = usePlacesAutocomplete({
+        requestOptions: {
+            language: lang,
+            types: ['(cities)'],
+        },
+        debounce: 300,
+        // ✅ Отключаем хук, если Google API не загрузился, чтобы избежать падения
+        initOnMount: typeof window !== 'undefined' && typeof window.google !== 'undefined',
+    });
+
 
     const handleInputChange = (e) => {
         setBirthPlace(e.target.value);

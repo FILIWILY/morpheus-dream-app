@@ -4,10 +4,10 @@ import { useProfile } from '../context/ProfileContext';
 import { Box, CircularProgress } from '@mui/material';
 
 const PrivateRoute = () => {
-  const { profile, loading } = useProfile();
+  const { profile, isLoading } = useProfile();
   const location = useLocation();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
