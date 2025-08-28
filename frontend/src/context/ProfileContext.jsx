@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
-import { AppReadyContext } from './App'; // ✅ Импортируем новый контекст
+import { AppReadyContext } from '../App'; // ✅ Импортируем новый контекст
 
 // ✅ Создаем контекст с "безопасными" значениями по умолчанию
 export const ProfileContext = createContext({
