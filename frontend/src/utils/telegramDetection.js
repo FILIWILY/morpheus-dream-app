@@ -171,13 +171,11 @@ export function getTelegramAuthData(telegramEnv) {
  * @returns {boolean}
  */
 export function isValidProductionEnvironment(telegramEnv) {
-  // В production требуем либо WebApp API, либо четкие признаки Telegram
+  // В production доверяем любому обнаруженному окружению Telegram.
+  // Бэкенд все равно проверит initData, если он будет предоставлен.
   if (process.env.NODE_ENV !== 'production') {
     return true; // В dev режиме разрешаем все
   }
 
-  return telegramEnv.isTelegram && (
-    telegramEnv.method === 'webapp_api' ||
-    (telegramEnv.method === 'alternative_detection' && telegramEnv.initData)
-  );
+  return telegramEnv.isTelegram;
 }

@@ -8,19 +8,30 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Dream Interpreter</title>
-    <script src="https://telegram.org/js/telegram-web-app.js" onload="console.log('[TelegramScript] Loaded successfully')" onerror="console.error('[TelegramScript] Failed to load')"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=initMap" onerror="console.warn('Google Places API failed to load')"></script>
+    <script 
+      src="https://telegram.org/js/telegram-web-app.js" 
+      onload="console.log('[TelegramScript] ✅ Script loaded successfully.')" 
+      onerror="console.error('[TelegramScript] 💥 Failed to load script!')"
+    ></script>
+    <script async defer 
+      src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=initMap" 
+      onerror="console.warn('[GooglePlaces] Google Places API failed to load')"
+    ></script>
     <script>
-      // Fallback for Google Places API
+      // Fallback for Google Places API and basic checks
       window.initMap = function() {
-        console.log('[GooglePlaces] API loaded successfully');
+        console.log('[GooglePlaces] API loaded.');
       };
       
-      // Debug Telegram WebApp availability
       document.addEventListener('DOMContentLoaded', function() {
-        console.log('[Debug] DOM loaded, checking Telegram WebApp...');
-        console.log('[Debug] window.Telegram:', window.Telegram);
-        console.log('[Debug] window.Telegram.WebApp:', window.Telegram?.WebApp);
+        console.log('[Debug] DOMContentLoaded event fired.');
+        setTimeout(function() {
+          console.log('[Debug] Final check after 500ms:', {
+            hasTelegram: !!window.Telegram,
+            hasWebApp: !!window.Telegram?.WebApp,
+            hasInitData: window.Telegram?.WebApp?.initData !== undefined,
+          });
+        }, 500);
       });
     </script>
   </head>
