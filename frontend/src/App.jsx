@@ -60,39 +60,42 @@ function App() {
       detectionAttempts++;
       console.log(`[App] 🚀 Initialization attempt #${detectionAttempts}`);
 
-      // Проверяем, доступен ли Telegram WebApp API
-      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData !== undefined) {
-        console.log('[App] ✅ Telegram WebApp API is available.');
+      // Условие готовности: ждем только появления самого объекта WebApp.
+      // Поле initData может появиться чуть позже.
+      if (window.Telegram && window.Telegram.WebApp) {
+        console.log('[App] ✅ Telegram WebApp object is available.');
         
-        try {
-          const telegramEnv = detectTelegramEnvironment();
-          
-          console.log('[App] 🔍 Detection result:', {
-            isTelegram: telegramEnv.isTelegram,
-            method: telegramEnv.method,
-            hasInitData: !!telegramEnv.initData,
-            initDataLength: telegramEnv.initData?.length || 0,
-            user: telegramEnv.user,
-          });
-
-          setDebugInfo(telegramEnv.debugInfo);
-
-          if (telegramEnv.isTelegram) {
-            if (telegramEnv.webApp) {
-              initializeTelegramWebApp(telegramEnv);
+        // Добавим микро-задержку, чтобы initData успел прогрузиться, если он еще не готов
+        setTimeout(() => {
+            try {
+              const telegramEnv = detectTelegramEnvironment();
+              
+              console.log('[App] 🔍 Detection result:', {
+                isTelegram: telegramEnv.isTelegram,
+                method: telegramEnv.method,
+                hasInitData: !!telegramEnv.initData,
+                initDataLength: telegramEnv.initData?.length || 0,
+                user: telegramEnv.user,
+              });
+    
+              setDebugInfo(telegramEnv.debugInfo);
+    
+              if (telegramEnv.isTelegram) {
+                if (telegramEnv.webApp) {
+                  initializeTelegramWebApp(telegramEnv);
+                }
+                setView('app');
+              } else {
+                 console.warn('[App] ⚠️ Detected as non-Telegram environment inside the main check.');
+                 setView('placeholder');
+              }
+            } catch (err) {
+                console.error('[App] 💥 Error during initialization:', err);
+                setError(err.message);
+                setDebugInfo(prev => ({ ...prev, error: err.message }));
+                setView('placeholder');
             }
-            setView('app');
-          } else {
-             // Эта ветка маловероятна, если мы уже проверили window.Telegram.WebApp
-             console.warn('[App] ⚠️ Detected as non-Telegram environment inside the main check.');
-             setView('placeholder');
-          }
-        } catch (err) {
-            console.error('[App] 💥 Error during initialization:', err);
-            setError(err.message);
-            setDebugInfo(prev => ({ ...prev, error: err.message }));
-            setView('placeholder');
-        }
+        }, 50); // 50ms задержки должно быть достаточно
 
       } else if (detectionAttempts < maxDetectionAttempts) {
         // Если API еще не готово, пробуем снова через 50 мс

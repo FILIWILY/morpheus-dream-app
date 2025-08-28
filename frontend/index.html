@@ -29,7 +29,7 @@
           console.log('[Debug] Final check after 500ms:', {
             hasTelegram: !!window.Telegram,
             hasWebApp: !!window.Telegram?.WebApp,
-            hasInitData: window.Telegram?.WebApp?.initData !== undefined,
+            initDataReady: window.Telegram?.WebApp?.initData !== undefined,
           });
         }, 500);
       });
