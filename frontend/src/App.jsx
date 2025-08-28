@@ -16,6 +16,10 @@ import Placeholder from './components/Placeholder';
 import React from 'react'; // Added missing import for React
 import { detectTelegramEnvironment, initializeTelegramWebApp, isValidProductionEnvironment } from './utils/telegramDetection.js';
 
+// ✅ Создаем новый контекст для статуса готовности приложения
+export const AppReadyContext = React.createContext(false);
+
+
 // Глобальный обработчик ошибок
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -51,6 +55,8 @@ function App() {
   const [i18nInstance, setI18nInstance] = useState(i18n);
   const [error, setError] = useState(null);
   const [debugInfo, setDebugInfo] = useState({});
+  const [isAppReady, setIsAppReady] = useState(false); // ✅ Новый стейт
+
 
   useEffect(() => {
     const isDev = import.meta.env.DEV;
@@ -82,6 +88,7 @@ function App() {
       
       console.log('[App] ✨ Приложение готово. Устанавливаем view = "app"');
       setView('app');
+      setIsAppReady(true); // ✅ Подаем сигнал, что приложение полностью готово!
     };
     
     const startApp = () => {
@@ -106,6 +113,7 @@ function App() {
             } else {
                 setError('Приложение должно быть открыто в Telegram.');
                 setView('placeholder');
+                setIsAppReady(true); // ✅ Готово, даже если это заглушка (чтобы логи показались)
             }
             return;
         }
@@ -143,6 +151,7 @@ function App() {
                     console.error(`[App] ❌ Critical Error: initData не появилась после ${timeout}мс.`);
                     setError('Не удалось получить данные для аутентификации от Telegram.');
                     setView('placeholder');
+                    setIsAppReady(true); // ✅ Готово, даже если с ошибкой (чтобы логи показались)
                 }
             }, timeout);
 
@@ -173,26 +182,28 @@ function App() {
 
   return (
     <ErrorBoundary debugInfo={debugInfo}>
-      <I18nContext.Provider value={i18nInstance}>
-        <LocalizationProvider>
-          <ProfileProvider>
-            <Router>
-              <Routes>
-                <Route path="/welcome" element={<WelcomePage />} />
-                <Route path="/language" element={<LanguagePage />} />
-                <Route path="/" element={<PrivateRoute />}>
-                  <Route index element={<Navigate to="/record" />} />
-                  <Route path="record" element={<RecordingPage />} />
-                  <Route path="interpretation/:id" element={<InterpretationPage />} />
-                  <Route path="history" element={<HistoryPage />} />
-                  <Route path="profile" element={<ProfilePage />} />
-                  <Route path="settings" element={<SettingsPage />} />
-                </Route>
-              </Routes>
-            </Router>
-          </ProfileProvider>
-        </LocalizationProvider>
-      </I18nContext.Provider>
+      <AppReadyContext.Provider value={isAppReady}> {/* ✅ Оборачиваем всё в новый провайдер */}
+        <I18nContext.Provider value={i18nInstance}>
+          <LocalizationProvider>
+            <ProfileProvider>
+              <Router>
+                <Routes>
+                  <Route path="/welcome" element={<WelcomePage />} />
+                  <Route path="/language" element={<LanguagePage />} />
+                  <Route path="/" element={<PrivateRoute />}>
+                    <Route index element={<Navigate to="/record" />} />
+                    <Route path="record" element={<RecordingPage />} />
+                    <Route path="interpretation/:id" element={<InterpretationPage />} />
+                    <Route path="history" element={<HistoryPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="settings" element={<SettingsPage />} />
+                  </Route>
+                </Routes>
+              </Router>
+            </ProfileProvider>
+          </LocalizationProvider>
+        </I18nContext.Provider>
+      </AppReadyContext.Provider>
     </ErrorBoundary>
   );
 }

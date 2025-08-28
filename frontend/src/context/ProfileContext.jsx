@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
+import { AppReadyContext } from './App'; // ✅ Импортируем новый контекст
 
 // ✅ Создаем контекст с "безопасными" значениями по умолчанию
 export const ProfileContext = createContext({
@@ -11,6 +12,7 @@ export const ProfileContext = createContext({
 export const ProfileProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const isAppReady = useContext(AppReadyContext); // ✅ Получаем статус готовности приложения
 
   useEffect(() => {
     // Эта функция будет вызвана только один раз при старте приложения
@@ -36,8 +38,13 @@ export const ProfileProvider = ({ children }) => {
       }
     };
 
-    fetchProfile();
-  }, []); // Пустой массив зависимостей означает "выполнить один раз"
+    // 🛑 Ключевое изменение: запускаем fetchProfile ТОЛЬКО КОГДА приложение готово
+    if (isAppReady) {
+        fetchProfile();
+    } else {
+        console.log('[ProfileContext] ⏳ Ожидание сигнала готовности приложения...');
+    }
+  }, [isAppReady]); // ✅ Добавляем isAppReady в зависимости
 
   const updateProfile = async (newProfileData) => {
     setIsLoading(true);

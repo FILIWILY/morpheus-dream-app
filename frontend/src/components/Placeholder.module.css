@@ -100,3 +100,76 @@
 .debugInfo strong {
     color: #fff;
 }
+
+/* Стили для блока логов */
+.logsContainer {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    text-align: left;
+    max-height: 200px; /* Ограничиваем высоту */
+    overflow-y: auto; /* Добавляем скролл */
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.logsContainer h3 {
+    margin: 0 0 10px 0;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.logsPre {
+    margin: 0;
+    padding: 0;
+    white-space: pre-wrap; /* Перенос строк */
+    word-wrap: break-word; /* Перенос длинных слов */
+}
+
+.logEntry {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.logTimestamp {
+    color: #888;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.logLevel {
+    font-weight: bold;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.logMessage {
+    flex-grow: 1;
+}
+
+/* Цвета для разных уровней логов */
+.log { color: #ccc; }
+.info { color: #6db3ff; }
+.warn { color: #ffcc00; }
+.error { color: #ff6b6b; }
+.debug { color: #9a9a9a; }
+
+.logLevel.log { color: #ccc; }
+.logLevel.info { color: #6db3ff; }
+.logLevel.warn { color: #ffcc00; }
+.logLevel.error { color: #ff6b6b; }
+.logLevel.debug { color: #9a9a9a; }
+
+.errorBlock {
+    margin-bottom: 20px;
+}
+
+.errorBlock h4 {
+    margin: 0 0 8px 0;
+    color: #ff8c8c;
+}
