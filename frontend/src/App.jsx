@@ -53,84 +53,76 @@ function App() {
 
   useEffect(() => {
     const isDev = import.meta.env.DEV;
-    let detectionAttempts = 0;
-    const maxDetectionAttempts = 40; // 40 * 50ms = 2 seconds timeout
+    const tg = window.Telegram?.WebApp;
 
     const initializeApp = () => {
-      detectionAttempts++;
-      console.log(`[App] 🚀 Initialization attempt #${detectionAttempts}`);
-
-      // Условие готовности: ждем только появления самого объекта WebApp.
-      // Поле initData может появиться чуть позже.
-      if (window.Telegram && window.Telegram.WebApp) {
-        console.log('[App] ✅ Telegram WebApp object is available.');
-        
-        // Добавим микро-задержку, чтобы initData успел прогрузиться, если он еще не готов
-        setTimeout(() => {
-            try {
-              const telegramEnv = detectTelegramEnvironment();
-              
-              console.log('[App] 🔍 Detection result:', {
-                isTelegram: telegramEnv.isTelegram,
-                method: telegramEnv.method,
-                hasInitData: !!telegramEnv.initData,
-                initDataLength: telegramEnv.initData?.length || 0,
-                user: telegramEnv.user,
-              });
-    
-              setDebugInfo(telegramEnv.debugInfo);
-    
-              if (telegramEnv.isTelegram) {
-                if (telegramEnv.webApp) {
-                  initializeTelegramWebApp(telegramEnv);
-                }
-                setView('app');
-              } else {
-                 console.warn('[App] ⚠️ Detected as non-Telegram environment inside the main check.');
-                 setView('placeholder');
-              }
-            } catch (err) {
-                console.error('[App] 💥 Error during initialization:', err);
-                setError(err.message);
-                setDebugInfo(prev => ({ ...prev, error: err.message }));
-                setView('placeholder');
-            }
-        }, 50); // 50ms задержки должно быть достаточно
-
-      } else if (detectionAttempts < maxDetectionAttempts) {
-        // Если API еще не готово, пробуем снова через 50 мс
-        setTimeout(initializeApp, 50);
-      } else {
-        // Timeout: API не появилось за 2 секунды
-        console.log('[App] ❌ Telegram WebApp API not found after 2 seconds.');
-        setDebugInfo(prev => ({
-            ...prev,
-            timeout: true,
-            isDev,
-            finalCheck: {
-                hasTelegram: !!window.Telegram,
-                hasWebApp: !!window.Telegram?.WebApp,
-                hasInitData: window.Telegram?.WebApp?.initData !== undefined,
-            }
-        }));
-
-        if (isDev) {
-          console.log('[App] 🔧 Development mode - bypassing Telegram check.');
-          setView('app');
-        } else {
-          console.log('[App]  Showing placeholder.');
+      console.log('[App] ✅ initializeApp function called.');
+      if (!tg) {
+        console.log('[App] ❌ Telegram WebApp object not found.');
+        if (!isDev) {
           setView('placeholder');
+        } else {
+          console.log('[App] 🔧 Development mode, showing app.');
+          setView('app');
         }
+        return;
       }
+      
+      console.log('[App] ✨ Telegram WebApp object found. Initializing now.');
+      // Явно вызываем ready(), чтобы сообщить Telegram, что приложение готово.
+      tg.ready();
+      
+      // Вызываем остальные методы для улучшения UX
+      initializeTelegramWebApp({ webApp: tg, isTelegram: true });
+      
+      setView('app');
     };
 
-    initializeApp();
-    
-    // Мы не возвращаем cleanup-функцию, чтобы не прерывать polling
+    // Вешаем слушатель на событие `viewportChanged`. 
+    // Это событие надежно срабатывает после инициализации WebApp.
+    // Мы используем его как триггер, чтобы начать работу нашего приложения.
+    const onViewportChanged = () => {
+        console.log('[App] 📢 viewportChanged event fired. Initializing app.');
+        // Убираем слушатель после первого срабатывания, чтобы избежать повторной инициализации
+        tg.offEvent('viewportChanged', onViewportChanged);
+        initializeApp();
+    };
+
+    if (tg && tg.initData) {
+        // Если WebApp уже готово к моменту загрузки нашего скрипта, 
+        // немедленно запускаем инициализацию.
+        console.log('[App] 🚀 WebApp is already available. Initializing immediately.');
+        initializeApp();
+    } else if (tg) {
+        // Если WebApp есть, но, возможно, еще не полностью готово,
+        // мы подписываемся на событие viewportChanged.
+        console.log('[App] ⏳ WebApp is available, but might be initializing. Setting up viewportChanged listener.');
+        tg.onEvent('viewportChanged', onViewportChanged);
+    } else {
+        // Если объекта tg нет вообще, значит мы точно не в Telegram.
+        console.log('[App] ❌ Not in a Telegram environment.');
+        if (!isDev) {
+          setView('placeholder');
+        } else {
+          setView('app');
+        }
+    }
+
+    // Функция очистки на случай размонтирования компонента
+    return () => {
+      if (tg) {
+        tg.offEvent('viewportChanged', onViewportChanged);
+      }
+    };
   }, []);
 
   if (view === 'loading') {
-    return null; 
+    // Показываем простой индикатор загрузки вместо null
+    return (
+      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white' }}>
+        Загрузка...
+      </div>
+    );
   }
 
   if (view === 'placeholder') {
