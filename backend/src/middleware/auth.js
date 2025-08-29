@@ -109,11 +109,12 @@ async function validateInitData(initDataString, botToken) {
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const TTL_SECONDS = 7 * 24 * 60 * 60; // TEMPORARY: 7 days for debugging
         
-        console.log(`[AUTH] TTL Check: authTimestamp=${authTimestamp}, currentTimestamp=${currentTimestamp}, diff=${currentTimestamp - authTimestamp} seconds`);
+        const timeDiff = Math.abs(currentTimestamp - authTimestamp);
+        console.log(`[AUTH] TTL Check: authTimestamp=${authTimestamp}, currentTimestamp=${currentTimestamp}, diff=${timeDiff} seconds (absolute)`);
         
-        if (currentTimestamp - authTimestamp > TTL_SECONDS) {
-            console.error(`[AUTH] initData expired: ${currentTimestamp - authTimestamp} seconds old (limit: ${TTL_SECONDS})`);
-            return { valid: false, error: `initData expired (older than ${TTL_SECONDS} seconds)` };
+        if (timeDiff > TTL_SECONDS) {
+            console.error(`[AUTH] initData expired: ${timeDiff} seconds difference (limit: ${TTL_SECONDS})`);
+            return { valid: false, error: `initData expired (time difference: ${timeDiff} seconds, limit: ${TTL_SECONDS})` };
         }
 
         // Remove hash from params for validation

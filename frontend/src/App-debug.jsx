@@ -17,11 +17,18 @@ const DebugWelcome = () => {
     console.log('[DebugWelcome] useEffect started - testing API');
     
     // Test API connection
-    fetch('/api/profile', {
-      headers: {
-        'X-Telegram-User-ID': 'debug-test-user'
-      }
-    })
+    const telegramEnv = detectTelegramEnvironment();
+    const headers = {};
+    
+    if (telegramEnv.isTelegram && telegramEnv.initData) {
+      headers['X-Telegram-Init-Data'] = telegramEnv.initData;
+      console.log('[DebugWelcome] Using Telegram initData for API call');
+    } else {
+      headers['X-Telegram-User-ID'] = 'debug-test-user';
+      console.log('[DebugWelcome] Using debug user ID for API call');
+    }
+    
+    fetch('/api/profile', { headers })
     .then(response => {
       console.log('[DebugWelcome] API Response status:', response.status);
       setApiTest(`API Status: ${response.status}`);
