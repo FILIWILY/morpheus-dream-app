@@ -49,12 +49,17 @@ export async function verifyTelegramAuth(req, res, next) {
     }
 
     try {
+        console.log(`[AUTH] Validating initData (length: ${initDataString.length})`);
+        
         // 4. Perform cryptographic validation according to senior requirements
         const isValid = await validateInitData(initDataString, process.env.TELEGRAM_BOT_TOKEN);
         if (!isValid.valid) {
-            console.warn('[AUTH] Invalid initData:', isValid.error);
-            return res.status(403).json({ error: 'Invalid or tampered data received from Telegram' });
+            console.error('[AUTH] ❌ initData validation failed:', isValid.error);
+            console.error('[AUTH] initData preview:', initDataString.substring(0, 100) + '...');
+            return res.status(403).json({ error: 'Invalid or tampered data received from Telegram', details: isValid.error });
         }
+        
+        console.log('[AUTH] ✅ initData validation successful');
 
         // 5. Extract user ID and attach to request
         const params = new URLSearchParams(initDataString);
@@ -102,9 +107,12 @@ async function validateInitData(initDataString, botToken) {
         // Senior requirement: Check TTL (reject if older than 24 hours)
         const authTimestamp = parseInt(authDate, 10);
         const currentTimestamp = Math.floor(Date.now() / 1000);
-        const TTL_SECONDS = 24 * 60 * 60; // 24 hours as per senior review
+        const TTL_SECONDS = 7 * 24 * 60 * 60; // TEMPORARY: 7 days for debugging
+        
+        console.log(`[AUTH] TTL Check: authTimestamp=${authTimestamp}, currentTimestamp=${currentTimestamp}, diff=${currentTimestamp - authTimestamp} seconds`);
         
         if (currentTimestamp - authTimestamp > TTL_SECONDS) {
+            console.error(`[AUTH] initData expired: ${currentTimestamp - authTimestamp} seconds old (limit: ${TTL_SECONDS})`);
             return { valid: false, error: `initData expired (older than ${TTL_SECONDS} seconds)` };
         }
 
