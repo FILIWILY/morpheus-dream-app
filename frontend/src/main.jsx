@@ -1,31 +1,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App-debug.jsx';
+import App from './App.jsx';
 import './index.css';
-
-console.log('[main] 🚀 Starting DEBUG application...');
+import { LocalizationProvider as AppLocalizationProvider } from './context/LocalizationContext.jsx';
+import { LocalizationProvider as MuiLocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { ru } from 'date-fns/locale';
+import { ProfileProvider } from './context/ProfileContext.jsx';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-// SIMPLIFIED VERSION - direct render without Google Maps dependency
-console.log('[main] 📦 Rendering app directly...');
-
+// Restore full application with all providers
 root.render(
   <React.StrictMode>
-    <App />
+    <AppLocalizationProvider>
+      <MuiLocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ru}>
+        <ProfileProvider>
+          <App />
+        </ProfileProvider>
+      </MuiLocalizationProvider>
+    </AppLocalizationProvider>
   </React.StrictMode>
 );
-
-console.log('[main] ✅ App rendered');
-
-// Global error handlers
-window.addEventListener('error', (event) => {
-  console.error('[main] 🚨 Global error:', event.error);
-});
-
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('[main] 🚨 Unhandled promise rejection:', event.reason);
-});
 
 // Функция для динамической загрузки скрипта Google Maps
 const loadGoogleMapsScript = () => {

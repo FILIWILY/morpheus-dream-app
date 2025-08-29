@@ -107,7 +107,7 @@ async function validateInitData(initDataString, botToken) {
         // Senior requirement: Check TTL (reject if older than 24 hours)
         const authTimestamp = parseInt(authDate, 10);
         const currentTimestamp = Math.floor(Date.now() / 1000);
-        const TTL_SECONDS = 7 * 24 * 60 * 60; // TEMPORARY: 7 days for debugging
+        const TTL_SECONDS = 24 * 60 * 60; // 24 hours as per senior review
         
         const timeDiff = Math.abs(currentTimestamp - authTimestamp);
         console.log(`[AUTH] TTL Check: authTimestamp=${authTimestamp}, currentTimestamp=${currentTimestamp}, diff=${timeDiff} seconds (absolute)`);
