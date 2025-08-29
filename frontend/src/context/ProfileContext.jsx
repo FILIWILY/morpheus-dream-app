@@ -1,66 +1,93 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
-import { AppReadyContext } from '../App'; // ✅ Импортируем новый контекст
+import { AppReadyContext } from '../App';
 
-// ✅ Создаем контекст с "безопасными" значениями по умолчанию
+// Create context with safe default values
 export const ProfileContext = createContext({
   profile: null,
   isLoading: true,
+  error: null,
   updateProfile: async () => {},
+  refetchProfile: async () => {}
 });
 
 export const ProfileProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const isAppReady = useContext(AppReadyContext); // ✅ Получаем статус готовности приложения
+  const [error, setError] = useState(null);
+  const isAppReady = useContext(AppReadyContext);
 
-  useEffect(() => {
-    // Эта функция будет вызвана только один раз при старте приложения
-    const fetchProfile = async () => {
-      console.log('[ProfileContext] Starting profile fetch...');
-      try {
-        const { data } = await api.get('/profile');
-        console.log('[ProfileContext] Profile fetched successfully:', data);
-        setProfile(data);
-      } catch (error) {
-        // Если профиль не найден (ошибка 404) или сервер не отвечает,
-        // мы просто устанавливаем null.
-        // Это говорит приложению, что пользователь новый, и НЕ вызывает сбоя.
-        console.error("[ProfileContext] Could not fetch profile, assuming new user:", {
-          status: error.response?.status,
-          message: error.message,
-          data: error.response?.data
-        });
-        setProfile(null); 
-      } finally {
-        setIsLoading(false);
-        console.log('[ProfileContext] Profile fetch completed');
+  const fetchProfile = async () => {
+    console.log('[ProfileContext] Starting profile fetch...');
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await api.get('/profile');
+      console.log('[ProfileContext] Profile fetched successfully:', response.data);
+      setProfile(response.data);
+    } catch (error) {
+      console.log('[ProfileContext] Profile fetch result:', {
+        status: error.response?.status,
+        message: error.message
+      });
+
+      if (error.response?.status === 404) {
+        // 404 means user exists but has no profile data (new user)
+        console.log('[ProfileContext] New user detected (404 response)');
+        setProfile(null);
+      } else {
+        // Other errors (network, server, auth issues)
+        console.error('[ProfileContext] Error fetching profile:', error);
+        setError(error.message);
+        setProfile(null);
       }
-    };
-
-    // 🛑 Ключевое изменение: запускаем fetchProfile ТОЛЬКО КОГДА приложение готово
-    if (isAppReady) {
-        fetchProfile();
-    } else {
-        console.log('[ProfileContext] ⏳ Ожидание сигнала готовности приложения...');
+    } finally {
+      setIsLoading(false);
+      console.log('[ProfileContext] Profile fetch completed');
     }
-  }, [isAppReady]); // ✅ Добавляем isAppReady в зависимости
+  };
+
+  // Fetch profile only when app is ready
+  useEffect(() => {
+    if (isAppReady) {
+      console.log('[ProfileContext] App is ready, fetching profile...');
+      fetchProfile();
+    } else {
+      console.log('[ProfileContext] ⏳ Waiting for app to be ready...');
+    }
+  }, [isAppReady]);
 
   const updateProfile = async (newProfileData) => {
+    console.log('[ProfileContext] Updating profile with data:', newProfileData);
     setIsLoading(true);
+    setError(null);
+    
     try {
-      const { data } = await api.put('/profile', newProfileData);
-      setProfile(data); // Обновляем профиль новыми данными с сервера
-      return data;
+      const response = await api.put('/profile', newProfileData);
+      console.log('[ProfileContext] Profile updated successfully:', response.data);
+      setProfile(response.data);
+      return response.data;
     } catch (error) {
-      console.error("Could not update profile", error);
+      console.error('[ProfileContext] Error updating profile:', error);
+      setError(error.message);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const value = { profile, isLoading, updateProfile };
+  const refetchProfile = async () => {
+    await fetchProfile();
+  };
+
+  const value = { 
+    profile, 
+    isLoading, 
+    error,
+    updateProfile, 
+    refetchProfile 
+  };
 
   return (
     <ProfileContext.Provider value={value}>
@@ -69,4 +96,10 @@ export const ProfileProvider = ({ children }) => {
   );
 };
 
-export const useProfile = () => useContext(ProfileContext);
+export const useProfile = () => {
+  const context = useContext(ProfileContext);
+  if (!context) {
+    throw new Error('useProfile must be used within a ProfileProvider');
+  }
+  return context;
+};

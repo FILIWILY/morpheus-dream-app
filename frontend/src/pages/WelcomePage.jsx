@@ -104,8 +104,8 @@ const WelcomePage = () => {
                 birthPlace: placeId ? { description: birthPlace, placeId } : birthPlace,
             };
             await updateProfile(profileData);
-            localStorage.setItem('hasCompletedWelcomeFlow', 'true');
-            navigate('/');
+            console.log('[WelcomePage] User completed registration, redirecting to main app');
+            navigate('/record'); // Go directly to main recording page
         } catch (err) {
             setError("Не удалось сохранить данные. Попробуйте снова.");
         } finally {
@@ -116,15 +116,18 @@ const WelcomePage = () => {
     const handleSkip = async () => {
         setIsLoading(true);
         try {
-            // Создаем пустой профиль, чтобы пользователь не попадал сюда снова
+            // Create minimal profile to mark user as registered (not new)
+            // This prevents infinite redirects to welcome page
             await updateProfile({
-                birthDate: '',
-                birthTime: '',
-                birthPlace: '',
+                birthDate: null, // null indicates user chose to skip
+                birthTime: null,
+                birthPlace: null,
             });
-            navigate('/');
+            console.log('[WelcomePage] User skipped registration, redirecting to main app');
+            navigate('/record'); // Go directly to main recording page
         } catch (err) {
-            setError("Не удалось пропустить шаг. Попробуйте сохранить данные или перезагрузите страницу.");
+            console.error('[WelcomePage] Error skipping registration:', err);
+            setError("Не удалось пропустить шаг. Попробуйте снова.");
         } finally {
             setIsLoading(false);
         }

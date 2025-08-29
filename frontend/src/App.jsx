@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ProfileProvider } from './context/ProfileContext'; // Импортируем провайдер
+import { ProfileProvider } from './context/ProfileContext';
 import { LocalizationProvider } from './context/LocalizationContext';
 import WelcomePage from './pages/WelcomePage';
 import RecordingPage from './pages/RecordingPage';
@@ -10,17 +10,16 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import LanguagePage from './pages/LanguagePage';
 import PrivateRoute from './components/PrivateRoute';
-import { getProfile, api } from './services/api';
-import i18n from './services/i18n'; // Используем существующий i18n
+import i18n from './services/i18n';
 import Placeholder from './components/Placeholder';
-import React from 'react'; // Added missing import for React
-import { detectTelegramEnvironment, initializeTelegramWebApp, isValidProductionEnvironment } from './utils/telegramDetection.js';
+import React from 'react';
+import { detectTelegramEnvironment, initializeTelegramWebApp } from './utils/telegramDetection.js';
 
-// ✅ Создаем новый контекст для статуса готовности приложения
+// Context for app readiness
 export const AppReadyContext = React.createContext(false);
+export const I18nContext = React.createContext(i18n);
 
-
-// Глобальный обработчик ошибок
+// Error boundary component
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -37,153 +36,112 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      // Передаем debugInfo в Placeholder, если он есть
       return <Placeholder error={this.state.error} debugInfo={this.props.debugInfo || {}} />;
     }
-
     return this.props.children;
   }
 }
 
-// Создаем I18nContext для передачи i18n экземпляра
-// Это замена I18nextProvider, которую я ошибочно пытался использовать
-export const I18nContext = React.createContext(i18n);
-
-
 function App() {
-  const [view, setView] = useState('loading'); // 'loading', 'app', 'placeholder'
-  const [i18nInstance, setI18nInstance] = useState(i18n);
+  const [appState, setAppState] = useState('initializing'); // 'initializing', 'ready', 'error'
   const [error, setError] = useState(null);
   const [debugInfo, setDebugInfo] = useState({});
-  const [isAppReady, setIsAppReady] = useState(false); // ✅ Новый стейт
-
 
   useEffect(() => {
-    const isDev = import.meta.env.DEV;
-    
-    // Функция для безопасного получения объекта WebApp
-    const getWebApp = () => {
-        try {
-            return window.Telegram?.WebApp;
-        } catch (e) {
-            console.error('[App] Ошибка доступа к window.Telegram.WebApp:', e);
-            return null;
-        }
-    };
-
-    const initializeApp = (tg) => {
-      console.log('[App] ✅ Инициализация приложения...');
-      if (!tg) {
-          console.error('[App] ❌ Объект Telegram WebApp не найден на этапе инициализации!');
-          setError('Объект Telegram WebApp не найден.');
-          setView('placeholder');
-          return;
-      }
-
-      // Явно вызываем ready(), чтобы сообщить Telegram, что приложение готово.
-      tg.ready();
+    const initializeApp = async () => {
+      console.log('[App] 🚀 Starting app initialization...');
       
-      // Вызываем остальные методы для улучшения UX
-      initializeTelegramWebApp({ webApp: tg, isTelegram: true });
+      const isDev = import.meta.env.DEV;
       
-      console.log('[App] ✨ Приложение готово. Устанавливаем view = "app"');
-      setView('app');
-      setIsAppReady(true); // ✅ Подаем сигнал, что приложение полностью готово!
-    };
-    
-    const startApp = () => {
-        console.log('[App] 🚀 Запуск startApp...');
-        const tg = getWebApp();
-
-        setDebugInfo({
-            isDev,
-            isTgObjectPresent: !!tg,
-            isInitDataPresent: !!tg?.initData,
-            initDataLength: tg?.initData?.length || 0,
-            platform: tg?.platform || 'unknown',
-            version: tg?.version || 'unknown',
-            colorScheme: tg?.colorScheme || 'unknown',
+      try {
+        // Detect Telegram environment
+        const telegramEnv = detectTelegramEnvironment();
+        
+        console.log('[App] Telegram environment detected:', {
+          isTelegram: telegramEnv.isTelegram,
+          method: telegramEnv.method,
+          hasInitData: !!telegramEnv.initData,
+          initDataLength: telegramEnv.initData ? telegramEnv.initData.length : 0
         });
 
-        if (!tg) {
-            console.log('[App] ❌ Объект Telegram WebApp не найден.');
-            if (isDev) {
-                console.log('[App] 🔧 Режим разработки, пропускаем проверку и показываем приложение.');
-                initializeApp(tg); // Передаем tg, даже если он null, для консистентности
-            } else {
-                setError('Приложение должно быть открыто в Telegram.');
-                setView('placeholder');
-                setIsAppReady(true); // ✅ Готово, даже если это заглушка (чтобы логи показались)
-            }
-            return;
+        // Set debug info
+        setDebugInfo({
+          isDev,
+          isTelegram: telegramEnv.isTelegram,
+          method: telegramEnv.method,
+          hasInitData: !!telegramEnv.initData,
+          initDataLength: telegramEnv.initData ? telegramEnv.initData.length : 0,
+          platform: telegramEnv.webApp?.platform || 'unknown',
+          version: telegramEnv.webApp?.version || 'unknown'
+        });
+
+        // In development mode, always proceed
+        if (isDev) {
+          console.log('[App] 🔧 Development mode - proceeding without strict Telegram checks');
+          if (telegramEnv.isTelegram && telegramEnv.webApp) {
+            initializeTelegramWebApp(telegramEnv);
+          }
+          setAppState('ready');
+          return;
         }
 
-        // Ключевая проверка: ждем initData
-        if (tg.initData) {
-            console.log(`[App] ✅ initData уже доступна (длина: ${tg.initData.length}). Запускаем инициализацию немедленно.`);
-            initializeApp(tg);
-        } else {
-            console.log('[App] ⏳ initData еще не доступна. Устанавливаем тайм-аут и слушатели для ожидания.');
-            let resolved = false;
-            const timeout = 5000; // 5 секунд
-
-            const resolutionHandler = () => {
-                if (resolved) return;
-                const currentTg = getWebApp();
-                if (currentTg && currentTg.initData) {
-                    resolved = true;
-                    console.log(`[App] ✅ initData получена через слушатель 'viewportChanged' (длина: ${currentTg.initData.length}).`);
-                    if (fallbackTimeout) clearTimeout(fallbackTimeout);
-                    currentTg.offEvent('viewportChanged', resolutionHandler);
-                    initializeApp(currentTg);
-                }
-            };
-            
-            const fallbackTimeout = setTimeout(() => {
-                if (resolved) return;
-                const currentTg = getWebApp();
-                if (currentTg && currentTg.initData) {
-                    resolved = true;
-                    console.log(`[App] ✅ initData получена через fallback тайм-аут (длина: ${currentTg.initData.length}).`);
-                    currentTg.offEvent('viewportChanged', resolutionHandler);
-                    initializeApp(currentTg);
-                } else {
-                    console.error(`[App] ❌ Critical Error: initData не появилась после ${timeout}мс.`);
-                    setError('Не удалось получить данные для аутентификации от Telegram.');
-                    setView('placeholder');
-                    setIsAppReady(true); // ✅ Готово, даже если с ошибкой (чтобы логи показались)
-                }
-            }, timeout);
-
-            tg.onEvent('viewportChanged', resolutionHandler);
+        // In production, require Telegram environment
+        if (!telegramEnv.isTelegram) {
+          throw new Error('This application must be opened in Telegram');
         }
+
+        // Initialize Telegram WebApp if available
+        if (telegramEnv.webApp) {
+          const initialized = initializeTelegramWebApp(telegramEnv);
+          if (!initialized) {
+            console.warn('[App] Failed to initialize Telegram WebApp, but continuing...');
+          }
+        }
+
+        // App is ready
+        console.log('[App] ✅ App initialization completed successfully');
+        setAppState('ready');
+
+      } catch (error) {
+        console.error('[App] ❌ App initialization failed:', error);
+        setError(error.message);
+        setAppState('error');
+      }
     };
-    
-    startApp();
 
+    initializeApp();
   }, []);
 
-  if (view === 'loading') {
-    // Показываем простой индикатор загрузки вместо null
+  // Show loading state
+  if (appState === 'initializing') {
     return (
-      <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white' }}>
-        Загрузка...
+      <div style={{ 
+        position: 'fixed', 
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)', 
+        color: 'white',
+        textAlign: 'center'
+      }}>
+        <div>Загрузка...</div>
       </div>
     );
   }
 
-  if (view === 'placeholder') {
+  // Show error state
+  if (appState === 'error') {
     return (
-      <I18nContext.Provider value={i18nInstance}>
+      <I18nContext.Provider value={i18n}>
         <Placeholder error={error} debugInfo={debugInfo} />
       </I18nContext.Provider>
     );
   }
 
+  // Show main app
   return (
     <ErrorBoundary debugInfo={debugInfo}>
-      <AppReadyContext.Provider value={isAppReady}> {/* ✅ Оборачиваем всё в новый провайдер */}
-        <I18nContext.Provider value={i18nInstance}>
+      <AppReadyContext.Provider value={true}>
+        <I18nContext.Provider value={i18n}>
           <LocalizationProvider>
             <ProfileProvider>
               <Router>
