@@ -1,32 +1,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
+import App from './App-debug.jsx';
 import './index.css';
-import { LocalizationProvider as AppLocalizationProvider } from './context/LocalizationContext.jsx';
-import { BrowserRouter } from 'react-router-dom';
-import { LocalizationProvider as MuiLocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { ru } from 'date-fns/locale';
-import { ProfileProvider } from './context/ProfileContext.jsx';
+
+console.log('[main] 🚀 Starting DEBUG application...');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
-// Эта функция будет вызвана скриптом Google Maps после его полной загрузки
-window.initApp = () => {
-  root.render(
-    <React.StrictMode>
-      <AppLocalizationProvider>
-        <MuiLocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ru}>
-          <ProfileProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </ProfileProvider>
-        </MuiLocalizationProvider>
-      </AppLocalizationProvider>
-    </React.StrictMode>
-  );
-};
+// SIMPLIFIED VERSION - direct render without Google Maps dependency
+console.log('[main] 📦 Rendering app directly...');
+
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+console.log('[main] ✅ App rendered');
+
+// Global error handlers
+window.addEventListener('error', (event) => {
+  console.error('[main] 🚨 Global error:', event.error);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('[main] 🚨 Unhandled promise rejection:', event.reason);
+});
 
 // Функция для динамической загрузки скрипта Google Maps
 const loadGoogleMapsScript = () => {
