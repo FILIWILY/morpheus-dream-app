@@ -26,11 +26,19 @@ root.render(
 // Функция для динамической загрузки скрипта Google Maps
 const loadGoogleMapsScript = () => {
   const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+  
+  // Отладочная информация
+  console.log('[Main] 🔍 Environment variables:', {
+    isDev: import.meta.env.DEV,
+    mode: import.meta.env.MODE,
+    hasGoogleKey: !!apiKey,
+    keyLength: apiKey ? apiKey.length : 0,
+    allViteVars: Object.keys(import.meta.env).filter(key => key.startsWith('VITE_'))
+  });
+  
   if (!apiKey) {
     console.error("Google Places API key is missing. Please add VITE_GOOGLE_PLACES_API_KEY to your .env file.");
-    // В случае отсутствия ключа, можно запустить приложение без функционала карт
-    // или показать сообщение об ошибке. Запустим приложение, чтобы не блокировать интерфейс.
-    window.initApp(); 
+    console.log("Running without Google Places functionality.");
     return;
   }
   

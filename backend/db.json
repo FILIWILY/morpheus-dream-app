@@ -221,6 +221,14 @@
           }
         }
       }
+    },
+    "dev_test_user_123": {
+      "dreams": [],
+      "profile": {
+        "birthDate": "10.09.1999",
+        "birthTime": "16:45",
+        "birthPlace": ""
+      }
     }
   }
 }

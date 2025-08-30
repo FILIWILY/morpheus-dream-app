@@ -10,6 +10,8 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import LanguagePage from './pages/LanguagePage';
 import PrivateRoute from './components/PrivateRoute';
+import Layout from './components/Layout';
+import StarryBackground from './components/StarryBackground';
 import i18n from './services/i18n';
 import Placeholder from './components/Placeholder';
 import React from 'react';
@@ -144,17 +146,20 @@ function App() {
         <I18nContext.Provider value={i18n}>
           <LocalizationProvider>
             <ProfileProvider>
+              <StarryBackground />
               <Router>
                 <Routes>
                   <Route path="/welcome" element={<WelcomePage />} />
                   <Route path="/language" element={<LanguagePage />} />
                   <Route path="/" element={<PrivateRoute />}>
-                    <Route index element={<Navigate to="/record" />} />
-                    <Route path="record" element={<RecordingPage />} />
-                    <Route path="interpretation/:id" element={<InterpretationPage />} />
-                    <Route path="history" element={<HistoryPage />} />
-                    <Route path="profile" element={<ProfilePage />} />
-                    <Route path="settings" element={<SettingsPage />} />
+                    <Route element={<Layout />}>
+                      <Route index element={<Navigate to="/record" />} />
+                      <Route path="record" element={<RecordingPage />} />
+                      <Route path="interpretation/:id" element={<InterpretationPage />} />
+                      <Route path="history" element={<HistoryPage />} />
+                      <Route path="profile" element={<ProfilePage />} />
+                      <Route path="settings" element={<SettingsPage />} />
+                    </Route>
                   </Route>
                 </Routes>
               </Router>

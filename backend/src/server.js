@@ -3,13 +3,33 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+
+// Настройка путей для ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Загружаем .env из корня проекта (../../.env относительно src/server.js)
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+// Отладочный вывод переменных окружения
+console.log('[ENV] DATABASE_TYPE:', process.env.DATABASE_TYPE);
+console.log('[ENV] NODE_ENV:', process.env.NODE_ENV);
+console.log('[ENV] DANGEROUSLY_BYPASS_AUTH:', process.env.DANGEROUSLY_BYPASS_AUTH);
+
+// Импорты после загрузки .env
 import axios from 'axios';
 import { getDreamInterpretation } from './services/ai_provider.js';
 import { getDreamAtmosphere, calculateTopTransits, getCosmicPassport } from './services/astrology.js';
 import { calculateNatalChart } from './services/natalChart.js';
-import * as db from './services/database.js';
 import { verifyTelegramAuth } from './middleware/auth.js';
+
+// Динамический импорт database.js после загрузки переменных окружения
+const db = await import('./services/database.js');
+
+// Инициализируем базу данных
+await db.initializeDatabase();
 
 const app = express();
 const PORT = process.env.PORT || 9000;

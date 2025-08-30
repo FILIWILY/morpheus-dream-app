@@ -2,10 +2,19 @@ import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
 
-const deepseek = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com/v1',
-});
+// DeepSeek клиент будет создан после загрузки .env
+let deepseek = null;
+
+const initializeDeepSeek = () => {
+  if (!deepseek) {
+    deepseek = new OpenAI({
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      baseURL: 'https://api.deepseek.com/v1',
+    });
+    console.log('🧠 DeepSeek client initialized');
+  }
+  return deepseek;
+};
 
 const getSystemPrompt = (lang) => {
   const language = lang === 'ru' ? 'русском' : 'английском';
@@ -80,6 +89,10 @@ Take the content generated from the blocks above and place it into the correspon
 
 export const getDreamInterpretation = async (dreamText, lang = 'ru', userProfile, tarotSpread, astrologyData) => {
   console.log('[DeepSeek] Fetching live interpretation for Psychoanalytic lens...');
+  
+  // Инициализируем DeepSeek клиент если еще не инициализирован
+  initializeDeepSeek();
+  
   const startTime = Date.now();
   
   try {

@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  // Загружаем .env из корня проекта (на уровень выше)
+  const env = loadEnv(mode, '../', '');
 
   return {
     plugins: [react()],
@@ -16,6 +17,10 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
       },
+    },
+    // Передаем переменные окружения в клиентский код
+    define: {
+      'import.meta.env.VITE_GOOGLE_PLACES_API_KEY': JSON.stringify(env.VITE_GOOGLE_PLACES_API_KEY),
     },
   }
 })

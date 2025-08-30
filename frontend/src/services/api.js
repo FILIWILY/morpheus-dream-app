@@ -22,15 +22,15 @@ api.interceptors.request.use(
       initDataLength: telegramEnv.initData ? telegramEnv.initData.length : 0
     });
 
-    if (telegramEnv.isTelegram) {
-      // Отправляем initData на сервер для валидации
-      config.headers['X-Telegram-Init-Data'] = telegramEnv.initData || '';
-      console.log('[API] Using Telegram initData, length:', telegramEnv.initData ? telegramEnv.initData.length : 0);
+    if (telegramEnv.isTelegram && telegramEnv.initData && telegramEnv.initData.length > 0) {
+      // Отправляем initData на сервер для валидации (только если есть реальные данные)
+      config.headers['X-Telegram-Init-Data'] = telegramEnv.initData;
+      console.log('[API] Using Telegram initData, length:', telegramEnv.initData.length);
     }
-    // For local development, bypass auth with a test user ID
-    else if (import.meta.env.DEV) {
-      config.headers['X-Telegram-User-ID'] = '12345-test-user';
-      console.log('[API] Using dev bypass auth');
+    // For local development or when no real initData available, use bypass auth
+    else if (import.meta.env.DEV || (telegramEnv.isTelegram && !telegramEnv.initData)) {
+      config.headers['X-Telegram-User-ID'] = 'dev_test_user_123'; // Тот же ID что в database.js
+      console.log('[API] Using dev bypass auth with test user');
     }
     else {
       console.warn('[API] No valid authentication method available');

@@ -1,7 +1,7 @@
 # Morpheus Dream App
 
 ## Project Overview
-This application is a dream interpreter that utilizes a language model to analyze dreams through four different "lenses": Psychoanalytic, Esoteric, Astrology, and Folkloric. It's currently set up for development using a frontend and backend architecture.
+This application is a **Telegram Mini App** for dream interpretation that utilizes AI language models to analyze dreams through multiple "lenses": Psychoanalytic, Tarot, and Astrology. Built as a modern web application that runs inside Telegram, providing secure authentication and seamless user experience.
 
 ## Getting Started
 
@@ -51,7 +51,7 @@ npm run dev:reset
 - **Framework**: Node.js with Express
 - **API Provides endpoints for dream interpretation.
 - **Data Storage**: Uses PostgreSQL for production and staging, with a fallback to a `db.json` file for local mock development. See `ReadMe/DB.md` for more details.
-- **Authentication**: Implements secure, cryptographically-verified authentication for users via the Telegram Web App protocol. A bypass is available for local development. See `ReadMe/API_backend.md` for details.
+- **Authentication**: Implements secure, cryptographically-verified authentication for users via the Telegram Web App protocol with HMAC-SHA256 validation and TTL checks. A bypass is available for local development. See `ReadMe/API_backend.md` and `ReadMe/Telegram.md` for details.
 - **External Integrations**: Connects to AI providers (OpenAI, DeepSeek) to generate dream interpretations.
 - **Environment Variables**: Uses `dotenv` for configuration. See `.env.example` for the full list of required variables.
 

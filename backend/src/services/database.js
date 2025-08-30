@@ -1,35 +1,151 @@
-import pg from 'pg';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
-const { Pool } = pg;
+// Настройка путей для ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// --- Configuration ---
+// Загружаем .env из корня проекта (../../.env относительно src/services/database.js)
+// Это необходимо, так как database.js может импортироваться до загрузки .env в server.js
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
+// Configuration
 const isProduction = process.env.NODE_ENV === 'production';
-const useMockApi = process.env.USE_MOCK_API === 'true';
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// Новая логика: в dev режиме можем выбирать БД, в проде всегда PostgreSQL
+const databaseType = isDevelopment 
+  ? (process.env.DATABASE_TYPE || 'json') // По умолчанию JSON в dev
+  : 'postgres'; // Всегда PostgreSQL в проде
+
+const useJsonDatabase = databaseType === 'json';
+const usePostgresDatabase = databaseType === 'postgres';
+
+// Отладочная информация
+console.log(`🔧 Database debug:`, {
+  isDevelopment,
+  DATABASE_TYPE_env: process.env.DATABASE_TYPE,
+  NODE_ENV_env: process.env.NODE_ENV,
+  databaseType,
+  useJsonDatabase,
+  usePostgresDatabase
+});
+
+console.log(`🔧 Database mode: ${useJsonDatabase ? 'JSON (db.json)' : 'PostgreSQL'}`);
+console.log(`🔧 Environment: ${isDevelopment ? 'Development' : 'Production'}`);
+
+// Дополнительная проверка переменных окружения
+if (process.env.DATABASE_TYPE === 'postgres' && useJsonDatabase) {
+  console.error(`❌ ОШИБКА: DATABASE_TYPE установлен как 'postgres', но используется JSON база данных!`);
+  console.error(`   Проверьте правильность загрузки .env файла`);
+}
+
+// Для обратной совместимости
+const useMockApi = useJsonDatabase;
 
 // --- Database Connection (PostgreSQL) ---
-let pool;
-if (!useMockApi) {
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: isProduction ? { rejectUnauthorized: false } : false,
-  });
+let pool = null;
 
-  pool.on('connect', () => {
-    console.log('🐘 Connected to PostgreSQL');
-  });
+// Функция инициализации базы данных
+export async function initializeDatabase() {
+  if (usePostgresDatabase) {
+    try {
+      const { Pool } = await import('pg');
+      
+      // Определяем строку подключения в зависимости от окружения
+      let connectionString;
+      
+      if (isDevelopment) {
+        // В Docker dev окружении используем имя сервиса 'postgres'
+        // В локальном dev окружении используем localhost:5433 (Docker PostgreSQL)
+        connectionString = process.env.DEV_DATABASE_URL || 
+          (process.env.DOCKER_ENV === 'true' 
+            ? 'postgresql://di_admin:didi1234didi@postgres:5432/di'
+            : 'postgresql://di_admin:didi1234didi@localhost:5433/di');
+      } else {
+        // Production всегда использует DATABASE_URL
+        connectionString = process.env.DATABASE_URL;
+      }
+      
+      pool = new Pool({
+        connectionString,
+        ssl: isProduction ? { rejectUnauthorized: false } : false,
+      });
 
-  pool.on('error', (err) => {
-    console.error('Unexpected error on idle client', err);
-    process.exit(-1);
-  });
+      pool.on('connect', () => {
+        console.log(`🐘 Connected to PostgreSQL (${isDevelopment ? 'Development' : 'Production'})`);
+      });
+
+      pool.on('error', (err) => {
+        console.error('Unexpected error on idle client', err);
+        if (isProduction) {
+          process.exit(-1);
+        } else {
+          console.warn('⚠️  PostgreSQL error in development mode - continuing...');
+        }
+      });
+      
+      console.log('📦 PostgreSQL initialized');
+      
+      // В dev режиме создаем тестового пользователя
+      if (isDevelopment) {
+        await createTestUserIfNeeded();
+      }
+      
+    } catch (error) {
+      console.error('❌ PostgreSQL module not found or connection failed.');
+      console.error('   Error:', error.message);
+      
+      if (isDevelopment) {
+        console.warn('🔄 Development mode: Falling back to JSON database...');
+        return true; // переключаемся на JSON в dev режиме
+      } else {
+        console.error('💥 Production mode: PostgreSQL is required!');
+        process.exit(1);
+      }
+    }
+  } else {
+    console.log('📁 Using JSON database (db.json)');
+  }
+  
+  return useJsonDatabase;
+}
+
+// Создание тестового пользователя для dev режима
+async function createTestUserIfNeeded() {
+  const testUserId = 'dev_test_user_123';
+  
+  try {
+    // Проверяем, существует ли тестовый пользователь
+    const existingUser = await pool.query('SELECT * FROM users WHERE telegram_id = $1', [testUserId]);
+    
+    if (existingUser.rows.length === 0) {
+      // Создаем тестового пользователя
+      await pool.query(`
+        INSERT INTO users (telegram_id, birth_date, birth_time, birth_place, birth_latitude, birth_longitude)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `, [
+        testUserId,
+        '1990-01-01', // Дата рождения для тестов
+        '12:00:00',   // Время рождения
+        'Moscow, Russia', // Место рождения
+        55.7558,      // Широта Москвы
+        37.6173       // Долгота Москвы
+      ]);
+      
+      console.log('👤 Test user created for development mode');
+    } else {
+      console.log('👤 Test user already exists');
+    }
+  } catch (error) {
+    console.warn('⚠️  Could not create test user:', error.message);
+    console.warn('   This is normal if database tables don\'t exist yet');
+  }
 }
 
 // --- Mock Database (db.json) ---
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const DB_PATH = path.join(__dirname, '..', '..', 'db.json');
 
 const readDB = () => {
@@ -59,7 +175,7 @@ const writeDB = (data) => {
  * @returns {Promise<object>} The user object from the database.
  */
 export async function findOrCreateUser(telegramId) {
-  if (useMockApi) {
+  if (!usePostgresDatabase) {
     const db = readDB();
     if (!db.users[telegramId]) {
       db.users[telegramId] = { dreams: [], profile: {} };
@@ -94,7 +210,7 @@ export async function findOrCreateUser(telegramId) {
  * @returns {Promise<object|null>} The user's profile object or null if not found.
  */
 export async function getProfile(telegramId) {
-    if (useMockApi) {
+    if (!usePostgresDatabase) {
         const db = readDB();
         const user = db.users[telegramId];
         return (user && user.profile && Object.keys(user.profile).length > 0) ? user.profile : null;
@@ -132,8 +248,11 @@ export async function getProfile(telegramId) {
  * @returns {Promise<object>} The updated profile object.
  */
 export async function updateProfile(telegramId, profileData) {
-    if (useMockApi) {
+    if (!usePostgresDatabase) {
         const db = readDB();
+        if (!db.users[telegramId]) {
+            db.users[telegramId] = { dreams: [], profile: {} };
+        }
         db.users[telegramId].profile = profileData;
         writeDB(db);
         return profileData;
@@ -175,8 +294,11 @@ export async function updateProfile(telegramId, profileData) {
  * @returns {Promise<object>} The saved dream object.
  */
 export async function saveDream(telegramId, dreamData) {
-    if (useMockApi) {
+    if (!usePostgresDatabase) {
         const db = readDB();
+        if (!db.users[telegramId]) {
+            db.users[telegramId] = { dreams: [], profile: {} };
+        }
         db.users[telegramId].dreams.push(dreamData);
         writeDB(db);
         return dreamData;
@@ -204,7 +326,7 @@ export async function saveDream(telegramId, dreamData) {
  * @returns {Promise<Array<object>>} An array of dream objects.
  */
 export async function getDreams(telegramId) {
-    if (useMockApi) {
+    if (!usePostgresDatabase) {
         const db = readDB();
         return db.users[telegramId]?.dreams || [];
     }
@@ -245,7 +367,7 @@ export async function getDreams(telegramId) {
  * @returns {Promise<object|null>} The dream object or null if not found.
  */
 export async function getDreamById(telegramId, dreamId) {
-    if (useMockApi) {
+    if (!usePostgresDatabase) {
         const db = readDB();
         const userDreams = db.users[telegramId]?.dreams || [];
         return userDreams.find(d => d.id === dreamId) || null;
@@ -285,8 +407,9 @@ export async function getDreamById(telegramId, dreamId) {
  * @returns {Promise<number>} The number of dreams deleted.
  */
 export async function deleteDreams(telegramId, dreamIds) {
-    if (useMockApi) {
+    if (!usePostgresDatabase) {
         const db = readDB();
+        if (!db.users[telegramId]) return 0;
         const initialCount = db.users[telegramId].dreams.length;
         db.users[telegramId].dreams = db.users[telegramId].dreams.filter(
             dream => !dreamIds.includes(dream.id)
@@ -319,7 +442,7 @@ export async function deleteDreams(telegramId, dreamIds) {
  * @returns {Promise<object>} The updated lens object.
  */
 export async function updateLensState(telegramId, dreamId, lens, stateUpdate) {
-    if (useMockApi) {
+    if (!usePostgresDatabase) {
         const db = readDB();
         const dream = db.users[telegramId]?.dreams.find(d => d.id === dreamId);
         if (!dream) throw new Error("Dream not found in mock DB");
@@ -369,7 +492,7 @@ export async function updateLensState(telegramId, dreamId, lens, stateUpdate) {
  * @returns {Promise<void>}
  */
 export async function updateActiveLens(telegramId, dreamId, activeLens) {
-    if (useMockApi) {
+    if (!usePostgresDatabase) {
         const db = readDB();
         const dream = db.users[telegramId]?.dreams.find(d => d.id === dreamId);
         if (dream) {

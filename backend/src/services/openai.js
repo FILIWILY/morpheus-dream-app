@@ -5,8 +5,19 @@ import { calculateNatalChart } from './natalChart.js';
 import { getCosmicPassport, getDreamAtmosphere, calculateTopTransits, PLANET_NAMES_RU, ASPECT_NAMES_RU } from './astrology.js';
 
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const MODEL = process.env.OPENAI_MODEL ?? "gpt-5-mini";
+// Клиент будет создан после загрузки .env
+let client = null;
+let MODEL = null;
+
+// Функция инициализации OpenAI клиента
+const initializeOpenAI = () => {
+  if (!client) {
+    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+    console.log('🤖 OpenAI client initialized');
+  }
+  return client;
+};
 
 const getSystemPrompt = () => {
   return `
@@ -119,6 +130,10 @@ Your response must be STRICTLY a single JSON object. Do not include static title
 
 export const getDreamInterpretation = async (dreamText, lang = 'ru', userProfile, tarotSpread, astrologyData) => {
   console.log('[AI] Fetching live interpretations...');
+  
+  // Инициализируем OpenAI клиент если еще не инициализирован
+  initializeOpenAI();
+  
   const startTime = Date.now();
   
   // --- LOGGING: Log incoming data ---
@@ -407,6 +422,9 @@ const getZodiacSignFromTitle = (title) => {
 
 // This function is kept for historical purposes or if needed for a simpler, non-structured call.
 export const getInterpretationFromAI_old = async (text, lang) => {
+  // Инициализируем OpenAI клиент если еще не инициализирован
+  initializeOpenAI();
+  
   const systemPrompt = `
     You are an erudite expert dream analyst. You analyze dreams through 4 main lenses: Psychoanalysis, Esotericism, Astrology, and Folklore.
     Your task is to receive the dream text and perform TWO actions:

@@ -13,7 +13,11 @@ In production, the backend authenticates every request by cryptographically veri
 
 -   **Header**: `X-Telegram-Init-Data`
 -   **Content**: The full `initData` string provided by the Telegram Web App (`window.Telegram.WebApp.initData`).
--   **Process**: The backend uses the `TELEGRAM_BOT_TOKEN` to validate the signature of the `initData` string. If the signature is valid, the user's `telegram_id` is extracted from the data and used for the request. If the signature is invalid or the header is missing, the request is rejected with a `401` or `403` error.
+-   **Process**: The backend uses the `TELEGRAM_BOT_TOKEN` to validate the signature of the `initData` string using HMAC-SHA256. Additionally, it checks the TTL (Time To Live) to ensure the data is not older than 24 hours using absolute time difference. If the signature is valid and TTL check passes, the user's `telegram_id` is extracted from the data and used for the request. If validation fails, the request is rejected with a `401` or `403` error.
+-   **Security Features**: 
+    - HMAC-SHA256 cryptographic validation
+    - TTL check with 24-hour expiration (using `Math.abs()` for time difference)
+    - Protection against replay attacks
 
 ### Local Development Mode (`DANGEROUSLY_BYPASS_AUTH=true`)
 For ease of testing outside the Telegram client (e.g., in a local browser), authentication can be bypassed.

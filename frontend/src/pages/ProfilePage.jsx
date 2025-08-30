@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
 import { LocalizationContext } from '../context/LocalizationContext';
 import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete';
+import { useGoogleMapsLoaded } from '../hooks/useGoogleMapsLoaded';
 import { Container, Typography, TextField, Button, Box, Alert, CircularProgress, AppBar, Toolbar, IconButton, List, ListItem, ListItemText } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import styles from './ProfilePage.module.css';
@@ -42,25 +43,30 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
     const { locale: lang } = useContext(LocalizationContext);
+    const { isLoaded: googleMapsLoaded, error: googleMapsError } = useGoogleMapsLoaded();
 
     // Локальное состояние для полей формы
     const [birthDate, setBirthDate] = useState('');
     const [birthTime, setBirthTime] = useState('');
+    const [manualBirthPlace, setManualBirthPlace] = useState(''); // Fallback для ручного ввода места
     
-    // Состояние для автокомплита
-    const {
-        ready,
-        value: birthPlaceValue,
-        suggestions: { status, data: suggestionsData },
-        setValue: setBirthPlaceValue,
-        clearSuggestions,
-    } = usePlacesAutocomplete({
+    // Состояние для автокомплита - только если Google Maps загружен
+    const placesAutocomplete = usePlacesAutocomplete({
         requestOptions: {
             language: lang,
             types: ['(cities)'],
         },
         debounce: 300,
+        initOnMount: googleMapsLoaded, // Инициализируем только когда Google Maps готов
     });
+
+    const {
+        ready = false,
+        value: birthPlaceValue = '',
+        suggestions: { status = '', data: suggestionsData = [] } = {},
+        setValue: setBirthPlaceValue = () => {},
+        clearSuggestions = () => {},
+    } = googleMapsLoaded ? placesAutocomplete : {};
 
     const [placeId, setPlaceId] = useState(null);
     const [error, setError] = useState('');
@@ -72,14 +78,26 @@ const ProfilePage = () => {
         if (profile) {
             setBirthDate(profile.birthDate || '');
             setBirthTime(profile.birthTime || '');
-            setBirthPlaceValue(profile.birthPlace || '', false); // Устанавливаем значение без вызова API
+            const birthPlaceValue = profile.birthPlace || '';
+            if (googleMapsLoaded && setBirthPlaceValue) {
+                setBirthPlaceValue(birthPlaceValue, false); // Устанавливаем значение без вызова API
+            } else {
+                setManualBirthPlace(birthPlaceValue);
+            }
         }
-    }, [profile, setBirthPlaceValue]);
+    }, [profile, setBirthPlaceValue, googleMapsLoaded]);
 
     const handleInputChange = (e) => {
-        setBirthPlaceValue(e.target.value);
-        setPlaceId(null); // Сбрасываем placeId при ручном вводе
+        if (googleMapsLoaded && setBirthPlaceValue) {
+            setBirthPlaceValue(e.target.value);
+            setPlaceId(null); // Сбрасываем placeId при ручном вводе
+        } else {
+            // Fallback для случая когда Google Maps не загружен
+            setManualBirthPlace(e.target.value);
+        }
     };
+
+
 
     const handleSelectSuggestion = ({ description, place_id }) => {
         setBirthPlaceValue(description, false); // Обновляем поле ввода
@@ -92,10 +110,11 @@ const ProfilePage = () => {
         setError('');
         setSuccess('');
 
+        const currentBirthPlace = googleMapsLoaded ? birthPlaceValue : manualBirthPlace;
         const profileData = {
             birthDate,
             birthTime,
-            birthPlace: placeId ? { description: birthPlaceValue, placeId } : birthPlaceValue,
+            birthPlace: placeId ? { description: currentBirthPlace, placeId } : currentBirthPlace,
         };
 
         try {
@@ -150,14 +169,17 @@ const ProfilePage = () => {
                 />
                 <Box>
                     <TextField
-                        label="Место рождения (Город, Страна)"
+                        label={googleMapsLoaded ? "Место рождения (Город, Страна)" : "Место рождения (Google Maps загружается...)"}
                         variant="outlined"
                         fullWidth
-                        value={birthPlaceValue}
+                        value={googleMapsLoaded ? birthPlaceValue : manualBirthPlace}
                         onChange={handleInputChange}
-                        disabled={!ready}
-                        inputProps={{ placeholder: "Начните вводить город..." }}
+                        disabled={googleMapsLoaded ? !ready : false}
+                        inputProps={{ 
+                            placeholder: googleMapsLoaded ? "Начните вводить город..." : "Введите место рождения вручную"
+                        }}
                         sx={textFieldStyles}
+                        helperText={googleMapsError ? `Ошибка: ${googleMapsError}` : (googleMapsLoaded ? "Начните вводить для поиска" : "Google Maps загружается...")}
                     />
                     {status === 'OK' && (
                         <List sx={{ bgcolor: 'var(--background-secondary)', mt: 1, p: 0 }}>

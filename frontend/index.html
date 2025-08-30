@@ -13,14 +13,15 @@
       onload="console.log('[TelegramScript] ✅ Script loaded successfully.')" 
       onerror="console.error('[TelegramScript] 💥 Failed to load script!')"
     ></script>
-    <script async defer 
-      src="https://maps.googleapis.com/maps/api/js?key=&libraries=places&callback=initMap" 
-      onerror="console.warn('[GooglePlaces] Google Places API failed to load')"
-    ></script>
+    <!-- Google Maps API будет загружен динамически из main.jsx -->
     <script>
       // Fallback for Google Places API and basic checks
       window.initMap = function() {
         console.log('[GooglePlaces] API loaded.');
+      };
+      
+      window.initApp = function() {
+        console.log('[GooglePlaces] Google Maps API loaded with Places library.');
       };
       
       document.addEventListener('DOMContentLoaded', function() {

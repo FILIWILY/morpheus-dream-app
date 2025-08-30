@@ -14,8 +14,10 @@ const BottomNav = () => {
   const [value, setValue] = useState(location.pathname);
 
   useEffect(() => {
-    if (["/", "/history", "/settings"].includes(location.pathname)) {
+    if (["/record", "/history", "/settings"].includes(location.pathname)) {
         setValue(location.pathname);
+    } else if (location.pathname === "/") {
+        setValue("/record");
     }
   }, [location.pathname]);
 
@@ -39,7 +41,7 @@ const BottomNav = () => {
     >
       <BottomNavigationAction 
         label={t('recordDream')} 
-        value="/" 
+        value="/record" 
         icon={<MicIcon />} 
         sx={iconStyle}
       />
