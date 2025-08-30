@@ -285,12 +285,19 @@ app.post('/processDreamText', async (req, res) => {
         }
 
         // 2. Вызываем AI-провайдер со всеми доступными данными
+        console.log('[Server] Calling AI provider...');
         interpretation = await getDreamInterpretation(text, lang, userProfile, tarotSpread, astrologyCalculations);
+        console.log('[Server] ✅ AI interpretation received successfully');
     }
 
+    console.log('[Server] Creating dream entry...');
     const newDreamEntry = { id: uuidv4(), date: dreamDate, originalText: text, activeLens: null, ...interpretation };
     
+    console.log('[Server] Saving dream to database...');
     await db.saveDream(req.userId, newDreamEntry);
+    console.log('[Server] ✅ Dream saved successfully, ID:', newDreamEntry.id);
+    
+    console.log('[Server] Sending response to client...');
     res.status(200).json(newDreamEntry);
   } catch (error) {
     console.error('[Server] Ошибка при обработке сна:', error);
