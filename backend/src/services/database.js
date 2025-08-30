@@ -69,9 +69,18 @@ export async function initializeDatabase() {
         connectionString = process.env.DATABASE_URL;
       }
       
+      // В Docker окружении SSL не используется, даже в продакшене
+      const useSSL = isProduction && !process.env.DATABASE_URL?.includes('@postgres:');
+      
+      console.log(`🔧 PostgreSQL connection config:`, {
+        isProduction,
+        connectionString: connectionString?.replace(/:[^:@]*@/, ':***@'), // Hide password
+        useSSL
+      });
+      
       pool = new Pool({
         connectionString,
-        ssl: isProduction ? { rejectUnauthorized: false } : false,
+        ssl: useSSL ? { rejectUnauthorized: false } : false,
       });
 
       pool.on('connect', () => {
