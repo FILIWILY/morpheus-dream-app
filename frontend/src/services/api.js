@@ -27,13 +27,19 @@ api.interceptors.request.use(
       config.headers['X-Telegram-Init-Data'] = telegramEnv.initData;
       console.log('[API] Using Telegram initData, length:', telegramEnv.initData.length);
     }
-    // For local development or when no real initData available, use bypass auth
-    else if (import.meta.env.DEV || (telegramEnv.isTelegram && !telegramEnv.initData)) {
+    // For local development ONLY - never use bypass auth in production
+    else if (import.meta.env.DEV && !telegramEnv.isTelegram) {
       config.headers['X-Telegram-User-ID'] = 'dev_test_user_123'; // Тот же ID что в database.js
-      console.log('[API] Using dev bypass auth with test user');
+      console.log('[API] Using dev bypass auth with test user (DEV mode only)');
     }
     else {
       console.warn('[API] No valid authentication method available');
+      console.warn('[API] Environment:', { 
+        isDev: import.meta.env.DEV,
+        isTelegram: telegramEnv.isTelegram,
+        hasInitData: !!telegramEnv.initData,
+        initDataLength: telegramEnv.initData ? telegramEnv.initData.length : 0
+      });
       console.warn('[API] Debug info:', telegramEnv.debugInfo);
     }
 
