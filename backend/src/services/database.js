@@ -355,14 +355,16 @@ export async function saveDream(telegramId, dreamData) {
     const { id, date, originalText, activeLens, ...interpretationData } = dreamData;
     
     try {
+        console.log(`[DB] Saving dream to PostgreSQL: ID=${id}, user=${telegramId}, date=${date}`);
         await pool.query(
             `INSERT INTO dreams (id, user_id, dream_date, dream_text, interpretation, active_lens)
              VALUES ($1, $2, $3, $4, $5, $6)`,
             [id, telegramId, date, originalText, interpretationData, activeLens]
         );
+        console.log(`[DB] ✅ Dream saved successfully: ${id}`);
         return dreamData; // Return the original, complete object for consistency
     } catch (error) {
-        console.error('Error saving dream:', error);
+        console.error('[DB] Error saving dream:', error);
         throw error;
     }
 }
@@ -421,6 +423,7 @@ export async function getDreamById(telegramId, dreamId) {
     }
 
     try {
+        console.log(`[DB] Fetching dream from PostgreSQL: ID=${dreamId}, user=${telegramId}`);
         const res = await pool.query(
             `SELECT id, dream_date AS date, dream_text AS "originalText", active_lens AS "activeLens", interpretation
              FROM dreams
@@ -429,10 +432,12 @@ export async function getDreamById(telegramId, dreamId) {
         );
 
         if (res.rows.length === 0) {
+            console.log(`[DB] ❌ Dream not found in PostgreSQL: ID=${dreamId}, user=${telegramId}`);
             return null;
         }
 
         const row = res.rows[0];
+        console.log(`[DB] ✅ Dream found in PostgreSQL: ${dreamId}`);
         // Reconstruct the full dream object to match db.json structure
         return {
             id: row.id,
@@ -442,7 +447,7 @@ export async function getDreamById(telegramId, dreamId) {
             ...row.interpretation
         };
     } catch (error) {
-        console.error('Error fetching dream by ID:', error);
+        console.error('[DB] Error fetching dream by ID:', error);
         throw error;
     }
 }

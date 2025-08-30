@@ -206,14 +206,17 @@ app.get('/dreams', async (req, res) => {
 // Получение одного сна по id
 app.get('/dreams/:dreamId', async (req, res) => {
   const { dreamId } = req.params;
+  console.log(`[Server] Fetching dream by ID: ${dreamId} for user: ${req.userId}`);
   try {
       const dream = await db.getDreamById(req.userId, dreamId);
       if (!dream) {
+        console.log(`[Server] ❌ Dream not found: ${dreamId} for user: ${req.userId}`);
         return res.status(404).json({ error: 'Dream not found' });
       }
+      console.log(`[Server] ✅ Dream found: ${dreamId}`);
       res.status(200).json(dream);
   } catch (error) {
-      console.error(`Error fetching dream ${dreamId}:`, error);
+      console.error(`[Server] Error fetching dream ${dreamId}:`, error);
       res.status(500).json({ error: 'Failed to fetch dream' });
   }
 });
