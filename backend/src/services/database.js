@@ -233,10 +233,30 @@ export async function getProfile(telegramId) {
 
         if (res.rows.length > 0) {
             const profile = res.rows[0];
+            
+            // Функция для преобразования даты из YYYY-MM-DD в DD.MM.YYYY для фронтенда
+            const formatDateForFrontend = (dateString) => {
+                if (!dateString) return null;
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString; // Если дата невалидна, возвращаем как есть
+                
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}.${month}.${year}`;
+            };
+            
+            // Функция для форматирования времени (убираем секунды если есть)
+            const formatTimeForFrontend = (timeString) => {
+                if (!timeString) return null;
+                // Если время в формате HH:MM:SS, обрезаем до HH:MM
+                return timeString.split(':').slice(0, 2).join(':');
+            };
+            
             // Convert DB naming to camelCase for consistency with the frontend
             return {
-                birthDate: profile.birth_date,
-                birthTime: profile.birth_time,
+                birthDate: formatDateForFrontend(profile.birth_date),
+                birthTime: formatTimeForFrontend(profile.birth_time),
                 birthPlace: profile.birth_place,
                 birthLatitude: profile.birth_latitude,
                 birthLongitude: profile.birth_longitude,
@@ -282,9 +302,27 @@ export async function updateProfile(telegramId, profileData) {
             [birthDate, birthTime, birthPlace, birthLatitude, birthLongitude, natalChart, telegramId]
         );
         const profile = res.rows[0];
+        
+        // Используем те же функции форматирования
+        const formatDateForFrontend = (dateString) => {
+            if (!dateString) return null;
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        };
+        
+        const formatTimeForFrontend = (timeString) => {
+            if (!timeString) return null;
+            return timeString.split(':').slice(0, 2).join(':');
+        };
+        
         return {
-            birthDate: profile.birth_date,
-            birthTime: profile.birth_time,
+            birthDate: formatDateForFrontend(profile.birth_date),
+            birthTime: formatTimeForFrontend(profile.birth_time),
             birthPlace: profile.birth_place,
             birthLatitude: profile.birth_latitude,
             birthLongitude: profile.birth_longitude,

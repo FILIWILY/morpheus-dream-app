@@ -84,14 +84,41 @@ app.get('/profile', async (req, res) => {
     }
 });
 
+// Функция для преобразования даты из DD.MM.YYYY в YYYY-MM-DD
+const convertDateFormat = (dateString) => {
+    if (!dateString) return null;
+    
+    // Если дата уже в формате YYYY-MM-DD, возвращаем как есть
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+        return dateString.split('T')[0]; // Убираем время если есть
+    }
+    
+    // Преобразуем из DD.MM.YYYY в YYYY-MM-DD
+    const match = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (match) {
+        const [, day, month, year] = match;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    
+    console.warn(`[SERVER] Invalid date format received: ${dateString}`);
+    return null;
+};
+
 // Обновление профиля
 app.put('/profile', async (req, res) => {
     const { birthDate, birthTime, birthPlace } = req.body;
     let userProfile = (await db.getProfile(req.userId)) || {};
 
-    // Обновляем дату и время
-    userProfile.birthDate = birthDate;
+    // Преобразуем и обновляем дату
+    const convertedBirthDate = convertDateFormat(birthDate);
+    if (birthDate && !convertedBirthDate) {
+        return res.status(400).json({ error: 'Invalid birth date format. Expected DD.MM.YYYY or YYYY-MM-DD' });
+    }
+    
+    userProfile.birthDate = convertedBirthDate;
     userProfile.birthTime = birthTime;
+    
+    console.log(`[SERVER] Date conversion: "${birthDate}" -> "${convertedBirthDate}"`);
 
     // Если передан placeId, получаем координаты
     if (birthPlace && birthPlace.placeId) {

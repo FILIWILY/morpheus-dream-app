@@ -13,7 +13,7 @@ let MODEL = null;
 const initializeOpenAI = () => {
   if (!client) {
     client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    MODEL = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+    MODEL = process.env.OPENAI_MODEL ?? "gpt-5-mini-2025-08-07";
     console.log('🤖 OpenAI client initialized');
   }
   return client;
