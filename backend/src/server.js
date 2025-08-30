@@ -207,6 +207,10 @@ app.get('/dreams', async (req, res) => {
 app.get('/dreams/:dreamId', async (req, res) => {
   const { dreamId } = req.params;
   console.log(`[Server] Fetching dream by ID: ${dreamId} for user: ${req.userId}`);
+  console.log(`[Server] Request headers:`, {
+    'X-Telegram-Init-Data': req.headers['x-telegram-init-data'] ? '[PRESENT]' : '[MISSING]',
+    'X-Telegram-User-ID': req.headers['x-telegram-user-id'] || '[MISSING]'
+  });
   try {
       const dream = await db.getDreamById(req.userId, dreamId);
       if (!dream) {
@@ -239,6 +243,11 @@ app.delete('/dreams', async (req, res) => {
 // Обработка текстового сна
 app.post('/processDreamText', async (req, res) => {
   const { text, lang, date } = req.body;
+  console.log(`[Server] Processing dream text for user: ${req.userId}`);
+  console.log(`[Server] Request headers:`, {
+    'X-Telegram-Init-Data': req.headers['x-telegram-init-data'] ? '[PRESENT]' : '[MISSING]',
+    'X-Telegram-User-ID': req.headers['x-telegram-user-id'] || '[MISSING]'
+  });
   if (!text || !date) {
     return res.status(400).json({ error: "Поля text и date обязательны." });
   }
