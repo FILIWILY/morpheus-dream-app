@@ -2,6 +2,7 @@
 
 .astrologyLens {
     color: #e0e0e0;
+    min-width: 0; /* Flexbox shrink fix */
 }
 
 .mainTitle {
@@ -181,12 +182,11 @@
 }
 
 .transitCard {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: #16161a; /* Solid background */
     border-radius: 12px;
     padding: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    backdrop-filter: blur(10px);
     height: 100%;
     text-align: center;
 }
@@ -295,11 +295,16 @@
 
 .mySwiper {
     width: 100%;
+    max-width: 320px; /* Constrain the swiper itself */
     padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .swiperContainer {
+    width: 100%;
+    min-width: 0; /* Flexbox shrink fix */
     margin-bottom: 24px;
+    overflow: hidden; /* Prevent overflow from coverflow effect */
 }
 
 .swiper-wrapper {
@@ -309,9 +314,9 @@
 .swiperSlide {
     background-position: center;
     background-size: cover;
-    width: 80vw; /* Was 300px */
-    max-width: 300px; /* Added max-width for larger screens */
     display: flex;
+    border-radius: 18px;
+    /* Let the Cards effect control the width */
 }
 
 .crystalsContainer {

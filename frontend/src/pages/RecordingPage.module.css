@@ -4,26 +4,41 @@
     flex-grow: 1; 
     max-width: 900px; 
     margin: 0 auto;
-    padding: 0; /* REMOVED side paddings */
+    padding: 0 16px; /* Main side paddings */
     box-sizing: border-box;
     overflow-x: hidden;
 }
 
 .header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* Align icon to the left */
     align-items: center;
     width: 100%;
     margin-top: 60px;
-    padding: 0 16px; /* ADDED side paddings */
+    padding: 4px 8px;
     box-sizing: border-box;
+    position: relative; /* Needed for absolute positioning of the title */
+
+    /* Glassmorphism Styles */
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 24px;
 }
 
 .title {
-    font-size: clamp(1.4rem, 5vw, 1.6rem) !important;
+    font-size: clamp(1.1rem, 4vw, 1.3rem) !important; /* Further reduced font size */
     font-weight: 500 !important;
     text-align: center;
-    flex-grow: 1;
+    
+    /* Centering trick */
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%; /* Allow wrapping */
+    pointer-events: none; /* Make it non-interactive */
 }
 
 .content {
@@ -32,6 +47,7 @@
     flex-direction: column;
     justify-content: space-between; 
     align-items: center; 
+    width: 100%;
 }
 
 .orbContainer {
@@ -44,20 +60,18 @@
 
 .footer {
     width: 100%;
-    padding: 0 16px; /* ADDED side paddings */
+    padding: 0;
     margin-bottom: 12px;
     display: flex;
     justify-content: center;
-    box-sizing: border-box;
 }
 .inputWrapper {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     width: 100%;
-    padding: 8px 8px 8px 16px; 
+    padding: 4px 8px;
     box-sizing: border-box;
-    transition: width 0.3s ease;
     
     /* Glassmorphism Styles */
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
@@ -65,9 +79,15 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
-    border-radius: 28px;
+    border-radius: 24px;
 }
 .textField {
     width: 100%;
     color: var(--text-primary);
+}
+
+/* Force placeholder to wrap */
+.textField :global(.MuiInputBase-input::placeholder) {
+    white-space: pre-wrap;
+    opacity: 0.7 !important;
 }

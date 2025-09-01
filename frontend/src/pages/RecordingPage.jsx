@@ -135,8 +135,6 @@ const RecordingPage = () => {
           >
             {isRecording ? t('recording') : t('recordYourDream')}
           </Typography>
-          {/* Empty spacer */}
-          <Box sx={{ width: 48, height: 48 }}/>
         </header>
 
         <Box className={styles.orbContainer}>

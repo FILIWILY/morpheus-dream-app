@@ -3,8 +3,8 @@ import styles from './AstrologyLens.module.css';
 import ReactMarkdown from 'react-markdown';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
-import 'swiper/css/effect-coverflow';
-import { EffectCoverflow } from 'swiper/modules';
+import 'swiper/css/effect-cards';
+import { EffectCards } from 'swiper/modules';
 import api from '../services/api';
 
 
@@ -343,18 +343,14 @@ const PlanetaryInfluence = ({ data, topTransits, explanation, onStateUpdate }) =
 
             <div className={styles.swiperContainer}>
             <Swiper
-                effect={'coverflow'}
+                effect={'cards'}
                 grabCursor={true}
                 centeredSlides={true}
-                slidesPerView={'auto'}
-                coverflowEffect={{
-                    rotate: 50,
-                    stretch: 0,
-                    depth: 100,
-                    modifier: 1,
-                    slideShadows: true,
+                slidesPerView={1}
+                modules={[EffectCards]}
+                cardsEffect={{
+                    rotate: false,
                 }}
-                modules={[EffectCoverflow]}
                 onSwiper={(swiper) => { 
                     swiperRef.current = swiper; 
                     const savedIndex = typeof state?.currentIndex === 'number' ? state.currentIndex : 0;

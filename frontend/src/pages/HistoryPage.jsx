@@ -11,6 +11,7 @@ import MenuIcon from '@mui/icons-material/Menu'; // Import menu icon
 import { LocalizationContext } from '../context/LocalizationContext';
 import styles from './HistoryPage.module.css';
 import { useDreams } from '../hooks/useDreams'; // Corrected the import path
+import { format } from 'date-fns';
 
 
 const HistoryPage = () => {
@@ -123,6 +124,7 @@ const HistoryPage = () => {
                 <List sx={{ pt: 1, p: 0 }}>
                     {dreams.map((dream) => {
                     const isSelected = selectedDreams.has(dream.id);
+                    const formattedDate = dream.date ? format(new Date(dream.date), 'dd.MM.yyyy') : '';
                     return (
                         <div key={dream.id} className={`${styles.dreamItemContainer} ${isSelected ? styles.selected : ''}`}>
                             <ListItem
@@ -147,7 +149,7 @@ const HistoryPage = () => {
                                     <ListItemIcon> <NightsStayIcon sx={{ color: 'var(--accent-primary)' }} /> </ListItemIcon>
                                     <ListItemText
                                         primary={dream.title}
-                                        secondary={dream.date}
+                                        secondary={formattedDate}
                                         primaryTypographyProps={{ fontWeight: '500', color: 'var(--text-primary)' }}
                                         secondaryTypographyProps={{ style: { color: 'var(--text-secondary)' } }}
                                     />

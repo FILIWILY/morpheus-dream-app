@@ -118,7 +118,14 @@ const SettingsDrawer = ({ open, onClose }) => {
                     } 
                 }}
             >
-                <Box sx={{ width: 300, display: 'flex', flexDirection: 'column', height: '100%', pt: '60px', boxSizing: 'border-box' }}>
+                <Box sx={{ 
+                    width: 300, 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    height: '100%', 
+                    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 60px)', 
+                    boxSizing: 'border-box' 
+                }}>
                     <AppBar position="static" sx={{ background: 'transparent', boxShadow: 'none' }}>
                         <Toolbar>
                             <IconButton edge="start" color="inherit" onClick={onClose}>
