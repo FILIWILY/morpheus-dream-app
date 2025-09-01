@@ -1,7 +1,8 @@
 .container {
     position: relative;
-    width: 340px;  /* Немного больше */
-    height: 340px; /* Немного больше */
+    /* ✅ 4. Расширяем блок, чтобы анимация не обрезалась */
+    width: 340px;
+    height: 340px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -21,12 +22,12 @@
     height: 100%;
 }
 
+/* ✅ 1. Этот класс больше не нужен, но можно оставить на всякий случай */
 .stopIcon {
     position: absolute;
     color: rgba(255, 255, 255, 0.9);
     font-size: 80px !important;
     z-index: 10;
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
-    /* Отключаем события мыши, чтобы сфера под иконкой оставалась кликабельной */
     pointer-events: none; 
 }

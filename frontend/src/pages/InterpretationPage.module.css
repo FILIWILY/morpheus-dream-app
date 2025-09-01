@@ -1,12 +1,7 @@
 .pageWrapper {
-    padding: 0 8px 120px 8px; /* Уменьшаем горизонтальный отступ еще больше */
+    padding: 60px 8px 120px 8px;
     max-width: 680px;
     margin: 0 auto;
-}
-
-.header {
-    /* This is now a dedicated spacer for Telegram UI elements and the device notch. */
-    height: 24px; /* Increased from 16px */
 }
 
 .content {

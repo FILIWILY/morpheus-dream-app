@@ -1,6 +1,6 @@
 {
   "dreamJournal": "Журнал Снов",
-  "recordYourDream": "Запишите свой сон",
+  "recordYourDream": "Начните запись",
   "recording": "Запись...",
   "recordDream": "Записать сон",
   "stopRecording": "Остановить запись",
@@ -14,32 +14,34 @@
   "cancel": "Отмена",
   "dreamInterpretation": "Толкование Сна",
   "snapshotSummary": "Краткое Содержание",
-  "keySymbolBreakdown": "Ключевые образы",
-  "explanation": "Объяснение",
-  "practicalTakeaway": "Практический Совет",
-  "comparisonStatistic": "Статистика для Сравнения",
   "historyEmpty": "Ваша история снов пуста. Запишите свой первый сон!",
   "historyLoadError": "Не удалось загрузить историю снов.",
   "unknownError": "Произошла неизвестная ошибка.",
-  "processingError": "Ошибка обработки: ",
-  "invalidResponse": "Получен некорректный ответ от сервера.",
-  "micPermissionDenied": "Доступ к микрофону запрещен. Пожалуйста, предоставьте разрешение в настройках браузера.",
-  "startRecordingError": "Ошибка начала записи: ",
   "whenDidYouDream": "Когда вам приснился этот сон?",
   "today": "Сегодня",
   "selectDate": "Выбрать дату",
   "confirmDate": "Подтвердить дату",
+  
+  "edit": "Изменить",
+  "done": "Готово",
+  "delete": "Удалить",
+  "selected": "Выбрано",
+  "confirmationTitle": "Подтверждение",
+  "confirmationText": "Вы уверены, что хотите удалить выбранные сны?",
+  "no": "Нет",
+  "yesDelete": "Да, удалить",
+
+  "profileDescription": "Введите эти данные, чтобы получить доступ к максимально полному анализу сна.",
+  "birthDateLabel": "Дата рождения (дд.мм.гггг)",
+  "birthTimeLabel": "Время рождения (чч:мм)",
+  "birthPlaceLabel": "Место рождения (Город, Страна)",
+  "saveData": "Сохранить данные",
+  "profileSaveSuccess": "Данные профиля успешно сохранены!",
+  "profileSaveError": "Не удалось сохранить данные профиля.",
+  
   "lenses": {
     "psychoanalytic": "Психоанализ",
-    "esoteric": "Эзотерика",
-    "astrology": "Астрология",
-    "culturology": "Культурология"
-  },
-  "culturologyLenses": {
-    "miller": "Сонник Миллера",
-    "tsvetkov": "Сонник Цветкова",
-    "vanga": "Сонник Ванги",
-    "chinese": "Китайский сонник",
-    "muslim": "Мусульманский сонник"
+    "tarot": "Таро",
+    "astrology": "Астрология"
   }
 }

@@ -1,6 +1,6 @@
 {
   "dreamJournal": "Dream Journal",
-  "recordYourDream": "Record your dream",
+  "recordYourDream": "Start recording",
   "recording": "Recording...",
   "recordDream": "Record Dream",
   "stopRecording": "Stop Recording",
@@ -14,32 +14,34 @@
   "cancel": "Cancel",
   "dreamInterpretation": "Dream Interpretation",
   "snapshotSummary": "Snapshot Summary",
-  "keySymbolBreakdown": "Key images",
-  "explanation": "Explanation",
-  "practicalTakeaway": "Practical Takeaway",
-  "comparisonStatistic": "Comparison Statistic",
   "historyEmpty": "Your dream history is empty. Record your first dream!",
   "historyLoadError": "Failed to load dream history.",
   "unknownError": "An unknown error occurred.",
-  "processingError": "Processing error: ",
-  "invalidResponse": "Received an invalid response from the server.",
-  "micPermissionDenied": "Microphone permission was denied. Please grant permission in your browser settings.",
-  "startRecordingError": "Failed to start recording: ",
-  "whenDidYouDream": "Когда вам приснился этот сон?",
-  "today": "Сегодня",
-  "selectDate": "Выбрать дату",
-  "confirmDate": "Подтвердить дату",
+  "whenDidYouDream": "When did you have this dream?",
+  "today": "Today",
+  "selectDate": "Select a date",
+  "confirmDate": "Confirm Date",
+
+  "edit": "Edit",
+  "done": "Done",
+  "delete": "Delete",
+  "selected": "Selected",
+  "confirmationTitle": "Confirmation",
+  "confirmationText": "Are you sure you want to delete the selected dreams?",
+  "no": "No",
+  "yesDelete": "Yes, delete",
+
+  "profileDescription": "Enter this data to get the most complete dream analysis.",
+  "birthDateLabel": "Date of Birth (dd.mm.yyyy)",
+  "birthTimeLabel": "Time of Birth (hh:mm)",
+  "birthPlaceLabel": "Place of Birth (City, Country)",
+  "saveData": "Save Data",
+  "profileSaveSuccess": "Profile data saved successfully!",
+  "profileSaveError": "Failed to save profile data.",
+
   "lenses": {
     "psychoanalytic": "Psychoanalysis",
-    "esoteric": "Esoterica",
-    "astrology": "Astrology",
-    "culturology": "Culturology"
-  },
-  "culturologyLenses": {
-    "miller": "Miller's Dream Book",
-    "tsvetkov": "Tsvetkov's Dream Book",
-    "vanga": "Vanga's Dream Book",
-    "chinese": "Chinese Dream Book",
-    "muslim": "Muslim Dream Book"
+    "tarot": "Tarot",
+    "astrology": "Astrology"
   }
 }

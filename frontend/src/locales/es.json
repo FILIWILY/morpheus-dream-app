@@ -1,6 +1,6 @@
 {
   "dreamJournal": "Diario de Sueños",
-  "recordYourDream": "Graba tu sueño",
+  "recordYourDream": "Iniciar grabación",
   "recording": "Grabando...",
   "recordDream": "Grabar Sueño",
   "stopRecording": "Detener Grabación",
@@ -14,19 +14,34 @@
   "cancel": "Cancelar",
   "dreamInterpretation": "Interpretación de Sueños",
   "snapshotSummary": "Resumen General",
-  "keySymbolBreakdown": "Análisis de Símbolos Clave",
-  "explanation": "Explicación",
-  "practicalTakeaway": "Consejo Práctico",
-  "comparisonStatistic": "Estadística Comparativa",
   "historyEmpty": "Tu historial de sueños está vacío. ¡Graba tu primer sueño!",
   "historyLoadError": "Error al cargar el historial de sueños.",
   "unknownError": "Ocurrió un error desconocido.",
-  "processingError": "Error de procesamiento: ",
-  "invalidResponse": "Respuesta inválida recibida del servidor.",
-  "micPermissionDenied": "Se denegó el permiso para el micrófono. Por favor, concede el permiso en la configuración de tu navegador.",
-  "startRecordingError": "Error al iniciar la grabación: ",
-  "whenDidYouDream": "Когда вам приснился этот сон?",
-  "today": "Сегодня",
-  "selectDate": "Выбрать дату",
-  "confirmDate": "Подтвердить дату"
+  "whenDidYouDream": "¿Cuándo tuviste este sueño?",
+  "today": "Hoy",
+  "selectDate": "Seleccionar fecha",
+  "confirmDate": "Confirmar fecha",
+
+  "edit": "Editar",
+  "done": "Hecho",
+  "delete": "Eliminar",
+  "selected": "Seleccionado",
+  "confirmationTitle": "Confirmación",
+  "confirmationText": "¿Estás seguro de que quieres eliminar los sueños seleccionados?",
+  "no": "No",
+  "yesDelete": "Sí, eliminar",
+
+  "profileDescription": "Ingrese estos datos para obtener el análisis de sueños más completo.",
+  "birthDateLabel": "Fecha de Nacimiento (dd.mm.aaaa)",
+  "birthTimeLabel": "Hora de Nacimiento (hh:mm)",
+  "birthPlaceLabel": "Lugar de Nacimiento (Ciudad, País)",
+  "saveData": "Guardar datos",
+  "profileSaveSuccess": "¡Datos del perfil guardados con éxito!",
+  "profileSaveError": "Error al guardar los datos del perfil.",
+
+  "lenses": {
+    "psychoanalytic": "Psicoanálisis",
+    "tarot": "Tarot",
+    "astrology": "Astrología"
+  }
 }

@@ -1,22 +1,22 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import api from '../services/api';
 import styles from './RecordingPage.module.css';
 
-import { Box, TextField, IconButton, CircularProgress, Alert } from '@mui/material';
+import { Box, TextField, IconButton, CircularProgress, Alert, AppBar, Toolbar, Typography } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import MenuIcon from '@mui/icons-material/Menu';
 
-// --- ВАЖНЫЕ ИЗМЕНЕНИЯ ---
-// 1. Импортируем новый RecordingOrb
-import RecordingOrb from '../components/RecordingOrb'; 
+import RecordingOrb from '../components/RecordingOrb';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { LocalizationContext } from '../context/LocalizationContext';
 import DateSelectionModal from '../components/DateSelectionModal';
 
 const RecordingPage = () => {
   const navigate = useNavigate();
+  const { openDrawer } = useOutletContext(); // Get the function from Layout
   const { t, locale } = useContext(LocalizationContext);
-  
+
   const [dreamText, setDreamText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,7 +24,6 @@ const RecordingPage = () => {
   const [dreamDate, setDreamDate] = useState(null);
   const [userAction, setUserAction] = useState(null);
 
-  // 2. Получаем новое значение 'amplitude' из нашего обновленного хука
   const { isRecording, audioBlob, amplitude, startRecording, stopRecording } = useAudioRecorder();
 
   useEffect(() => {
@@ -57,6 +56,10 @@ const RecordingPage = () => {
 
   const handleInitiateAction = (actionType) => {
     setError(null);
+    if (actionType === 'sendText' && !dreamText.trim()) {
+      setError('Пожалуйста, опишите свой сон.');
+      return;
+    }
     setUserAction(actionType);
     setIsModalOpen(true);
   };
@@ -77,11 +80,23 @@ const RecordingPage = () => {
     }
   };
 
-  const handleTextFormSubmit = (e) => {
-    e.preventDefault();
-    if (!dreamText.trim() || isLoading) return;
+  const triggerTextSubmit = () => {
+    if (isLoading) return;
     handleInitiateAction('sendText');
   };
+
+  const handleTextFormSubmit = (e) => {
+    e.preventDefault();
+    triggerTextSubmit();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      triggerTextSubmit();
+    }
+  };
+
 
   const handleTextSubmit = async (date) => {
     setIsLoading(true);
@@ -108,24 +123,38 @@ const RecordingPage = () => {
         onClose={() => setIsModalOpen(false)}
         onDateSelect={handleDateSelect}
       />
+
       <main className={styles.content}>
-        <h1 className={styles.title}>
-          {isRecording ? t('recording') : t('recordYourDream')}
-        </h1>
-        {error && <Alert severity="error" sx={{ position: 'absolute', top: '120px' }}>{error}</Alert>}
-        
-        {isLoading ? (
-          <CircularProgress size={140} color="primary" />
-        ) : (
-          // 3. Используем RecordingOrb и передаем необходимые пропсы
-          <RecordingOrb 
-            isRecording={isRecording} 
-            amplitude={amplitude}
-            onClick={isLoading ? undefined : handleRecordClick} 
-          />
-        )}
+        <header className={styles.header}>
+          <IconButton size="large" color="inherit" aria-label="menu" onClick={openDrawer}>
+            <MenuIcon />
+          </IconButton>
+          <Typography 
+            variant="h1" 
+            className={styles.title}
+          >
+            {isRecording ? t('recording') : t('recordYourDream')}
+          </Typography>
+          {/* Empty spacer */}
+          <Box sx={{ width: 48, height: 48 }}/>
+        </header>
+
+        <Box className={styles.orbContainer}>
+            {error && <Alert severity="error" onClose={() => setError(null)} sx={{ position: 'absolute', top: '0' }}>{error}</Alert>}
+
+            {isLoading ? (
+              <CircularProgress size={140} color="primary" />
+            ) : (
+              <RecordingOrb
+                isRecording={isRecording}
+                amplitude={amplitude}
+                onClick={isLoading ? undefined : handleRecordClick}
+              />
+            )}
+        </Box>
       </main>
-      <footer className={styles.footer}>
+
+      <footer className={`${styles.footer} ${isRecording ? styles.faded : ''}`}>
         <Box
           component="form"
           onSubmit={handleTextFormSubmit}
@@ -143,12 +172,13 @@ const RecordingPage = () => {
             maxRows={4}
             InputProps={{
               disableUnderline: true,
-              sx: { color: 'white', padding: '4px 8px' }
+              sx: { color: 'var(--text-primary)', padding: '4px 8px' }
             }}
+            onKeyDown={handleKeyDown}
           />
           <IconButton
             type="submit"
-            disabled={!dreamText.trim() || isLoading || isRecording}
+            disabled={isLoading || isRecording}
             aria-label={t('send')}
             sx={{ color: 'var(--accent-primary)' }}
           >

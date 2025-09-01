@@ -1,8 +1,8 @@
 {
   "dreamJournal": "Journal des Rêves",
-  "recordYourDream": "Enregistrez votre rêve",
+  "recordYourDream": "Commencer l'enregistrement",
   "recording": "Enregistrement...",
-  "recordDream": "Enregistrer le Rêve",
+  "recordDream": "Enregistrer un rêve",
   "stopRecording": "Arrêter l'enregistrement",
   "describeDream": "Décrivez votre rêve ou commencez à enregistrer...",
   "send": "Envoyer",
@@ -14,19 +14,34 @@
   "cancel": "Annuler",
   "dreamInterpretation": "Interprétation des Rêves",
   "snapshotSummary": "Résumé Instantané",
-  "keySymbolBreakdown": "Analyse des Symboles Clés",
-  "explanation": "Explication",
-  "practicalTakeaway": "Conseil Pratique",
-  "comparisonStatistic": "Statistique Comparative",
   "historyEmpty": "Votre historique de rêves est vide. Enregistrez votre premier rêve !",
   "historyLoadError": "Échec du chargement de l'historique des rêves.",
   "unknownError": "Une erreur inconnue est survenue.",
-  "processingError": "Erreur de traitement : ",
-  "invalidResponse": "Réponse invalide reçue du serveur.",
-  "micPermissionDenied": "La permission d'utiliser le microphone a été refusée. Veuillez accorder la permission dans les paramètres de votre navigateur.",
-  "startRecordingError": "Échec du démarrage de l'enregistrement : ",
-  "whenDidYouDream": "Когда вам приснился этот сон?",
-  "today": "Сегодня",
-  "selectDate": "Выбрать дату",
-  "confirmDate": "Подтвердить дату"
+  "whenDidYouDream": "Quand avez-vous fait ce rêve ?",
+  "today": "Aujourd'hui",
+  "selectDate": "Choisir une date",
+  "confirmDate": "Confirmer la date",
+
+  "edit": "Modifier",
+  "done": "Terminé",
+  "delete": "Supprimer",
+  "selected": "Sélectionné",
+  "confirmationTitle": "Confirmation",
+  "confirmationText": "Êtes-vous sûr de vouloir supprimer les rêves sélectionnés ?",
+  "no": "Non",
+  "yesDelete": "Oui, supprimer",
+
+  "profileDescription": "Entrez ces données pour obtenir l'analyse de rêve la plus complète.",
+  "birthDateLabel": "Date de naissance (jj.mm.aaaa)",
+  "birthTimeLabel": "Heure de naissance (hh:mm)",
+  "birthPlaceLabel": "Lieu de naissance (Ville, Pays)",
+  "saveData": "Enregistrer les données",
+  "profileSaveSuccess": "Données du profil enregistrées avec succès !",
+  "profileSaveError": "Échec de l'enregistrement des données du profil.",
+
+  "lenses": {
+    "psychoanalytic": "Psychanalyse",
+    "tarot": "Tarot",
+    "astrology": "Astrologie"
+  }
 }

@@ -1,0 +1,22 @@
+.dreamItemContainer {
+  /* ✅ Затемняем фон стекла */
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+
+  border-radius: 14px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dreamItemContainer.selected {
+    background: linear-gradient(135deg, rgba(200, 80, 255, 0.25), rgba(200, 80, 255, 0.05));
+    border-color: var(--accent-primary);
+}
+
+.listItem {
+  background-color: transparent !important;
+}

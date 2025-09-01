@@ -1,0 +1,18 @@
+.suggestionsList {
+    max-height: 200px;
+    overflow-y: auto;
+    
+    /* Glassmorphism styles */
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 0;
+    /* The parent flex container's `gap` property will handle spacing. */
+}
+
+.suggestionItem:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}

@@ -61,6 +61,8 @@ const WelcomePage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [placeId, setPlaceId] = useState(null);
     
+    const isSaveDisabled = !birthDate || !birthTime || !birthPlace;
+
     // ✅ Полностью переработана логика для защиты от падения Google Places API
     const {
         ready,
@@ -91,8 +93,8 @@ const WelcomePage = () => {
     };
 
     const handleSave = async () => {
-        if (!birthDate || !birthPlace) {
-            setError("Дата и место рождения обязательны для сохранения.");
+        if (!birthDate || !birthTime || !birthPlace) {
+            setError("Пожалуйста, заполните все поля: дату, время и место рождения.");
             return;
         }
         setIsLoading(true);
@@ -108,26 +110,6 @@ const WelcomePage = () => {
             navigate('/record'); // Go directly to main recording page
         } catch (err) {
             setError("Не удалось сохранить данные. Попробуйте снова.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSkip = async () => {
-        setIsLoading(true);
-        try {
-            // Create minimal profile to mark user as registered (not new)
-            // This prevents infinite redirects to welcome page
-            await updateProfile({
-                birthDate: null, // null indicates user chose to skip
-                birthTime: null,
-                birthPlace: null,
-            });
-            console.log('[WelcomePage] User skipped registration, redirecting to main app');
-            navigate('/record'); // Go directly to main recording page
-        } catch (err) {
-            console.error('[WelcomePage] Error skipping registration:', err);
-            setError("Не удалось пропустить шаг. Попробуйте снова.");
         } finally {
             setIsLoading(false);
         }
@@ -154,7 +136,7 @@ const WelcomePage = () => {
                     inputProps={{ maxLength: 10 }}
                 />
                 <TextField
-                    label="Время рождения (чч:мм, необязательно)"
+                    label="Время рождения (чч:мм)"
                     variant="outlined"
                     fullWidth
                     value={birthTime}
@@ -192,14 +174,11 @@ const WelcomePage = () => {
                 {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
 
                 <Alert severity="info" className={styles.alert}>
-                    *Для доступа к Астрологической линзе
+                    Эти данные нужны для доступа к Астрологической линзе
                 </Alert>
 
-                <Button variant="contained" onClick={handleSave} size="large" disabled={isLoading}>
+                <Button variant="contained" onClick={handleSave} size="large" disabled={isLoading || isSaveDisabled}>
                     Сохранить и продолжить
-                </Button>
-                <Button variant="text" onClick={handleSkip} className={styles.skipButton}>
-                    Пропустить
                 </Button>
             </Box>
         </Box>

@@ -1,52 +1,71 @@
 .pageContainer {
     display: flex;
     flex-direction: column;
-    /* height: 100%; Let layout handle height */
-    flex-grow: 1; /* Take up all available space in the layout */
+    flex-grow: 1; 
     max-width: 900px; 
     margin: 0 auto;
-    padding: 16px;
+    padding: 0; /* REMOVED side paddings */
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .header {
-    text-align: center;
-    /* padding: 24px 0; No longer needed */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 60px;
+    padding: 0 16px; /* ADDED side paddings */
+    box-sizing: border-box;
 }
 
 .title {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 24px; /* Add some space between title and orb */
+    font-size: clamp(1.4rem, 5vw, 1.6rem) !important;
+    font-weight: 500 !important;
+    text-align: center;
+    flex-grow: 1;
 }
 
-/* Этот блок центрирует кнопку */
 .content {
     flex-grow: 1;
     display: flex; 
-    flex-direction: column; /* Stack title and orb vertically */
-    justify-content: center; 
+    flex-direction: column;
+    justify-content: space-between; 
     align-items: center; 
-    min-height: 250px;
+}
+
+.orbContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    width: 100%;
 }
 
 .footer {
+    width: 100%;
+    padding: 0 16px; /* ADDED side paddings */
     margin-bottom: 12px;
     display: flex;
     justify-content: center;
+    box-sizing: border-box;
 }
 .inputWrapper {
-    width: 100%;
-    max-width: 480px;
     display: flex;
     align-items: center;
     gap: 8px;
+    width: 100%;
     padding: 8px 8px 8px 16px; 
-    background-color: rgba(30, 20, 46, 0.8);
-    border-radius: 20px; 
-    border: 1px solid var(--border-color);
     box-sizing: border-box;
     transition: width 0.3s ease;
+    
+    /* Glassmorphism Styles */
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 28px;
 }
 .textField {
     width: 100%;

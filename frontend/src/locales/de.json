@@ -1,6 +1,6 @@
 {
   "dreamJournal": "Traumtagebuch",
-  "recordYourDream": "Zeichnen Sie Ihren Traum auf",
+  "recordYourDream": "Aufnahme starten",
   "recording": "Aufnahme...",
   "recordDream": "Traum aufzeichnen",
   "stopRecording": "Aufnahme stoppen",
@@ -14,19 +14,34 @@
   "cancel": "Abbrechen",
   "dreamInterpretation": "Traumdeutung",
   "snapshotSummary": "Zusammenfassung",
-  "keySymbolBreakdown": "Schlüsselsymbol-Analyse",
-  "explanation": "Erklärung",
-  "practicalTakeaway": "Praktischer Rat",
-  "comparisonStatistic": "Vergleichsstatistik",
   "historyEmpty": "Ihr Traumverlauf ist leer. Zeichnen Sie Ihren ersten Traum auf!",
   "historyLoadError": "Fehler beim Laden des Traumverlaufs.",
   "unknownError": "Ein unbekannter Fehler ist aufgetreten.",
-  "processingError": "Verarbeitungsfehler: ",
-  "invalidResponse": "Ungültige Antwort vom Server erhalten.",
-  "micPermissionDenied": "Mikrofonberechtigung wurde verweigert. Bitte erteilen Sie die Berechtigung in Ihren Browsereinstellungen.",
-  "startRecordingError": "Fehler beim Starten der Aufnahme: ",
-  "whenDidYouDream": "Когда вам приснился этот сон?",
-  "today": "Сегодня",
-  "selectDate": "Выбрать дату",
-  "confirmDate": "Подтвердить дату"
+  "whenDidYouDream": "Wann hatten Sie diesen Traum?",
+  "today": "Heute",
+  "selectDate": "Datum auswählen",
+  "confirmDate": "Datum bestätigen",
+
+  "edit": "Bearbeiten",
+  "done": "Fertig",
+  "delete": "Löschen",
+  "selected": "Ausgewählt",
+  "confirmationTitle": "Bestätigung",
+  "confirmationText": "Sind Sie sicher, dass Sie die ausgewählten Träume löschen möchten?",
+  "no": "Nein",
+  "yesDelete": "Ja, löschen",
+
+  "profileDescription": "Geben Sie diese Daten ein, um die umfassendste Traumanalyse zu erhalten.",
+  "birthDateLabel": "Geburtsdatum (tt.mm.jjjj)",
+  "birthTimeLabel": "Geburtszeit (hh:mm)",
+  "birthPlaceLabel": "Geburtsort (Stadt, Land)",
+  "saveData": "Daten speichern",
+  "profileSaveSuccess": "Profildaten erfolgreich gespeichert!",
+  "profileSaveError": "Fehler beim Speichern der Profildaten.",
+
+  "lenses": {
+    "psychoanalytic": "Psychoanalyse",
+    "tarot": "Tarot",
+    "astrology": "Astrologie"
+  }
 }

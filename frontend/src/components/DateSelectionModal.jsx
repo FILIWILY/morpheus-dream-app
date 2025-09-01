@@ -10,12 +10,14 @@ const style = {
   transform: 'translate(-50%, -50%)',
   width: 'calc(100% - 32px)',
   maxWidth: 400,
-  bgcolor: '#1c1c1e',
-  border: '1px solid #333',
-  borderRadius: '14px',
-  boxShadow: 24,
   p: 3,
   color: 'white',
+  borderRadius: '14px',
+  background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1))',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+  boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.3)',
 };
 
 const DateSelectionModal = ({ open, onClose, onDateSelect }) => {
@@ -28,7 +30,6 @@ const DateSelectionModal = ({ open, onClose, onDateSelect }) => {
 
   const handleSelectFromCalendar = () => {
     if (selectedDate) {
-      // Форматируем дату в YYYY-MM-DD
       const formattedDate = selectedDate.toISOString().split('T')[0];
       onDateSelect(formattedDate);
     }
@@ -42,12 +43,7 @@ const DateSelectionModal = ({ open, onClose, onDateSelect }) => {
         </Typography>
         
         <Stack spacing={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSelectToday}
-            fullWidth
-          >
+          <Button variant="contained" onClick={handleSelectToday} fullWidth>
             {t('today')}
           </Button>
           
@@ -55,26 +51,36 @@ const DateSelectionModal = ({ open, onClose, onDateSelect }) => {
             label={t('selectDate')}
             value={selectedDate}
             onChange={(newValue) => setSelectedDate(newValue)}
-            sx={{
-              width: '100%',
-              '& .MuiInputBase-root': {
-                  color: 'white',
-              },
-              '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(255, 255, 255, 0.23)',
-              },
-              '& .MuiSvgIcon-root': {
-                  color: 'white',
+            slotProps={{
+              textField: {
+                sx: {
+                  '& .MuiInputLabel-root': { 
+                    color: 'rgba(255, 255, 255, 0.7)',
+                  },
+                  '& .M_uiInputBase-input': {
+                    color: 'white',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: 'white',
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'rgba(255, 255, 255, 0.7)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'white',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'var(--accent-primary)',
+                    },
+                  },
+                }
               }
             }}
           />
 
           {selectedDate && (
-            <Button
-              variant="contained"
-              onClick={handleSelectFromCalendar}
-              fullWidth
-            >
+            <Button variant="contained" onClick={handleSelectFromCalendar} fullWidth>
               {t('confirmDate')}
             </Button>
           )}

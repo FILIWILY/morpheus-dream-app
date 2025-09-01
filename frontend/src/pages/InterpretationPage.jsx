@@ -220,10 +220,6 @@ const InterpretationPage = () => {
 
     return (
         <div className={styles.pageWrapper}>
-            <header className={styles.header}>
-                {/* This header is now an empty spacer for Telegram's UI elements */}
-            </header>
-
             <main className={styles.content}>
                 <InterpretationSection 
                     title={interpretationData.title} 

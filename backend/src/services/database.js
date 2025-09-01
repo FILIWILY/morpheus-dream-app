@@ -131,20 +131,15 @@ async function createTestUserIfNeeded() {
     const existingUser = await pool.query('SELECT * FROM users WHERE telegram_id = $1', [testUserId]);
     
     if (existingUser.rows.length === 0) {
-      // Создаем тестового пользователя
+      // Создаем тестового пользователя с ПУСТЫМ профилем
       await pool.query(`
         INSERT INTO users (telegram_id, birth_date, birth_time, birth_place, birth_latitude, birth_longitude)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        VALUES ($1, NULL, NULL, NULL, NULL, NULL)
       `, [
-        testUserId,
-        '1990-01-01', // Дата рождения для тестов
-        '12:00:00',   // Время рождения
-        'Moscow, Russia', // Место рождения
-        55.7558,      // Широта Москвы
-        37.6173       // Долгота Москвы
+        testUserId
       ]);
       
-      console.log('👤 Test user created for development mode');
+      console.log('👤 Test user with an EMPTY profile created for development mode');
     } else {
       console.log('👤 Test user already exists');
     }
