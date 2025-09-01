@@ -28,7 +28,7 @@ To support multiple providers cleanly, the backend uses the following structure 
 
 ### Model in Use
 
--   **If `USE_OPENAI=true`**: `gpt-5-mini` (or as specified in `OPENAI_MODEL`).
+-   **If `USE_OPENAI=true`**: `gpt-5-mini-2025-08-07` (or as specified in `OPENAI_MODEL`).
 -   **If `USE_OPENAI=false`**: `deepseek-reasoner`. **Note:** As of August 2024, the DeepSeek API has shown significant performance issues, with response times often exceeding 3 minutes. For development and production, it is strongly recommended to use OpenAI.
 
 
