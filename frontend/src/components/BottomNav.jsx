@@ -37,7 +37,11 @@ const BottomNav = () => {
       value={value} 
       onChange={handleChange} 
       showLabels 
-      sx={{ background: 'transparent' }}
+      sx={{ 
+        background: 'transparent',
+        /* The height is managed by the .nav container in Layout.module.css */
+        height: '100%' 
+      }}
     >
       <BottomNavigationAction 
         label={t('recordDream')} 

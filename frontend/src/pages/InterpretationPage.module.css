@@ -5,16 +5,8 @@
 }
 
 .header {
-    display: flex;
-    align-items: center;
-    padding: 12px 12px; /* Добавляем горизонтальный отступ для выравнивания */
-    gap: 12px; /* Уменьшаем гэп */
-}
-
-.pageTitle {
-    font-size: 18px; /* Уменьшаем кегль */
-    font-weight: 600;
-    margin: 0;
+    /* This is now a dedicated spacer for Telegram UI elements and the device notch. */
+    height: 24px; /* Increased from 16px */
 }
 
 .content {

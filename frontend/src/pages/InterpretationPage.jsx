@@ -221,14 +221,15 @@ const InterpretationPage = () => {
     return (
         <div className={styles.pageWrapper}>
             <header className={styles.header}>
-                <IconButton edge="start" color="inherit" onClick={() => navigate(-1)}>
-                    <ArrowBackIcon />
-                </IconButton>
-                <h1 className={styles.pageTitle}>{interpretationData.title}</h1>
+                {/* This header is now an empty spacer for Telegram's UI elements */}
             </header>
 
             <main className={styles.content}>
-                <InterpretationSection title={t('snapshotSummary')} accentColor={activeAccentColor}>
+                <InterpretationSection 
+                    title={interpretationData.title} 
+                    accentColor={activeAccentColor}
+                    onBackClick={() => navigate(-1)}
+                >
                     <p>{interpretationData.snapshotSummary}</p>
                 </InterpretationSection>
                 

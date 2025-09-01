@@ -309,7 +309,8 @@
 .swiperSlide {
     background-position: center;
     background-size: cover;
-    width: 300px;
+    width: 80vw; /* Was 300px */
+    max-width: 300px; /* Added max-width for larger screens */
     display: flex;
 }
 

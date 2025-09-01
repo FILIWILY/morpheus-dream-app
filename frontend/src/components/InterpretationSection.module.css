@@ -2,13 +2,25 @@
     width: 100%;
 }
 
+.titleContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between button and title */
+}
+
+.backButton {
+    margin-left: -12px !important; /* Visually align the icon with the content edge */
+    color: var(--text-secondary) !important;
+}
+
 .title {
-    font-size: 14px;
+    font-size: 20px; /* Decreased from 22px */
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
+    /* text-transform: uppercase; Removed for a more natural title look */
+    /* letter-spacing: 0.8px; */
     color: var(--text-primary);
-    margin: 0 0 4px 0;
+    margin: 0 0 8px 0; /* Increased bottom margin slightly */
+    line-height: 1.3; /* Added for better readability */
 }
 
 .content {

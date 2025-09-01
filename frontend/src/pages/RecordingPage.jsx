@@ -108,12 +108,10 @@ const RecordingPage = () => {
         onClose={() => setIsModalOpen(false)}
         onDateSelect={handleDateSelect}
       />
-      <header className={styles.header}>
+      <main className={styles.content}>
         <h1 className={styles.title}>
           {isRecording ? t('recording') : t('recordYourDream')}
         </h1>
-      </header>
-      <main className={styles.content}>
         {error && <Alert severity="error" sx={{ position: 'absolute', top: '120px' }}>{error}</Alert>}
         
         {isLoading ? (
