@@ -38,6 +38,7 @@ const cardImageMap = {
 const TarotSpread = ({ spread, summary, accentColor, isRevealed, onReveal }) => {
     const [currentIndex, setCurrentIndex] = useState(-1); // -1: initial, 0-4: cards, 5: summary
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false); // Prevent navigation spam
     const [touchStartX, setTouchStartX] = useState(0);
     const [touchEndX, setTouchEndX] = useState(0);
 
@@ -64,15 +65,38 @@ const TarotSpread = ({ spread, summary, accentColor, isRevealed, onReveal }) => 
         }, 300); // Animation duration
     };
 
+    const navigateToSlide = (newIndex) => {
+        if (isNavigating || isAnimating) return;
+
+        const nextItem = sliderItems[newIndex];
+        if (nextItem && nextItem.cardName) {
+            setIsNavigating(true);
+            const imageUrl = cardImageMap[nextItem.cardName];
+            const img = new Image();
+            img.src = imageUrl;
+
+            const onImageReady = () => {
+                changeSlide(newIndex);
+                setIsNavigating(false);
+            };
+
+            img.onload = onImageReady;
+            img.onerror = onImageReady; // Also navigate on error to not block user
+        } else {
+            // For non-image slides like the summary, navigate directly
+            changeSlide(newIndex);
+        }
+    };
+
     const handleNext = () => {
         if (currentIndex < sliderItems.length - 1) {
-            changeSlide(currentIndex + 1);
+            navigateToSlide(currentIndex + 1);
         }
     };
 
     const handlePrev = () => {
         if (currentIndex > 0) {
-            changeSlide(currentIndex - 1);
+            navigateToSlide(currentIndex - 1);
         }
     };
 
