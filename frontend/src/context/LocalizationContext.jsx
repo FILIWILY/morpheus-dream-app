@@ -12,6 +12,7 @@ export const LocalizationProvider = ({ children }) => {
       locale,
       setLocale: (newLocale) => {
         i18n.locale = newLocale;
+        localStorage.setItem('userLanguage', newLocale); // Сохраняем выбор
         setLocale(newLocale);
       },
     }),

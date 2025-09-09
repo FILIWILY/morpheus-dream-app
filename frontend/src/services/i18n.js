@@ -18,10 +18,30 @@ const i18n = new I18n({
 
 // ✅ РАСШИРЯЕМ СПИСОК ПОДДЕРЖИВАЕМЫХ ЯЗЫКОВ
 const supportedLocales = ['en', 'ru', 'de', 'es', 'fr'];
+
+// 1. Проверяем сохраненный язык в localStorage
+const savedLanguage = localStorage.getItem('userLanguage');
+
+// 2. Определяем язык Telegram
+const telegramLanguage = window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
+
+// 3. Определяем язык браузера
 const browserLanguage = navigator.language.split(/[-_]/)[0];
 
-// Устанавливаем язык по умолчанию на основе языка браузера, если он поддерживается
-i18n.locale = supportedLocales.includes(browserLanguage) ? browserLanguage : 'en';
+// Приоритетный выбор языка
+let language = 'en'; // Язык по умолчанию
+
+if (savedLanguage && supportedLocales.includes(savedLanguage)) {
+  language = savedLanguage;
+} else if (telegramLanguage && supportedLocales.includes(telegramLanguage)) {
+  language = telegramLanguage;
+} else if (supportedLocales.includes(browserLanguage)) {
+  language = browserLanguage;
+}
+
+// Устанавливаем язык
+i18n.locale = language;
+
 
 i18n.enableFallback = true;
 
