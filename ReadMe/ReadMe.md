@@ -45,7 +45,11 @@ npm run dev:reset
     - `SettingsPage`: Application settings.
     - `LanguagePage`: Language selection.
 - **Audio Recording**: Utilizes a custom `useAudioRecorder` hook.
-- **Localization**: Managed via `i18n-js` and `LocalizationContext` with language files in `frontend/src/locales/`.
+- **Localization**: Managed via `i18n-js` and `LocalizationContext`. The language is determined based on the following priority:
+    1.  User's saved choice from a previous session (stored in `localStorage`).
+    2.  User's language setting from their Telegram profile.
+    3.  Browser's default language.
+    Language files are located in `frontend/src/locales/`.
 
 ### Backend
 - **Framework**: Node.js with Express

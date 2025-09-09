@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styles from './TarotSpread.module.css';
 import { Box, Typography, Button, IconButton } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 // Import card images with correct paths and filenames
-import CardFool from '../assets/tarot/major_arcana_fool.png';
-import CardMagician from '../assets/tarot/major_arcana_magician.png';
-import CardPriestess from '../assets/tarot/major_arcana_priestess.png';
-import CardEmpress from '../assets/tarot/major_arcana_empress.png';
-import CardEmperor from '../assets/tarot/major_arcana_emperor.png';
-import CardHierophant from '../assets/tarot/major_arcana_hierophant.png';
-import CardLovers from '../assets/tarot/major_arcana_lovers.png';
-import CardChariot from '../assets/tarot/major_arcana_chariot.png';
-import CardStrength from '../assets/tarot/major_arcana_strength.png';
-import CardHermit from '../assets/tarot/major_arcana_hermit.png';
-import CardFortune from '../assets/tarot/major_arcana_fortune.png';
-import CardJustice from '../assets/tarot/major_arcana_justice.png';
-import CardHanged from '../assets/tarot/major_arcana_hanged.png';
-import CardDeath from '../assets/tarot/major_arcana_death.png';
-import CardTemperance from '../assets/tarot/major_arcana_temperance.png';
-import CardDevil from '../assets/tarot/major_arcana_devil.png';
-import CardTower from '../assets/tarot/major_arcana_tower.png';
-import CardStar from '../assets/tarot/major_arcana_star.png';
-import CardMoon from '../assets/tarot/major_arcana_moon.png';
-import CardSun from '../assets/tarot/major_arcana_sun.png';
-import CardJudgement from '../assets/tarot/major_arcana_judgement.png';
-import CardWorld from '../assets/tarot/major_arcana_world.png';
+import CardFool from '../assets/tarot/major_arcana_fool.webp';
+import CardMagician from '../assets/tarot/major_arcana_magician.webp';
+import CardPriestess from '../assets/tarot/major_arcana_priestess.webp';
+import CardEmpress from '../assets/tarot/major_arcana_empress.webp';
+import CardEmperor from '../assets/tarot/major_arcana_emperor.webp';
+import CardHierophant from '../assets/tarot/major_arcana_hierophant.webp';
+import CardLovers from '../assets/tarot/major_arcana_lovers.webp';
+import CardChariot from '../assets/tarot/major_arcana_chariot.webp';
+import CardStrength from '../assets/tarot/major_arcana_strength.webp';
+import CardHermit from '../assets/tarot/major_arcana_hermit.webp';
+import CardFortune from '../assets/tarot/major_arcana_fortune.webp';
+import CardJustice from '../assets/tarot/major_arcana_justice.webp';
+import CardHanged from '../assets/tarot/major_arcana_hanged.webp';
+import CardDeath from '../assets/tarot/major_arcana_death.webp';
+import CardTemperance from '../assets/tarot/major_arcana_temperance.webp';
+import CardDevil from '../assets/tarot/major_arcana_devil.webp';
+import CardTower from '../assets/tarot/major_arcana_tower.webp';
+import CardStar from '../assets/tarot/major_arcana_star.webp';
+import CardMoon from '../assets/tarot/major_arcana_moon.webp';
+import CardSun from '../assets/tarot/major_arcana_sun.webp';
+import CardJudgement from '../assets/tarot/major_arcana_judgement.webp';
+import CardWorld from '../assets/tarot/major_arcana_world.webp';
 
 const cardImageMap = {
     // Russian Names
@@ -42,8 +42,11 @@ const TarotSpread = ({ spread, summary, accentColor, isRevealed, onReveal }) => 
     const [touchEndX, setTouchEndX] = useState(0);
 
     // Combine spread and summary into a single array for easier indexing
-    const sliderItems = [...spread, { position: 'Общий Смысл', cardName: null, interpretation: summary }];
-
+    const sliderItems = useMemo(() => [
+        ...spread, 
+        { position: 'Общий Смысл', cardName: null, interpretation: summary }
+    ], [spread, summary]);
+    
     useEffect(() => {
         if (isRevealed && currentIndex === -1) {
             setCurrentIndex(0);
@@ -155,7 +158,11 @@ const TarotSpread = ({ spread, summary, accentColor, isRevealed, onReveal }) => 
 
                 {currentItem.cardName && (
                     <Box className={styles.card}>
-                        <img src={cardImageMap[currentItem.cardName]} alt={currentItem.cardName} className={styles.cardImage} />
+                        <img 
+                            src={cardImageMap[currentItem.cardName]} 
+                            alt={currentItem.cardName} 
+                            className={styles.cardImage}
+                        />
                     </Box>
                 )}
                 

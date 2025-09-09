@@ -11,6 +11,7 @@ import RecordingOrb from '../components/RecordingOrb';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { LocalizationContext } from '../context/LocalizationContext';
 import DateSelectionModal from '../components/DateSelectionModal';
+import { preloadTarotImages } from '../utils/imagePreloader';
 
 const RecordingPage = () => {
   const navigate = useNavigate();
@@ -44,6 +45,7 @@ const RecordingPage = () => {
       formData.append('audiofile', audioBlob, `dream-recording-${Date.now()}.webm`);
       try {
         const response = await api.post('/processDreamAudio', formData);
+        preloadTarotImages(); // Start preloading images
         navigate(`/interpretation/${response.data.id}`);
       } catch (err) {
         setError(err.response?.data?.error || err.message || t('unknownError'));
@@ -107,6 +109,7 @@ const RecordingPage = () => {
         lang: locale,
         date: date,
       });
+      preloadTarotImages(); // Start preloading images
       navigate(`/interpretation/${response.data.id}`);
     } catch (err) {
       setError(err.response?.data?.error || err.message || t('unknownError'));
