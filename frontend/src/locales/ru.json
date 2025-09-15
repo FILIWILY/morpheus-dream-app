@@ -35,9 +35,13 @@
   "birthDateLabel": "Дата рождения (дд.мм.гггг)",
   "birthTimeLabel": "Время рождения (чч:мм)",
   "birthPlaceLabel": "Место рождения (Город, Страна)",
-  "saveData": "Сохранить данные",
+  "saveData": "Сохранить",
   "profileSaveSuccess": "Данные профиля успешно сохранены!",
   "profileSaveError": "Не удалось сохранить данные профиля.",
+  "profileSaveErrorRequired": "Пожалуйста, заполните все поля.",
+  "birthPlaceValidationError": "Пожалуйста, выберите место из списка.",
+  "birthPlaceMigrationError": "Пожалуйста, подтвердите город, выбрав его из списка.",
+  "birthPlaceHint": "Выберите место из списка",
   
   "lenses": {
     "psychoanalytic": "Психоанализ",

@@ -40,6 +40,9 @@ const SettingsDrawer = ({ open, onClose }) => {
     const [birthDate, setBirthDate] = useState('');
     const [birthTime, setBirthTime] = useState('');
     const [placeId, setPlaceId] = useState(null);
+    const [initialProfile, setInitialProfile] = useState(null);
+    const suggestionsRef = React.useRef(null);
+    const blurTimeoutRef = React.useRef(null);
     
     const {
         ready,
@@ -60,13 +63,44 @@ const SettingsDrawer = ({ open, onClose }) => {
 
     useEffect(() => {
         if (profile) {
-            setBirthDate(profile.birthDate || '');
-            setBirthTime(profile.birthTime || '');
-            setBirthPlace(profile.birthPlace || '', false);
-        }
-    }, [profile, setBirthPlace]);
+            const birthPlaceText = (typeof profile.birthPlace === 'object' && profile.birthPlace !== null) ? profile.birthPlace.description : profile.birthPlace || '';
+            const initialPlaceId = (typeof profile.birthPlace === 'object' && profile.birthPlace !== null) ? profile.birthPlace.placeId : null;
 
-    const isSaveDisabled = !birthDate || !birthTime || !birthPlace;
+            const initialData = {
+                birthDate: profile.birthDate || '',
+                birthTime: profile.birthTime || '',
+                birthPlace: birthPlaceText,
+                placeId: initialPlaceId,
+            };
+            setBirthDate(initialData.birthDate);
+            setBirthTime(initialData.birthTime);
+            setBirthPlace(initialData.birthPlace, false);
+            setPlaceId(initialData.placeId);
+            setInitialProfile(initialData);
+        }
+    }, [profile, setBirthPlace, t]);
+
+    // Close suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+                clearSuggestions();
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [suggestionsRef, clearSuggestions]);
+
+    const isRequiredFieldsFilled = birthDate && birthTime && birthPlace && placeId;
+
+    const hasChanges = initialProfile && (
+        initialProfile.birthDate !== birthDate ||
+        initialProfile.birthTime !== birthTime ||
+        initialProfile.birthPlace !== birthPlace ||
+        initialProfile.placeId !== placeId
+    );
 
     const handlePlaceInputChange = (e) => {
         setBirthPlace(e.target.value);
@@ -74,14 +108,17 @@ const SettingsDrawer = ({ open, onClose }) => {
     };
 
     const handleSelectSuggestion = ({ description, place_id }) => {
+        if (blurTimeoutRef.current) {
+            clearTimeout(blurTimeoutRef.current);
+        }
         setBirthPlace(description, false);
         setPlaceId(place_id);
         clearSuggestions();
     };
 
     const handleSave = async () => {
-        if (!birthDate || !birthTime || !birthPlace) {
-            setError(t('profileSaveErrorRequired')); // Assuming you'll add this to locales
+        if (!isRequiredFieldsFilled) {
+            setError(t('profileSaveErrorRequired'));
             return;
         }
         setIsSaving(true);
@@ -91,10 +128,16 @@ const SettingsDrawer = ({ open, onClose }) => {
             const profileData = {
                 birthDate,
                 birthTime,
-                birthPlace: placeId ? { description: birthPlace, placeId } : birthPlace,
+                birthPlace: { description: birthPlace, placeId },
             };
             await updateProfile(profileData);
             setSuccess(t('profileSaveSuccess'));
+            setInitialProfile({
+                birthDate,
+                birthTime,
+                birthPlace,
+                placeId,
+            });
         } catch (err) {
             setError(t('profileSaveError'));
         } finally {
@@ -122,11 +165,15 @@ const SettingsDrawer = ({ open, onClose }) => {
                     width: 300, 
                     display: 'flex', 
                     flexDirection: 'column', 
-                    height: '100%', 
-                    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 60px)', 
-                    boxSizing: 'border-box' 
+                    height: '100%',
+                    boxSizing: 'border-box'
                 }}>
-                    <AppBar position="static" sx={{ background: 'transparent', boxShadow: 'none' }}>
+                    <AppBar position="relative" sx={{ // Changed to relative
+                        background: 'transparent', 
+                        boxShadow: 'none', 
+                        flexShrink: 0,
+                        marginTop: '60px', // Added margin
+                    }}>
                         <Toolbar>
                             <IconButton edge="start" color="inherit" onClick={onClose}>
                                 <ArrowBackIcon />
@@ -134,38 +181,34 @@ const SettingsDrawer = ({ open, onClose }) => {
                             <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
                               {t('settings')}
                             </Typography>
+                            {hasChanges && isRequiredFieldsFilled && (
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                    sx={{
+                                        textTransform: 'none',
+                                        fontSize: '1rem',
+                                    }}
+                                >
+                                    {isSaving ? <CircularProgress size={24} color="inherit" /> : t('save')}
+                                </Button>
+                            )}
                         </Toolbar>
                     </AppBar>
 
-                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
+                    <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2 }}>
                         {isProfileLoading ? (
                             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                                 <CircularProgress />
                             </Box>
                         ) : (
                             <>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, flexGrow: 1, overflowY: 'auto', position: 'relative' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, color: 'var(--text-primary)' }}>
-                                        {t('profileDescription')}
-                                    </Typography>
-                                    <TextField
-                                        label={t('birthDateLabel')}
-                                        variant="outlined"
-                                        fullWidth
-                                        value={birthDate}
-                                        onChange={(e) => setBirthDate(formatDate(e.target.value))}
-                                        inputProps={{ maxLength: 10, placeholder: "23.05.1990" }}
-                                        sx={textFieldStyles}
-                                    />
-                                    <TextField
-                                        label={t('birthTimeLabel')}
-                                        variant="outlined"
-                                        fullWidth
-                                        value={birthTime}
-                                        onChange={(e) => setBirthTime(formatTime(e.target.value))}
-                                        inputProps={{ maxLength: 5, placeholder: "14:30" }}
-                                        sx={textFieldStyles}
-                                    />
+                                <Typography variant="body2" sx={{ mb: 2, color: 'var(--text-primary)' }}>
+                                    {t('profileDescription')}
+                                </Typography>
+
+                                <Box sx={{ position: 'relative', mb: 2 }}>
                                     <TextField
                                         label={t('birthPlaceLabel')}
                                         variant="outlined"
@@ -177,7 +220,10 @@ const SettingsDrawer = ({ open, onClose }) => {
                                         sx={textFieldStyles}
                                     />
                                     {status === 'OK' && (
-                                        <List className={styles.suggestionsList}>
+                                        <List ref={suggestionsRef} className={styles.suggestionsList}>
+                                            <Typography variant="caption" sx={{ color: '#ff4d4d', p: '8px 16px', display: 'block' }}>
+                                                {t('birthPlaceHint')}
+                                            </Typography>
                                             {suggestionsData.map((suggestion) => (
                                                 <ListItem
                                                     button
@@ -190,28 +236,37 @@ const SettingsDrawer = ({ open, onClose }) => {
                                             ))}
                                         </List>
                                     )}
-                                    
-                                    {error && <Alert severity="error">{error}</Alert>}
-                                    {success && <Alert severity="success">{success}</Alert>}
-
-                                    <Button 
-                                        variant="contained" 
-                                        onClick={handleSave} 
-                                        size="large" 
-                                        disabled={isSaving || isSaveDisabled}
-                                        sx={{ mt: 'auto' }}
-                                    >
-                                        {isSaving ? <CircularProgress size={24} /> : t('saveData')}
-                                    </Button>
                                 </Box>
 
+                                <TextField
+                                    label={t('birthDateLabel')}
+                                    variant="outlined"
+                                    fullWidth
+                                    value={birthDate}
+                                    onChange={(e) => setBirthDate(formatDate(e.target.value))}
+                                    inputProps={{ maxLength: 10, placeholder: "23.05.1990" }}
+                                    sx={{...textFieldStyles, mb: 2}}
+                                />
+                                <TextField
+                                    label={t('birthTimeLabel')}
+                                    variant="outlined"
+                                    fullWidth
+                                    value={birthTime}
+                                    onChange={(e) => setBirthTime(formatTime(e.target.value))}
+                                    inputProps={{ maxLength: 5, placeholder: "14:30" }}
+                                    sx={textFieldStyles}
+                                />
+                                
+                                {error && <Alert severity="error" sx={{mt: 2}}>{error}</Alert>}
+                                {success && <Alert severity="success" sx={{mt: 2}}>{success}</Alert>}
+                            
                                 <List sx={{mt: 2}}>
                                     <ListItem disablePadding>
                                         <ListItemButton onClick={() => setIsLangModalOpen(true)}>
                                         <ListItemIcon>
                                             <TranslateIcon sx={{ color: 'var(--text-secondary)' }} />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('language')} />
+                                        <ListItemText primary={t('language')} sx={{ color: 'var(--text-primary)' }}/>
                                         </ListItemButton>
                                     </ListItem>
                                 </List>

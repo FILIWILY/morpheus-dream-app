@@ -35,9 +35,13 @@
   "birthDateLabel": "Geburtsdatum (tt.mm.jjjj)",
   "birthTimeLabel": "Geburtszeit (hh:mm)",
   "birthPlaceLabel": "Geburtsort (Stadt, Land)",
-  "saveData": "Daten speichern",
+  "saveData": "Speichern",
   "profileSaveSuccess": "Profildaten erfolgreich gespeichert!",
   "profileSaveError": "Fehler beim Speichern der Profildaten.",
+  "profileSaveErrorRequired": "Bitte füllen Sie alle Felder aus.",
+  "birthPlaceValidationError": "Bitte wählen Sie einen Ort aus der Liste aus.",
+  "birthPlaceMigrationError": "Bitte bestätigen Sie Ihre Stadt, indem Sie sie aus der Liste auswählen.",
+  "birthPlaceHint": "Wählen Sie einen Ort aus der Liste",
 
   "lenses": {
     "psychoanalytic": "Psychoanalyse",

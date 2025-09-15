@@ -31,13 +31,17 @@
   "no": "No",
   "yesDelete": "Sí, eliminar",
 
-  "profileDescription": "Ingrese estos datos para obtener el análisis de sueños más completo.",
-  "birthDateLabel": "Fecha de Nacimiento (dd.mm.aaaa)",
-  "birthTimeLabel": "Hora de Nacimiento (hh:mm)",
+  "profileDescription": "Introduce estos datos para acceder al análisis más completo de tus sueños.",
+  "birthDateLabel": "Fecha de nacimiento (dd.mm.aaaa)",
+  "birthTimeLabel": "Hora de nacimiento (hh:mm)",
   "birthPlaceLabel": "Lugar de Nacimiento (Ciudad, País)",
-  "saveData": "Guardar datos",
+  "saveData": "Guardar",
   "profileSaveSuccess": "¡Datos del perfil guardados con éxito!",
   "profileSaveError": "Error al guardar los datos del perfil.",
+  "profileSaveErrorRequired": "Por favor, rellene todos los campos.",
+  "birthPlaceValidationError": "Por favor, seleccione una ubicación de la lista.",
+  "birthPlaceMigrationError": "Por favor, confirme su ciudad seleccionándola de la lista.",
+  "birthPlaceHint": "Seleccione una ubicación de la lista",
 
   "lenses": {
     "psychoanalytic": "Psicoanálisis",

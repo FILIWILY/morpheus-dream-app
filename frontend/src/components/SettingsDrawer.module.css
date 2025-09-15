@@ -1,16 +1,19 @@
 .suggestionsList {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     max-height: 200px;
     overflow-y: auto;
+    margin-top: 2px;
     
-    /* Glassmorphism styles */
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+    /* Opaque dark background to overlay content */
+    background-color: #1c1c1e;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     padding: 0;
-    /* The parent flex container's `gap` property will handle spacing. */
 }
 
 .suggestionItem:hover {

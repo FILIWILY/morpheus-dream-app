@@ -31,13 +31,17 @@
   "no": "Non",
   "yesDelete": "Oui, supprimer",
 
-  "profileDescription": "Entrez ces données pour obtenir l'analyse de rêve la plus complète.",
+  "profileDescription": "Entrez ces données pour accéder à l'analyse la plus complète de vos rêves.",
   "birthDateLabel": "Date de naissance (jj.mm.aaaa)",
   "birthTimeLabel": "Heure de naissance (hh:mm)",
   "birthPlaceLabel": "Lieu de naissance (Ville, Pays)",
-  "saveData": "Enregistrer les données",
+  "saveData": "Enregistrer",
   "profileSaveSuccess": "Données du profil enregistrées avec succès !",
   "profileSaveError": "Échec de l'enregistrement des données du profil.",
+  "profileSaveErrorRequired": "Veuillez remplir tous les champs.",
+  "birthPlaceValidationError": "Veuillez sélectionner un emplacement dans la liste.",
+  "birthPlaceMigrationError": "Veuillez confirmer votre ville en la sélectionnant dans la liste.",
+  "birthPlaceHint": "Sélectionnez un emplacement dans la liste",
 
   "lenses": {
     "psychoanalytic": "Psychanalyse",

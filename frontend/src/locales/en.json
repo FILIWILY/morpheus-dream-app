@@ -32,12 +32,16 @@
   "yesDelete": "Yes, delete",
 
   "profileDescription": "Enter this data to get the most complete dream analysis.",
-  "birthDateLabel": "Date of Birth (dd.mm.yyyy)",
-  "birthTimeLabel": "Time of Birth (hh:mm)",
+  "birthDateLabel": "Date of birth (dd.mm.yyyy)",
+  "birthTimeLabel": "Time of birth (hh:mm)",
   "birthPlaceLabel": "Place of Birth (City, Country)",
-  "saveData": "Save Data",
+  "saveData": "Save",
   "profileSaveSuccess": "Profile data saved successfully!",
   "profileSaveError": "Failed to save profile data.",
+  "profileSaveErrorRequired": "Please fill in all fields.",
+  "birthPlaceValidationError": "Please select a location from the list.",
+  "birthPlaceMigrationError": "Please confirm your city by selecting it from the list.",
+  "birthPlaceHint": "Select a location from the list",
 
   "lenses": {
     "psychoanalytic": "Psychoanalysis",
