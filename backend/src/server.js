@@ -196,7 +196,11 @@ app.put('/profile', async (req, res) => {
 app.get('/dreams', async (req, res) => {
     try {
         const dreams = await db.getDreams(req.userId);
-        res.status(200).json(dreams.slice().reverse()); // Maintain original reverse logic for now
+        
+        // Сортируем сны по дате, от новых к старым
+        const sortedDreams = dreams.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        res.status(200).json(sortedDreams);
     } catch (error) {
         console.error('Error fetching dreams:', error);
         res.status(500).json({ error: 'Failed to fetch dreams' });

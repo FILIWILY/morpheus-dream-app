@@ -166,13 +166,13 @@ const SettingsDrawer = ({ open, onClose }) => {
                     display: 'flex', 
                     flexDirection: 'column', 
                     height: '100%',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    paddingTop: '60px'
                 }}>
                     <AppBar position="relative" sx={{ // Changed to relative
                         background: 'transparent', 
                         boxShadow: 'none', 
                         flexShrink: 0,
-                        marginTop: '60px', // Added margin
                     }}>
                         <Toolbar>
                             <IconButton edge="start" color="inherit" onClick={onClose}>
