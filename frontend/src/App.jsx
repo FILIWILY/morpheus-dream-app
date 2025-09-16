@@ -10,7 +10,7 @@ import HistoryPage from './pages/HistoryPage';
 import InterpretationPage from './pages/InterpretationPage';
 import ProfilePage from './pages/ProfilePage';
 import PrivateRoute from './components/PrivateRoute';
-import { AppLocalizationProvider, LocalizationContext } from './context/LocalizationContext';
+import { LocalizationProvider, LocalizationContext } from './context/LocalizationContext';
 
 export const AppReadyContext = React.createContext(false);
 
@@ -33,7 +33,7 @@ function App() {
   
   return (
     <AppReadyContext.Provider value={isAppReady}>
-      <AppLocalizationProvider>
+      <LocalizationProvider>
         <LocalizationContext.Consumer>
           {({ locale }) => (
             <MuiLocalizationProvider 
@@ -62,7 +62,7 @@ function App() {
             </MuiLocalizationProvider>
           )}
         </LocalizationContext.Consumer>
-      </AppLocalizationProvider>
+      </LocalizationProvider>
     </AppReadyContext.Provider>
   );
 }
