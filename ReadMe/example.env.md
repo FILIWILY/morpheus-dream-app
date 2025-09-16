@@ -46,6 +46,13 @@ GOOGLE_GEOCODING_API_KEY=AIzaSyBt-NVP7W3i8t2UtLjV_qCKs7nnKwLzFhs
 # --- Telegram Bot Settings ---
 TELEGRAM_BOT_TOKEN=your_secret_bot_token_here
 
+# Base URL for the Telegram Web App (used by the deployment script for cache busting)
+BASE_WEB_APP_URL=https://dream-interpretation.ru/
+
+# Full Web App URL with a version parameter for cache busting.
+# This variable is automatically generated and updated by the deploy.sh script.
+TELEGRAM_WEB_APP_URL=https://dream-interpretation.ru/?v=20250101000000
+
 # --- Development/Production Settings ---
 # Set to 'true' ONLY for local testing outside of the Telegram client.
 # MUST be 'false' or unset in production.

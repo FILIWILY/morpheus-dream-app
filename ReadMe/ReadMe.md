@@ -5,99 +5,29 @@ This application is a **Telegram Mini App** for dream interpretation that utiliz
 
 ## Getting Started
 
-### Prerequisites
-- Node.js (with npm) installed.
+A comprehensive guide for local development, production deployment, and environment setup can be found in the **[Development & Production Guide](ReadMe/Deployment.md)**.
 
-### Installation
-1. Clone the repository.
-2. Navigate to the project root directory.
-3. Install dependencies for both frontend and backend:
-   ```bash
-   npm install
-   npm install --prefix frontend
-   npm install --prefix backend
-   ```
-
-### Running the Application
-To run the application in development mode (both frontend and backend simultaneously):
-```bash
-npm run dev
-```
-
-To reset the database to its initial empty state and run the application (this will require re-registration):
-```bash
-npm run dev:reset
-```
+### Quick Start (Local Development)
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+2.  **Configure Environment**: Copy `.env.example` to `.env` and fill in the required variables.
+3.  **Run**: For the recommended hybrid development mode with hot-reloading, see the detailed guide. A quick start with a mock database is:
+    ```bash
+    npm run dev
+    ```
 
 ## Architecture
 
-### Frontend
-- **Framework**: React with Vite
-- **Routing**: `react-router-dom` with `PrivateRoute` for authenticated routes.
-- **UI Components**: Uses Material-UI (`@mui/material`, `@mui/icons-material`, `@mui/x-date-pickers`) and custom components.
-- **State Management**: Context API (`LocalizationContext`, `ProfileContext`) for global state.
-- **API Interaction**: Communicates with the backend via `frontend/src/services/api.js`.
-- **Key Pages**:
-    - `WelcomePage`: Initial welcome screen, redirects to ProfilePage for new users.
-    - `ProfilePage`: User profile management (e.g., birth date, birth place for Astrology interpretations). This is where new users register their profile.
-    - `RecordingPage`: Handles dream input (text or audio) and sends it for interpretation.
-    - `HistoryPage`: Shows past dream interpretations.
-    - `SettingsPage`: Application settings.
-    - `LanguagePage`: Language selection.
-- **Audio Recording**: Utilizes a custom `useAudioRecorder` hook.
-- **Localization**: Managed via `i18n-js` and `LocalizationContext`. The language is determined based on the following priority:
-    1.  User's saved choice from a previous session (stored in `localStorage`).
-    2.  User's language setting from their Telegram profile.
-    3.  Browser's default language.
-    Language files are located in `frontend/src/locales/`.
+The application is built with a React frontend and a Node.js/Express backend, containerized with Docker for production.
 
-### Backend
-- **Framework**: Node.js with Express
-- **API Provides endpoints for dream interpretation.
-- **Data Storage**: Uses PostgreSQL for production and staging, with a fallback to a `db.json` file for local mock development. See `ReadMe/DB.md` for more details.
-- **Authentication**: Implements secure, cryptographically-verified authentication for users via the Telegram Web App protocol with HMAC-SHA256 validation and TTL checks. A bypass is available for local development. See `ReadMe/API_backend.md` and `ReadMe/Telegram.md` for details.
-- **External Integrations**: Connects to AI providers (OpenAI, DeepSeek) to generate dream interpretations.
-- **Environment Variables**: Uses `dotenv` for configuration. See `.env.example` for the full list of required variables.
+-   **Frontend**: React with Vite, Material-UI, and React Router.
+-   **Backend**: Node.js with Express, connecting to a PostgreSQL database.
+-   **Authentication**: Secure, cryptographically-verified authentication via the Telegram Web App protocol.
 
-## Deployment
-
-The recommended method for running this application in production is using Docker. The project includes a `Dockerfile` for the backend and a `docker-compose.yml` file to orchestrate all services.
-
-For detailed instructions on how to build and run the application with Docker, please see the **[Deployment Guide](ReadMe/Deployment.md)**.
-
-## Environment Variables
-
-Refer to `.env.example` in the project root for the environment variables required for the Docker setup. The old `backend/.env` is now only used for running the backend service natively without Docker.
-
-## Запуск проекта в режиме Production (с помощью Docker)
-
-Для запуска приложения в режиме, приближенном к продакшену, используется Docker и Docker Compose. Это позволяет упаковать приложение и все его зависимости (базу данных, Node.js, Nginx) в изолированные контейнеры.
-
-### Требования
-- Установленный Docker Desktop.
-
-### Настройка
-1.  **Создайте файл `.env`** в корневой директории проекта. Скопируйте в него содержимое из `.env.example` и заполните все необходимые ключи API (`OPENAI_API_KEY`, `GOOGLE_GEOCODING_API_KEY` и т.д.) и токен Telegram-бота.
-2.  **Убедитесь, что Docker Desktop запущен.**
-
-### Первый запуск
-Откройте терминал в корневой папке проекта и выполните команду:
-```bash
-docker-compose up --build
-```
--   `--build`: Эта опция заставит Docker собрать образы для фронтенда и бэкенда заново. Это необходимо при первом запуске или после внесения изменений в код или `Dockerfile`.
-
-### Последующие запуски
-Для всех последующих запусков (например, после перезагрузки компьютера) достаточно выполнить:
-```bash
-docker-compose up
-```
-
-### Остановка
-Чтобы остановить все контейнеры, нажмите `Ctrl + C` в терминале, где запущен `docker-compose`.
-
----
-
-## Запуск проекта в режиме Dev (локально)
-
-Этот режим предназначен для активной разработки и отладки.
+For more detailed information on the architecture, API endpoints, and specific implementations, please refer to the documentation in the `ReadMe/` directory:
+-   **[API Backend Documentation](ReadMe/API_backend.md)**
+-   **[API Frontend Documentation](ReadMe/API_frontend.md)**
+-   **[Telegram Mini App Implementation Details](ReadMe/Telegram.md)**
+-   **[Deployment and Nginx Architecture](ReadMe/nginx.md)**
