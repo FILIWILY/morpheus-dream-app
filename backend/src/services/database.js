@@ -258,8 +258,22 @@ export async function getProfile(telegramId) {
                 natalChart: profile.natalChart,
                 onboardingCompleted: profile.onboarding_completed
             };
+        } else {
+            // User not found, create a new profile with default values
+            await pool.query(
+                'INSERT INTO users (telegram_id, onboarding_completed) VALUES ($1, $2)',
+                [telegramId, false]
+            );
+            return {
+                birthDate: null,
+                birthTime: null,
+                birthPlace: null,
+                birthLatitude: null,
+                birthLongitude: null,
+                natalChart: null,
+                onboardingCompleted: false
+            };
         }
-        return null;
     } catch (error) {
         console.error('Error fetching profile:', error);
         throw error;
