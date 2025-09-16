@@ -24,12 +24,60 @@ import { getDreamInterpretation } from './services/ai_provider.js';
 import { getDreamAtmosphere, calculateTopTransits, getCosmicPassport } from './services/astrology.js';
 import { calculateNatalChart } from './services/natalChart.js';
 import { verifyTelegramAuth } from './middleware/auth.js';
+import TelegramBot from 'node-telegram-bot-api';
+
+// --- Telegram Bot Setup ---
+const setupTelegramBot = () => {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const webAppUrl = process.env.TELEGRAM_WEB_APP_URL;
+
+  if (!token) {
+    console.error('❌ TELEGRAM_BOT_TOKEN is not set. Bot setup is skipped.');
+    return;
+  }
+
+  if (!webAppUrl) {
+    console.error('❌ TELEGRAM_WEB_APP_URL is not set. Bot menu button will not be updated.');
+    return;
+  }
+
+  const bot = new TelegramBot(token);
+
+  bot.setMyCommands([
+    {
+      command: '/start',
+      description: 'Запустить приложение'
+    }
+  ]).then(() => {
+    console.log('🤖 Telegram commands updated.');
+  }).catch(console.error);
+
+  bot.setChatMenuButton({
+    menu_button: {
+      type: 'web_app',
+      text: 'Открыть Morpheus',
+      web_app: {
+        url: webAppUrl
+      }
+    }
+  }).then(() => {
+    console.log(`✅ Telegram menu button updated to point to: ${webAppUrl}`);
+  }).catch((error) => {
+    console.error('Failed to set chat menu button:', error.response ? error.response.body : error);
+  });
+
+  console.log('🤖 Telegram Bot setup complete.');
+};
+
 
 // Динамический импорт database.js после загрузки переменных окружения
 const db = await import('./services/database.js');
 
 // Инициализируем базу данных
 await db.initializeDatabase();
+
+// Настраиваем Telegram бота
+setupTelegramBot();
 
 const app = express();
 const PORT = process.env.PORT || 9000;
