@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
     birth_place VARCHAR(255),
     birth_latitude REAL,
     birth_longitude REAL,
-    "natalChart" JSONB
+    "natalChart" JSONB,
+    onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Create the dreams table to store dream interpretations.

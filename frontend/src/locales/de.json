@@ -10,6 +10,9 @@
   "history": "Verlauf",
   "settings": "Einstellungen",
   "language": "Sprache",
+  "dreamHistory": "Traumverlauf",
+  "noDreamsYet": "Noch keine Träume",
+  "deleteSelected": "Ausgewählte löschen",
   "save": "Speichern",
   "cancel": "Abbrechen",
   "dreamInterpretation": "Traumdeutung",
@@ -37,15 +40,29 @@
   "birthPlaceLabel": "Geburtsort (Stadt, Land)",
   "saveData": "Speichern",
   "profileSaveSuccess": "Profildaten erfolgreich gespeichert!",
-  "profileSaveError": "Fehler beim Speichern der Profildaten.",
+  "profileSaveError": "Daten konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
   "profileSaveErrorRequired": "Bitte füllen Sie alle Felder aus.",
   "birthPlaceValidationError": "Bitte wählen Sie einen Ort aus der Liste aus.",
   "birthPlaceMigrationError": "Bitte bestätigen Sie Ihre Stadt, indem Sie sie aus der Liste auswählen.",
-  "birthPlaceHint": "Wählen Sie einen Ort aus der Liste",
+  "birthPlaceHint": "Wählen Sie eine Stadt aus der Liste",
+  "saveAndContinue": "Speichern und weiter",
+  "skip": "Überspringen",
+  "profileSkipError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
 
   "lenses": {
     "psychoanalytic": "Psychoanalyse",
     "tarot": "Tarot",
     "astrology": "Astrologie"
-  }
+  },
+  "sayYourDream": "Sprechen Sie Ihren Traum...",
+  "dreamTitle": "Traumtitel",
+  "interpretation": "Interpretation",
+  "dreamText": "Traumtext",
+  "lenses": "Linsen",
+  "welcomeTitle": "Willkommen!",
+  "welcomeText1": "Morpheus hilft Ihnen, Ihre Träume besser zu verstehen. Um das volle Potenzial der astrologischen Deutungen freizuschalten, empfehlen wir, Ihre Geburtsdaten anzugeben.",
+  "welcomeText2": "Dies ist optional und kann jederzeit später in den Einstellungen nachgeholt werden.",
+  "continue": "Weiter",
+  "profileTitle": "Erzählen Sie uns von sich",
+  "profileSubtitle": "Diese Daten sind für genaue astrologische Deutungen erforderlich."
 }

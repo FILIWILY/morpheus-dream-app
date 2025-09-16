@@ -222,7 +222,7 @@ export async function getProfile(telegramId) {
 
     try {
         const res = await pool.query(
-            'SELECT birth_date, birth_time, birth_place, birth_latitude, birth_longitude, "natalChart" FROM users WHERE telegram_id = $1',
+            'SELECT birth_date, birth_time, birth_place, birth_latitude, birth_longitude, "natalChart", onboarding_completed FROM users WHERE telegram_id = $1',
             [telegramId]
         );
 
@@ -255,7 +255,8 @@ export async function getProfile(telegramId) {
                 birthPlace: profile.birth_place,
                 birthLatitude: profile.birth_latitude,
                 birthLongitude: profile.birth_longitude,
-                natalChart: profile.natalChart
+                natalChart: profile.natalChart,
+                onboardingCompleted: profile.onboarding_completed
             };
         }
         return null;
@@ -282,20 +283,46 @@ export async function updateProfile(telegramId, profileData) {
         return profileData;
     }
 
-    const { birthDate, birthTime, birthPlace, birthLatitude, birthLongitude, natalChart } = profileData;
+    const { birthDate, birthTime, birthPlace, birthLatitude, birthLongitude, natalChart, onboardingCompleted } = profileData;
+
+    // Build the query dynamically to only update provided fields
+    const fields = [];
+    const values = [];
+    let queryIndex = 1;
+
+    if (birthDate !== undefined) { fields.push(`birth_date = $${queryIndex++}`); values.push(birthDate); }
+    if (birthTime !== undefined) { fields.push(`birth_time = $${queryIndex++}`); values.push(birthTime); }
+    if (birthPlace !== undefined) { fields.push(`birth_place = $${queryIndex++}`); values.push(birthPlace); }
+    if (birthLatitude !== undefined) { fields.push(`birth_latitude = $${queryIndex++}`); values.push(birthLatitude); }
+    if (birthLongitude !== undefined) { fields.push(`birth_longitude = $${queryIndex++}`); values.push(birthLongitude); }
+    if (natalChart !== undefined) { fields.push(`"natalChart" = $${queryIndex++}`); values.push(natalChart); }
+    if (onboardingCompleted !== undefined) { fields.push(`onboarding_completed = $${queryIndex++}`); values.push(onboardingCompleted); }
+
+    if (fields.length === 0) {
+        return getProfile(telegramId); // Nothing to update
+    }
+
+    values.push(telegramId); // For the WHERE clause
+
+    const queryString = `
+        UPDATE users SET
+            ${fields.join(', ')}
+        WHERE telegram_id = $${queryIndex}
+        RETURNING birth_date, birth_time, birth_place, birth_latitude, birth_longitude, "natalChart", onboarding_completed
+    `;
+
     try {
-        const res = await pool.query(
-            `UPDATE users SET
-                birth_date = $1,
-                birth_time = $2,
-                birth_place = $3,
-                birth_latitude = $4,
-                birth_longitude = $5,
-                "natalChart" = $6
-            WHERE telegram_id = $7
-            RETURNING birth_date, birth_time, birth_place, birth_latitude, birth_longitude, "natalChart"`,
-            [birthDate, birthTime, birthPlace, birthLatitude, birthLongitude, natalChart, telegramId]
-        );
+        const res = await pool.query(queryString, values);
+
+        if (res.rows.length === 0) {
+            // This might happen if the user doesn't exist, though findOrCreateUser should prevent this.
+            // We'll create the user and then attempt the update again.
+            await findOrCreateUser(telegramId);
+            const secondAttempt = await pool.query(queryString, values);
+            if (secondAttempt.rows.length === 0) throw new Error("User not found even after creation attempt.");
+            res.rows[0] = secondAttempt.rows[0];
+        }
+
         const profile = res.rows[0];
         
         // Используем те же функции форматирования
@@ -321,7 +348,8 @@ export async function updateProfile(telegramId, profileData) {
             birthPlace: profile.birth_place,
             birthLatitude: profile.birth_latitude,
             birthLongitude: profile.birth_longitude,
-            natalChart: profile.natalChart
+            natalChart: profile.natalChart,
+            onboardingCompleted: profile.onboarding_completed
         };
     } catch (error) {
         console.error('Error updating profile:', error);

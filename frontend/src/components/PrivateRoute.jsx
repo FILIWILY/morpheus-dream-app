@@ -26,17 +26,15 @@ const PrivateRoute = () => {
     );
   }
 
-  // A new user is identified by having a profile object from the backend,
-  // but the `birthDate` field is specifically `null`. `undefined` is not
-  // a possible state from the backend for this field.
-  if (profile && profile.birthDate === null) {
-    console.log('[PrivateRoute] New user detected (birthDate is null), redirecting to welcome page');
+  // A new user is identified by having onboarding incomplete.
+  // Redirect them to the welcome page to start the onboarding flow.
+  if (profile && !profile.onboardingCompleted) {
+    console.log('[PrivateRoute] New user detected (onboarding not completed), redirecting to welcome page');
     return <Navigate to="/welcome" state={{ from: location }} replace />;
   }
   
-  // User is fully registered (has a birthDate string) or has explicitly skipped
-  // in a way that is no longer handled here. Allow access.
-  console.log('[PrivateRoute] User authenticated and profile is complete, allowing access');
+  // User has completed onboarding, allow access.
+  console.log('[PrivateRoute] User authenticated and onboarding is complete, allowing access');
   return <Outlet />;
 };
 

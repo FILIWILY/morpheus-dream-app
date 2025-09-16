@@ -35,7 +35,7 @@ const formatTime = (value) => {
 const ProfilePage = () => {
     const navigate = useNavigate();
     const { updateProfile } = useProfile();
-    const { locale: lang } = useContext(LocalizationContext) || { locale: 'ru' };
+    const { t, locale: lang } = useContext(LocalizationContext) || { locale: 'ru', t: (key) => key };
     const [birthDate, setBirthDate] = useState('');
     const [birthTime, setBirthTime] = useState('');
     const [error, setError] = useState('');
@@ -80,12 +80,13 @@ const ProfilePage = () => {
                     birthDate,
                     birthTime,
                     birthPlace: { description: birthPlace, placeId },
+                    onboardingCompleted: true,
                 };
                 await updateProfile(profileData);
                 console.log('[ProfilePage] User completed registration, redirecting to main app');
                 navigate('/record');
             } catch (err) {
-                setError("Не удалось сохранить данные. Попробуйте снова.");
+                setError(t('profileSaveError'));
             } finally {
                 setIsLoading(false);
             }
@@ -96,17 +97,17 @@ const ProfilePage = () => {
         setIsLoading(true);
         setError('');
         try {
-            // Send empty data to indicate the user has skipped this step.
-            // The backend will save the profile with null values.
+            // Send onboarding completed flag along with null values for profile data.
             await updateProfile({
                 birthDate: null,
                 birthTime: null,
                 birthPlace: null,
+                onboardingCompleted: true,
             });
             console.log('[ProfilePage] User skipped registration, redirecting to main app');
             navigate('/record');
         } catch (err) {
-            setError("Произошла ошибка. Попробуйте снова.");
+            setError(t('profileSkipError'));
         } finally {
             setIsLoading(false);
         }
@@ -116,45 +117,28 @@ const ProfilePage = () => {
         <Box className={styles.container}>
             <Box className={styles.glassCard}>
                 <Typography variant="h5" component="h1" className={styles.title}>
-                    Расскажите о себе
+                    {t('profileTitle')}
                 </Typography>
                 <Typography className={styles.subtitle}>
-                    Эти данные необходимы для точных астрологических толкований.
+                    {t('profileSubtitle')}
                 </Typography>
 
-                <TextField
-                    label="Дата рождения (дд.мм.гггг)"
-                    variant="outlined"
-                    fullWidth
-                    value={birthDate}
-                    onChange={(e) => setBirthDate(formatDate(e.target.value))}
-                    placeholder="23.05.1990"
-                    sx={textFieldStyles}
-                    inputProps={{ maxLength: 10 }}
-                />
-                <TextField
-                    label="Время рождения (чч:мм)"
-                    variant="outlined"
-                    fullWidth
-                    value={birthTime}
-                    onChange={(e) => setBirthTime(formatTime(e.target.value))}
-                    placeholder="14:30"
-                    sx={textFieldStyles}
-                    inputProps={{ maxLength: 5 }}
-                />
                 <Box sx={{position: 'relative'}}>
                     <TextField
-                        label="Место рождения (Город, Страна)"
+                        label={t('birthPlaceLabel')}
                         variant="outlined"
                         fullWidth
                         value={birthPlace}
                         onChange={handleInputChange}
                         disabled={!ready}
-                        placeholder="Начните вводить город..."
+                        placeholder={t('birthPlacePlaceholder')}
                         sx={textFieldStyles}
                     />
                     {status === 'OK' && (
                         <List className={styles.suggestionsList}>
+                             <Typography variant="caption" sx={{ color: '#ff4d4d', p: '8px 16px', display: 'block' }}>
+                                {t('birthPlaceHint')}
+                            </Typography>
                             {suggestionsData.map((suggestion) => (
                                 <ListItem
                                     button
@@ -167,6 +151,27 @@ const ProfilePage = () => {
                         </List>
                     )}
                 </Box>
+
+                <TextField
+                    label={t('birthDateLabel')}
+                    variant="outlined"
+                    fullWidth
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(formatDate(e.target.value))}
+                    placeholder="23.05.1990"
+                    sx={textFieldStyles}
+                    inputProps={{ maxLength: 10 }}
+                />
+                <TextField
+                    label={t('birthTimeLabel')}
+                    variant="outlined"
+                    fullWidth
+                    value={birthTime}
+                    onChange={(e) => setBirthTime(formatTime(e.target.value))}
+                    placeholder="14:30"
+                    sx={textFieldStyles}
+                    inputProps={{ maxLength: 5 }}
+                />
                 
                 {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
 
@@ -177,7 +182,7 @@ const ProfilePage = () => {
                     disabled={isLoading || isSaveDisabled}
                     className={styles.button}
                 >
-                    {isLoading ? <CircularProgress size={24} color="inherit"/> : 'Сохранить и продолжить'}
+                    {isLoading ? <CircularProgress size={24} color="inherit"/> : t('saveAndContinue')}
                 </Button>
                 <Button 
                     onClick={handleSkip} 
@@ -185,7 +190,7 @@ const ProfilePage = () => {
                     disabled={isLoading}
                     className={styles.skipButton}
                 >
-                    Пропустить
+                    {t('skip')}
                 </Button>
             </Box>
         </Box>

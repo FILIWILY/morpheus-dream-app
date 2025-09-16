@@ -1,37 +1,58 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, IconButton } from '@mui/material';
+import TranslateIcon from '@mui/icons-material/Translate';
+import StarryBackground from '../components/StarryBackground';
+import LanguageSelectionModal from '../components/LanguageSelectionModal';
+import { LocalizationContext } from '../context/LocalizationContext';
 import styles from './WelcomePage.module.css';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
+  const { t } = useContext(LocalizationContext);
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
 
   const handleContinue = () => {
-    // Navigate to the new ProfilePage to fill in details
     navigate('/profile');
   };
 
   return (
-    <div className={styles.welcomeContainer}>
-      <Box className={styles.glassCard}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'white' }}>
-          Добро пожаловать!
-        </Typography>
-        <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-          Morpheus поможет вам лучше понять свои сны. Чтобы разблокировать полный потенциал астрологических толкований, мы рекомендуем указать данные вашего рождения.
-        </Typography>
-        <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-          Это необязательно, и вы всегда сможете сделать это позже в настройках.
-        </Typography>
-        <Button 
-          variant="contained" 
-          onClick={handleContinue}
-          className={styles.button}
-        >
-          Продолжить
-        </Button>
-      </Box>
-    </div>
+    <>
+      <StarryBackground>
+        <div className={styles.welcomeContainer}>
+          <Box className={styles.glassCard}>
+            
+            <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+              <IconButton onClick={() => setIsLangModalOpen(true)} sx={{ color: 'white' }}>
+                <TranslateIcon />
+              </IconButton>
+            </Box>
+
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'white' }}>
+              {t('welcomeTitle')}
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+              {t('welcomeText1')}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+              {t('welcomeText2')}
+            </Typography>
+            <Button 
+              variant="contained" 
+              onClick={handleContinue}
+              className={styles.button}
+            >
+              {t('continue')}
+            </Button>
+          </Box>
+        </div>
+      </StarryBackground>
+
+      <LanguageSelectionModal 
+        open={isLangModalOpen} 
+        onClose={() => setIsLangModalOpen(false)} 
+      />
+    </>
   );
 };
 

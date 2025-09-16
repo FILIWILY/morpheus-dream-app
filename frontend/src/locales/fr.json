@@ -47,5 +47,25 @@
     "psychoanalytic": "Psychanalyse",
     "tarot": "Tarot",
     "astrology": "Astrologie"
-  }
+  },
+  "language": "Langue",
+  "dreamHistory": "Historique des rêves",
+  "noDreamsYet": "Aucun rêve pour le moment",
+  "deleteSelected": "Supprimer la sélection",
+  "sayYourDream": "Racontez votre rêve...",
+  "dreamTitle": "Titre du rêve",
+  "interpretation": "Interprétation",
+  "dreamText": "Texte du rêve",
+  "lenses": "Lentilles",
+  "welcomeTitle": "Bienvenue !",
+  "welcomeText1": "Morpheus vous aidera à mieux comprendre vos rêves. Pour libérer tout le potentiel des interprétations astrologiques, nous vous recommandons de fournir vos informations de naissance.",
+  "welcomeText2": "Ceci est facultatif, et vous pouvez toujours le faire plus tard dans les paramètres.",
+  "continue": "Continuer",
+  "profileTitle": "Parlez-nous de vous",
+  "profileSubtitle": "Ces données sont nécessaires pour des interprétations astrologiques précises.",
+  "birthPlaceHint": "Sélectionnez une ville dans la liste",
+  "saveAndContinue": "Enregistrer et continuer",
+  "skip": "Passer",
+  "profileSaveError": "Échec de la sauvegarde des données. Veuillez réessayer.",
+  "profileSkipError": "Une erreur est survenue. Veuillez réessayer."
 }

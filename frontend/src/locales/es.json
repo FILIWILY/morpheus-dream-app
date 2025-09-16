@@ -10,6 +10,9 @@
   "history": "Historial",
   "settings": "Ajustes",
   "language": "Idioma",
+  "dreamHistory": "Historial de sueños",
+  "noDreamsYet": "Aún no hay sueños",
+  "deleteSelected": "Eliminar seleccionados",
   "save": "Guardar",
   "cancel": "Cancelar",
   "dreamInterpretation": "Interpretación de Sueños",
@@ -41,11 +44,19 @@
   "profileSaveErrorRequired": "Por favor, rellene todos los campos.",
   "birthPlaceValidationError": "Por favor, seleccione una ubicación de la lista.",
   "birthPlaceMigrationError": "Por favor, confirme su ciudad seleccionándola de la lista.",
-  "birthPlaceHint": "Seleccione una ubicación de la lista",
-
-  "lenses": {
-    "psychoanalytic": "Psicoanálisis",
-    "tarot": "Tarot",
-    "astrology": "Astrología"
-  }
+  "birthPlaceHint": "Selecciona una ciudad de la lista",
+  "sayYourDream": "Diga su sueño...",
+  "dreamTitle": "Título del sueño",
+  "interpretation": "Interpretación",
+  "dreamText": "Texto del sueño",
+  "lenses": "Lentes",
+  "welcomeTitle": "¡Bienvenido!",
+  "welcomeText1": "Morpheus te ayudará a entender mejor tus sueños. Para desbloquear todo el potencial de las interpretaciones astrológicas, te recomendamos que proporciones tus datos de nacimiento.",
+  "welcomeText2": "Esto es opcional y siempre puedes hacerlo más tarde en la configuración.",
+  "continue": "Continuar",
+  "profileTitle": "Cuéntanos sobre ti",
+  "profileSubtitle": "Estos datos son necesarios para interpretaciones astrológicas precisas.",
+  "saveAndContinue": "Guardar y continuar",
+  "skip": "Omitir",
+  "profileSkipError": "Ocurrió un error. Por favor, inténtalo de nuevo."
 }

@@ -25,6 +25,7 @@ Stores essential information about each user.
 | `birth_latitude` | `REAL` | Geocoded latitude of the birth place. |
 | `birth_longitude` | `REAL` | Geocoded longitude of the birth place. |
 | `"natalChart"` | `JSONB` | Stores the calculated natal chart data as a JSON object. |
+| `onboarding_completed` | `BOOLEAN` | `false` by default. Set to `true` after the user saves or skips the `ProfilePage` for the first time. Prevents the user from being sent back into the onboarding flow on subsequent sessions. |
 
 #### `dreams` Table
 Stores each dream and its full interpretation.
