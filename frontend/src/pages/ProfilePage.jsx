@@ -4,7 +4,6 @@ import { useProfile } from '../context/ProfileContext';
 import { LocalizationContext } from '../context/LocalizationContext';
 import usePlacesAutocomplete from 'use-places-autocomplete';
 import { Typography, TextField, Button, Box, Alert, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
-import StarryBackground from '../components/StarryBackground';
 import styles from './ProfilePage.module.css';
 
 // Styles for input fields on a dark background
@@ -114,84 +113,82 @@ const ProfilePage = () => {
     };
 
     return (
-        <StarryBackground>
-            <Box className={styles.container}>
-                <Box className={styles.glassCard}>
-                    <Typography variant="h5" component="h1" className={styles.title}>
-                        Расскажите о себе
-                    </Typography>
-                    <Typography className={styles.subtitle}>
-                        Эти данные необходимы для точных астрологических толкований.
-                    </Typography>
+        <Box className={styles.container}>
+            <Box className={styles.glassCard}>
+                <Typography variant="h5" component="h1" className={styles.title}>
+                    Расскажите о себе
+                </Typography>
+                <Typography className={styles.subtitle}>
+                    Эти данные необходимы для точных астрологических толкований.
+                </Typography>
 
+                <TextField
+                    label="Дата рождения (дд.мм.гггг)"
+                    variant="outlined"
+                    fullWidth
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(formatDate(e.target.value))}
+                    placeholder="23.05.1990"
+                    sx={textFieldStyles}
+                    inputProps={{ maxLength: 10 }}
+                />
+                <TextField
+                    label="Время рождения (чч:мм)"
+                    variant="outlined"
+                    fullWidth
+                    value={birthTime}
+                    onChange={(e) => setBirthTime(formatTime(e.target.value))}
+                    placeholder="14:30"
+                    sx={textFieldStyles}
+                    inputProps={{ maxLength: 5 }}
+                />
+                <Box sx={{position: 'relative'}}>
                     <TextField
-                        label="Дата рождения (дд.мм.гггг)"
+                        label="Место рождения (Город, Страна)"
                         variant="outlined"
                         fullWidth
-                        value={birthDate}
-                        onChange={(e) => setBirthDate(formatDate(e.target.value))}
-                        placeholder="23.05.1990"
+                        value={birthPlace}
+                        onChange={handleInputChange}
+                        disabled={!ready}
+                        placeholder="Начните вводить город..."
                         sx={textFieldStyles}
-                        inputProps={{ maxLength: 10 }}
                     />
-                    <TextField
-                        label="Время рождения (чч:мм)"
-                        variant="outlined"
-                        fullWidth
-                        value={birthTime}
-                        onChange={(e) => setBirthTime(formatTime(e.target.value))}
-                        placeholder="14:30"
-                        sx={textFieldStyles}
-                        inputProps={{ maxLength: 5 }}
-                    />
-                    <Box sx={{position: 'relative'}}>
-                        <TextField
-                            label="Место рождения (Город, Страна)"
-                            variant="outlined"
-                            fullWidth
-                            value={birthPlace}
-                            onChange={handleInputChange}
-                            disabled={!ready}
-                            placeholder="Начните вводить город..."
-                            sx={textFieldStyles}
-                        />
-                        {status === 'OK' && (
-                            <List className={styles.suggestionsList}>
-                                {suggestionsData.map((suggestion) => (
-                                    <ListItem
-                                        button
-                                        key={suggestion.place_id}
-                                        onClick={() => handleSelectSuggestion(suggestion)}
-                                    >
-                                        <ListItemText primary={suggestion.description} sx={{ color: 'var(--text-primary)'}} />
-                                    </ListItem>
-                                ))}
-                            </List>
-                        )}
-                    </Box>
-                    
-                    {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
-
-                    <Button 
-                        variant="contained" 
-                        onClick={handleSave} 
-                        size="large" 
-                        disabled={isLoading || isSaveDisabled}
-                        className={styles.button}
-                    >
-                        {isLoading ? <CircularProgress size={24} color="inherit"/> : 'Сохранить и продолжить'}
-                    </Button>
-                    <Button 
-                        onClick={handleSkip} 
-                        size="small" 
-                        disabled={isLoading}
-                        className={styles.skipButton}
-                    >
-                        Пропустить
-                    </Button>
+                    {status === 'OK' && (
+                        <List className={styles.suggestionsList}>
+                            {suggestionsData.map((suggestion) => (
+                                <ListItem
+                                    button
+                                    key={suggestion.place_id}
+                                    onClick={() => handleSelectSuggestion(suggestion)}
+                                >
+                                    <ListItemText primary={suggestion.description} sx={{ color: 'var(--text-primary)'}} />
+                                </ListItem>
+                            ))}
+                        </List>
+                    )}
                 </Box>
+                
+                {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+
+                <Button 
+                    variant="contained" 
+                    onClick={handleSave} 
+                    size="large" 
+                    disabled={isLoading || isSaveDisabled}
+                    className={styles.button}
+                >
+                    {isLoading ? <CircularProgress size={24} color="inherit"/> : 'Сохранить и продолжить'}
+                </Button>
+                <Button 
+                    onClick={handleSkip} 
+                    size="small" 
+                    disabled={isLoading}
+                    className={styles.skipButton}
+                >
+                    Пропустить
+                </Button>
             </Box>
-        </StarryBackground>
+        </Box>
     );
 };
 

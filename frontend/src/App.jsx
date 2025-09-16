@@ -10,6 +10,8 @@ import HistoryPage from './pages/HistoryPage';
 import InterpretationPage from './pages/InterpretationPage';
 import ProfilePage from './pages/ProfilePage';
 import PrivateRoute from './components/PrivateRoute';
+import Layout from './components/Layout';
+import StarryBackground from './components/StarryBackground';
 import { LocalizationProvider, LocalizationContext } from './context/LocalizationContext';
 
 export const AppReadyContext = React.createContext(false);
@@ -42,19 +44,24 @@ function App() {
             >
               <ProfileProvider>
                 <BrowserRouter>
+                  <StarryBackground />
                   <Routes>
-                    {/* Public routes that don't require a profile */}
+                    {/* Public onboarding routes that render WITHOUT the main Layout */}
                     <Route path="/welcome" element={<WelcomePage />} />
                     <Route path="/profile" element={<ProfilePage />} />
 
-                    {/* All main app routes are protected */}
+                    {/* Protected routes that render WITHIN the main Layout */}
                     <Route element={<PrivateRoute />}>
-                      <Route path="/record" element={<RecordingPage />} />
-                      <Route path="/history" element={<HistoryPage />} />
-                      <Route path="/interpretation/:dreamId" element={<InterpretationPage />} />
+                      <Route element={<Layout />}>
+                        <Route path="/record" element={<RecordingPage />} />
+                        <Route path="/history" element={<HistoryPage />} />
+                        <Route path="/interpretation/:dreamId" element={<InterpretationPage />} />
+                        {/* Redirect any other nested path to /record */}
+                        <Route path="*" element={<Navigate to="/record" replace />} />
+                      </Route>
                     </Route>
                     
-                    {/* Default route redirects to the main recording page */}
+                    {/* A top-level catch-all to redirect to the main app entry point */}
                     <Route path="*" element={<Navigate to="/record" replace />} />
                   </Routes>
                 </BrowserRouter>
