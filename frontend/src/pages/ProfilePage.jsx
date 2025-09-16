@@ -42,8 +42,6 @@ const ProfilePage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [placeId, setPlaceId] = useState(null);
     
-    const isSaveDisabled = !birthDate || !birthTime || !birthPlace || !placeId;
-
     const {
         ready,
         value: birthPlace,
@@ -58,7 +56,9 @@ const ProfilePage = () => {
         debounce: 300,
         initOnMount: typeof window !== 'undefined' && typeof window.google !== 'undefined',
     });
-
+    
+    // Moved this line to after birthPlace is defined to prevent a crash.
+    const isSaveDisabled = !birthDate || !birthTime || !birthPlace || !placeId;
 
     const handleInputChange = (e) => {
         setBirthPlace(e.target.value);
