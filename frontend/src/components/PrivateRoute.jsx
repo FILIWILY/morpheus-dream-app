@@ -26,19 +26,17 @@ const PrivateRoute = () => {
     );
   }
 
-  // If profile exists but birthDate is undefined, the user is new and hasn't
-  // completed the profile setup yet. Redirect them to the welcome page first.
-  if (profile && profile.birthDate === undefined) {
-    console.log('[PrivateRoute] New user detected (profile exists but birthDate is undefined), redirecting to welcome page');
+  // A new user is identified by having a profile object from the backend,
+  // but the `birthDate` field is specifically `null`. `undefined` is not
+  // a possible state from the backend for this field.
+  if (profile && profile.birthDate === null) {
+    console.log('[PrivateRoute] New user detected (birthDate is null), redirecting to welcome page');
     return <Navigate to="/welcome" state={{ from: location }} replace />;
   }
   
-  // The old check `profile === null` is removed because the backend now always
-  // creates a user record on first contact, so the profile object will exist,
-  // even if its fields (like birthDate) are not set.
-
-  // User is fully registered (or has explicitly skipped), allow access to protected routes
-  console.log('[PrivateRoute] User authenticated and registered, allowing access');
+  // User is fully registered (has a birthDate string) or has explicitly skipped
+  // in a way that is no longer handled here. Allow access.
+  console.log('[PrivateRoute] User authenticated and profile is complete, allowing access');
   return <Outlet />;
 };
 
