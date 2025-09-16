@@ -38,6 +38,7 @@
   "birthDateLabel": "Geburtsdatum (tt.mm.jjjj)",
   "birthTimeLabel": "Geburtszeit (hh:mm)",
   "birthPlaceLabel": "Geburtsort (Stadt, Land)",
+  "birthPlacePlaceholder": "Beginnen Sie, eine Stadt einzugeben...",
   "saveData": "Speichern",
   "profileSaveSuccess": "Profildaten erfolgreich gespeichert!",
   "profileSaveError": "Daten konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
