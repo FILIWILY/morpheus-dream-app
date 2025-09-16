@@ -1,18 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button } from '@mui/material';
-import Layout from '../components/Layout';
-import styles from './WelcomePage.module.css'; // Import the new CSS module
+import StarryBackground from '../components/StarryBackground';
+import styles from './WelcomePage.module.css';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
 
   const handleContinue = () => {
+    // Navigate to the new ProfilePage to fill in details
     navigate('/profile');
   };
 
   return (
-    <Layout>
+    <StarryBackground>
       <div className={styles.welcomeContainer}>
         <Box className={styles.glassCard}>
           <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'white' }}>
@@ -33,7 +34,7 @@ const WelcomePage = () => {
           </Button>
         </Box>
       </div>
-    </Layout>
+    </StarryBackground>
   );
 };
 

@@ -1,0 +1,68 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.glassCard {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 32px;
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    text-align: center;
+    font-weight: bold !important;
+    color: white;
+}
+
+.subtitle {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: -8px !important;
+    margin-bottom: 8px !important;
+}
+
+.button {
+    margin-top: 8px !important;
+    border-radius: 20px !important;
+    padding: 10px 20px !important;
+    font-weight: bold !important;
+    background: linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%);
+    color: white !important;
+    box-shadow: 0 3px 5px 2px rgba(255, 105, 135, .3);
+}
+
+.skipButton {
+    color: rgba(255, 255, 255, 0.5) !important;
+    text-transform: none !important;
+}
+
+.suggestionsList {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #1c1c1e;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    padding: 0;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+}
