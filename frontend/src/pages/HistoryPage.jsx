@@ -113,12 +113,12 @@ const HistoryPage = () => {
 
         <Box sx={{ flexGrow: 1, overflow: 'auto', px: 1 }}>
             {isLoading ? (
-                <Typography>Loading...</Typography>
+                <Typography>Loading...</Typography> // TODO: Localize this
             ) : error ? (
-                <Typography>{error}</Typography>
+                <Typography>{t(error)}</Typography>
             ) : dreams.length === 0 ? (
                 <Typography sx={{ textAlign: 'center', color: 'var(--text-secondary)', mt: 4 }}>
-                    {t('historyEmpty')}
+                    {t('historyEmptyNew')}
                 </Typography>
             ) : (
                 <List sx={{ pt: 1, p: 0 }}>

@@ -14,7 +14,7 @@ export const useDreams = () => {
             setDreams(response.data || []);
         } catch (err) {
             console.error('Failed to fetch dreams:', err);
-            setError('Failed to load dreams.');
+            setError('historyLoadError'); // Use i18n key instead of hardcoded string
             setDreams([]);
         } finally {
             setIsLoading(false);
@@ -31,7 +31,7 @@ export const useDreams = () => {
             setDreams(prevDreams => prevDreams.filter(dream => !dreamIds.includes(dream.id)));
         } catch (err) {
             console.error('Failed to delete dreams:', err);
-            setError('Failed to delete selected dreams.');
+            setError('historyLoadError'); // Consider a more specific key if available
         }
     }, []);
 
