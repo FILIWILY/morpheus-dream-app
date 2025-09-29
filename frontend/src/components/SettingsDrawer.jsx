@@ -3,6 +3,8 @@ import { useProfile } from '../context/ProfileContext';
 import { LocalizationContext } from '../context/LocalizationContext';
 import usePlacesAutocomplete from 'use-places-autocomplete';
 import { Drawer, Box, AppBar, Toolbar, IconButton, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, Button, Alert, CircularProgress } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TranslateIcon from '@mui/icons-material/Translate';
 import LanguageSelectionModal from './LanguageSelectionModal';
@@ -18,6 +20,18 @@ const textFieldStyles = {
         '&.Mui-focused fieldset': { borderColor: 'var(--accent-primary)' },
     },
 };
+
+const SuccessAlert = styled(Alert)(({ theme }) => ({
+    backgroundColor: 'rgba(52, 228, 157, 0.1)',
+    color: 'var(--text-primary)',
+    borderRadius: '8px',
+    '& .MuiAlert-icon': {
+      color: '#34E49D',
+    },
+    '& .MuiAlert-message': {
+        width: '100%',
+    }
+}));
 
 const formatDate = (value) => {
   const digits = value.replace(/\D/g, '').slice(0, 8);
@@ -63,9 +77,29 @@ const SettingsDrawer = ({ open, onClose }) => {
 
     useEffect(() => {
         if (profile) {
-            const birthPlaceText = (typeof profile.birthPlace === 'object' && profile.birthPlace !== null) ? profile.birthPlace.description : profile.birthPlace || '';
-            const initialPlaceId = (typeof profile.birthPlace === 'object' && profile.birthPlace !== null) ? profile.birthPlace.placeId : null;
+            let birthPlaceText = '';
+            let initialPlaceId = null;
 
+            if (typeof profile.birthPlace === 'string') {
+                try {
+                    // Пытаемся распарсить, если это JSON-строка
+                    const parsed = JSON.parse(profile.birthPlace);
+                    if (typeof parsed === 'object' && parsed !== null && parsed.description) {
+                        birthPlaceText = parsed.description;
+                        initialPlaceId = parsed.placeId || null;
+                    } else {
+                        // Если распарсилось, но структура не та, или это просто строка
+                        birthPlaceText = profile.birthPlace;
+                    }
+                } catch (e) {
+                    // Если это невалидный JSON, считаем просто строкой
+                    birthPlaceText = profile.birthPlace;
+                }
+            } else if (typeof profile.birthPlace === 'object' && profile.birthPlace !== null && profile.birthPlace.description) {
+                birthPlaceText = profile.birthPlace.description;
+                initialPlaceId = profile.birthPlace.placeId || null;
+            }
+            
             const initialData = {
                 birthDate: profile.birthDate || '',
                 birthTime: profile.birthTime || '',
@@ -80,6 +114,13 @@ const SettingsDrawer = ({ open, onClose }) => {
         }
     }, [profile, setBirthPlace, t]);
 
+    useEffect(() => {
+        if (!open) {
+            setSuccess('');
+            setError('');
+        }
+    }, [open]);
+
     // Close suggestions when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -93,7 +134,7 @@ const SettingsDrawer = ({ open, onClose }) => {
         };
     }, [suggestionsRef, clearSuggestions]);
 
-    const isRequiredFieldsFilled = birthDate && birthTime && birthPlace && placeId;
+    const isRequiredFieldsFilled = birthDate && birthTime && birthPlace;
 
     const hasChanges = initialProfile && (
         initialProfile.birthDate !== birthDate ||
@@ -103,8 +144,16 @@ const SettingsDrawer = ({ open, onClose }) => {
     );
 
     const handlePlaceInputChange = (e) => {
-        setBirthPlace(e.target.value);
-        setPlaceId(null);
+        const newValue = e.target.value;
+        setBirthPlace(newValue);
+
+        if (initialProfile && newValue !== initialProfile.birthPlace) {
+            setPlaceId(null);
+        } else if (initialProfile && newValue === initialProfile.birthPlace) {
+            setPlaceId(initialProfile.placeId);
+        } else {
+            setPlaceId(null);
+        }
     };
 
     const handleSelectSuggestion = ({ description, place_id }) => {
@@ -128,7 +177,7 @@ const SettingsDrawer = ({ open, onClose }) => {
             const profileData = {
                 birthDate,
                 birthTime,
-                birthPlace: { description: birthPlace, placeId },
+                birthPlace: { description: birthPlace, placeId: placeId || null },
             };
             await updateProfile(profileData);
             setSuccess(t('profileSaveSuccess'));
@@ -138,6 +187,9 @@ const SettingsDrawer = ({ open, onClose }) => {
                 birthPlace,
                 placeId,
             });
+            setTimeout(() => {
+                onClose();
+            }, 500);
         } catch (err) {
             setError(t('profileSaveError'));
         } finally {
@@ -181,7 +233,7 @@ const SettingsDrawer = ({ open, onClose }) => {
                             <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
                               {t('settings')}
                             </Typography>
-                            {hasChanges && isRequiredFieldsFilled && (
+                            {hasChanges && (
                                 <Button
                                     variant="contained"
                                     onClick={handleSave}
@@ -258,7 +310,15 @@ const SettingsDrawer = ({ open, onClose }) => {
                                 />
                                 
                                 {error && <Alert severity="error" sx={{mt: 2}}>{error}</Alert>}
-                                {success && <Alert severity="success" sx={{mt: 2}}>{success}</Alert>}
+                                {success && 
+                                    <SuccessAlert 
+                                        icon={<CheckCircleOutlineIcon fontSize="inherit" />} 
+                                        severity="success" 
+                                        sx={{mt: 2}}
+                                    >
+                                        {success}
+                                    </SuccessAlert>
+                                }
                             
                                 <List sx={{mt: 2}}>
                                     <ListItem disablePadding>

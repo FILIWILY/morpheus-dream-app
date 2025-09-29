@@ -29,8 +29,8 @@ const PrivateRoute = () => {
   // A new user is identified by having onboarding incomplete.
   // Redirect them to the welcome page to start the onboarding flow.
   if (profile && !profile.onboardingCompleted) {
-    console.log('[PrivateRoute] New user detected (onboarding not completed), redirecting to welcome page');
-    return <Navigate to="/welcome" state={{ from: location }} replace />;
+    console.log('[PrivateRoute] New user detected (onboarding not completed), redirecting to language selection page');
+    return <Navigate to="/language" state={{ from: location }} replace />;
   }
   
   // User has completed onboarding, allow access.

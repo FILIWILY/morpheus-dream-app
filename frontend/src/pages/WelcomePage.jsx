@@ -1,55 +1,72 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, IconButton } from '@mui/material';
-import TranslateIcon from '@mui/icons-material/Translate';
-import LanguageSelectionModal from '../components/LanguageSelectionModal';
+import { Box, Typography, Button, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { LocalizationContext } from '../context/LocalizationContext';
 import styles from './WelcomePage.module.css';
+
+const LENS_COLORS = {
+  psycho: '#03A9F4',
+  astro: '#C850FF',
+  tarot: '#FF9800',
+};
 
 const WelcomePage = () => {
   const navigate = useNavigate();
   const { t } = useContext(LocalizationContext);
-  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
 
   const handleContinue = () => {
     navigate('/profile');
   };
 
-  return (
+  const features = [
+    t('featureRecord'),
     <>
-      <div className={styles.welcomeContainer}>
-        <Box className={styles.glassCard}>
-          
-          <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
-            <IconButton onClick={() => setIsLangModalOpen(true)} sx={{ color: 'white' }}>
-              <TranslateIcon />
-            </IconButton>
-          </Box>
+      {t('featureDecode_part1')}
+      <span style={{ color: LENS_COLORS.psycho, fontWeight: 'bold' }}>{t('featureDecode_lens1')}</span>
+      {t('featureDecode_part2')}
+      <span style={{ color: LENS_COLORS.astro, fontWeight: 'bold' }}>{t('featureDecode_lens2')}</span>
+      {t('featureDecode_part3')}
+      <span style={{ color: LENS_COLORS.tarot, fontWeight: 'bold' }}>{t('featureDecode_lens3')}</span>
+      {t('featureDecode_part4')}
+    </>,
+    t('featureTrack'),
+  ];
 
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: 'white' }}>
-            {t('welcomeTitle')}
-          </Typography>
-          <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-            {t('welcomeText1')}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-            {t('welcomeText2')}
-          </Typography>
-          <Button 
-            variant="contained" 
-            onClick={handleContinue}
-            className={styles.button}
-          >
-            {t('continue')}
-          </Button>
-        </Box>
-      </div>
+  return (
+    <div className={styles.welcomeContainer}>
+      <Box className={styles.glassCard}>
+        <Typography 
+          variant="h1" 
+          component="h1" 
+          className={styles.newTitle}
+        >
+          {t('welcomeNewTitle')}
+        </Typography>
+        
+        <List sx={{ width: '100%', color: 'white', p: 0 }}>
+          {features.map((feature, index) => (
+            <ListItem key={index} sx={{ p: 0, mb: 1.5, alignItems: 'flex-start' }}>
+              <ListItemIcon sx={{ minWidth: 'auto', mr: 1.5, mt: '3px', color: 'var(--accent-primary)' }}>
+                <CheckCircleOutlineIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText 
+                primary={feature} 
+                primaryTypographyProps={{ style: { fontSize: '0.95rem', lineHeight: '1.4' } }}
+              />
+            </ListItem>
+          ))}
+        </List>
 
-      <LanguageSelectionModal 
-        open={isLangModalOpen} 
-        onClose={() => setIsLangModalOpen(false)} 
-      />
-    </>
+        <Button 
+          variant="contained" 
+          onClick={handleContinue}
+          className={styles.button}
+        >
+          {t('continue')}
+        </Button>
+      </Box>
+    </div>
   );
 };
 

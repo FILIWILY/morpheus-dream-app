@@ -5,6 +5,7 @@ import { LocalizationProvider as MuiLocalizationProvider } from '@mui/x-date-pic
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import {ru, enUS, de, es, fr} from 'date-fns/locale';
 import WelcomePage from './pages/WelcomePage';
+import LanguageSelectionPage from './pages/LanguageSelectionPage'; // Import the new page
 import RecordingPage from './pages/RecordingPage';
 import HistoryPage from './pages/HistoryPage';
 import InterpretationPage from './pages/InterpretationPage';
@@ -47,6 +48,7 @@ function App() {
                   <StarryBackground />
                   <Routes>
                     {/* Public onboarding routes that render WITHOUT the main Layout */}
+                    <Route path="/language" element={<LanguageSelectionPage />} />
                     <Route path="/welcome" element={<WelcomePage />} />
                     <Route path="/profile" element={<ProfilePage />} />
 

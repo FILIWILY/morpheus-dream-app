@@ -1,35 +1,51 @@
 .welcomeContainer {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center;
-    padding: 24px;
-    height: 100%;
+    min-height: 100vh;
+    padding: 2rem;
     box-sizing: border-box;
 }
 
 .glassCard {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 32px;
-    max-width: 400px;
+    border-radius: 15px;
+    padding: 3vh 1.5rem; /* Responsive vertical padding */
     width: 100%;
+    max-width: 550px;
+    text-align: left; /* Align text to the left */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    align-items: stretch; /* Stretch items to fill the width */
+    gap: 1.5vh; /* Added responsive gap */
+}
+
+.newTitle {
+    color: white !important;
+    font-weight: bold !important;
+    font-size: 1rem !important; /* Reduced font size by half from original design */
+    margin-bottom: 0 !important; /* Let the parent gap handle spacing */
+    text-align: left;
+    line-height: 1.4 !important;
 }
 
 .button {
-    margin-top: 16px !important;
-    border-radius: 20px !important;
-    padding: 10px 20px !important;
-    font-weight: bold !important;
-    background: linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%);
+    background-color: var(--accent-primary) !important;
     color: white !important;
-    box-shadow: 0 3px 5px 2px rgba(255, 105, 135, .3);
+    font-weight: bold !important;
+    padding: 12px 0 !important;
+    margin-top: 0 !important; /* Let the parent gap handle spacing */
+    border-radius: 8px !important;
+    width: 100%;
+    align-self: center; /* Center the button itself */
+    max-width: 300px;
+    transition: background-color 0.3s ease !important;
+}
+
+.button:hover {
+    background-color: #00bfa5 !important; /* A slightly lighter shade for hover */
 }

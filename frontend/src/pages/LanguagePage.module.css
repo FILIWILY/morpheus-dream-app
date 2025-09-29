@@ -1,0 +1,47 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.glassCard {
+    background: rgba(30, 30, 50, 0.75);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 32px;
+    color: var(--text-primary);
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    text-align: center;
+}
+
+.title {
+    font-weight: bold !important;
+    margin-bottom: 24px !important;
+    color: white;
+}
+
+.grid {
+    margin-top: 16px;
+}
+
+.button {
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    padding: 12px 0 !important;
+    text-transform: none !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease !important;
+}
+
+.button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--accent-primary) !important;
+}

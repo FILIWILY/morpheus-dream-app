@@ -13,6 +13,9 @@
       onload="console.log('[TelegramScript] ✅ Script loaded successfully.')" 
       onerror="console.error('[TelegramScript] 💥 Failed to load script!')"
     ></script>
+    <script async
+      src="https://maps.googleapis.com/maps/api/js?key=%VITE_GOOGLE_PLACES_API_KEY%&libraries=places&callback=initMap">
+    </script>
     <!-- Google Maps API будет загружен динамически из main.jsx -->
     <script>
       // Fallback for Google Places API and basic checks

@@ -59,22 +59,32 @@ export const ProfileProvider = ({ children }) => {
   }, [isAppReady]);
 
   const updateProfile = async (newProfileData) => {
-    console.log('[ProfileContext] Updating profile with data:', newProfileData);
-    setIsLoading(true);
+    const oldProfile = profile; // Save the old profile in case of an error
+    console.log('[ProfileContext] Optimistically updating profile with data:', newProfileData);
+    
+    // Optimistically update the local state immediately
+    setProfile(prevProfile => ({
+      ...prevProfile,
+      ...newProfileData,
+    }));
+    
     setError(null);
     
     try {
+      // Then, send the update to the server
       const response = await api.put('/profile', newProfileData);
-      console.log('[ProfileContext] Profile updated successfully:', response.data);
+      console.log('[ProfileContext] Profile updated on server successfully:', response.data);
+      
+      // Update the local state with the final, authoritative data from the server
       setProfile(response.data);
       return response.data;
     } catch (error) {
-      console.error('[ProfileContext] Error updating profile:', error);
+      console.error('[ProfileContext] Error updating profile, rolling back optimistic update:', error);
       setError(error.message);
+      setProfile(oldProfile); // Rollback to the old profile on error
       throw error;
-    } finally {
-      setIsLoading(false);
     }
+    // No finally block needed here, as we are not using a loading state for this optimistic update.
   };
 
   const refetchProfile = async () => {

@@ -1,0 +1,81 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem; /* Use smaller padding for small screens */
+    box-sizing: border-box;
+}
+
+.glassCard {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 3vh 2rem; /* Responsive vertical padding */
+    width: 100%;
+    max-width: 400px; /* Made it a bit smaller */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh; /* Responsive gap */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    font-weight: bold !important;
+    color: white !important;
+    text-align: center !important;
+    font-size: 1.5rem !important; /* Reduced font size */
+    margin-bottom: 0 !important; /* Let parent gap control spacing */
+}
+
+.radioGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem; /* Reduced gap between radio buttons */
+    align-items: flex-start;
+    margin: 0 auto;
+    width: fit-content;
+}
+
+.formControlLabel .MuiTypography-root {
+    color: var(--text-primary);
+    font-size: 1rem; /* Slightly smaller labels */
+}
+
+.button {
+    background-color: var(--accent-primary) !important;
+    color: white !important;
+    font-weight: bold !important;
+    padding: 10px 0 !important; /* Reduced padding */
+    margin-top: 0 !important; /* Let parent gap control spacing */
+    border-radius: 8px !important;
+    transition: background-color 0.3s ease !important;
+}
+
+.button:hover {
+    background-color: #00bfa5 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .glassCard {
+        padding: 1.5rem;
+        gap: 0.8rem;
+    }
+
+    .title {
+        font-size: 1.3rem !important;
+    }
+
+    .formControlLabel .MuiTypography-root {
+        font-size: 0.95rem;
+    }
+}
+
+.flagIcon {
+  width: 24px;
+  height: auto;
+  margin-right: 12px;
+  border-radius: 3px;
+}

@@ -6,6 +6,12 @@ import usePlacesAutocomplete from 'use-places-autocomplete';
 import { Typography, TextField, Button, Box, Alert, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
 import styles from './ProfilePage.module.css';
 
+const LENS_COLORS = {
+  psycho: '#03A9F4',
+  astro: '#C850FF',
+  tarot: '#FF9800',
+};
+
 // Styles for input fields on a dark background
 const textFieldStyles = {
     '& .MuiInputBase-input': { color: 'var(--text-primary)' },
@@ -54,7 +60,6 @@ const ProfilePage = () => {
             types: ['(cities)'],
         },
         debounce: 300,
-        initOnMount: typeof window !== 'undefined' && typeof window.google !== 'undefined',
     });
     
     // Moved this line to after birthPlace is defined to prevent a crash.
@@ -116,11 +121,33 @@ const ProfilePage = () => {
     return (
         <Box className={styles.container}>
             <Box className={styles.glassCard}>
-                <Typography variant="h5" component="h1" className={styles.title}>
+                <Typography 
+                    variant="h1" 
+                    component="h1" 
+                    className={styles.title} 
+                    sx={{ 
+                        textAlign: 'center',
+                        // mb: '0.5rem' // Removed to rely on parent gap
+                    }}
+                >
                     {t('profileTitle')}
                 </Typography>
-                <Typography className={styles.subtitle}>
-                    {t('profileSubtitle')}
+                
+                <Typography 
+                    className={styles.explanation}
+                    sx={{
+                        textAlign: 'justify',
+                        textIndent: 0,
+                        margin: 0 // Remove all margins
+                    }}
+                >
+                    Эти данные нужны для построения вашей натальной карты, которая используется в 
+                    <span style={{ color: LENS_COLORS.astro, fontWeight: 'bold' }}> Астрологической Линзе</span>
+                    . Мы анализируем положение планет в момент вашего рождения и их взаимодействие с текущими транзитами, чтобы дать максимально точное толкование. 
+                    Если вы пропустите этот шаг, вам будут доступны только линзы 
+                    <span style={{ color: LENS_COLORS.psycho, fontWeight: 'bold' }}> Психоанализа </span> 
+                    и 
+                    <span style={{ color: LENS_COLORS.tarot, fontWeight: 'bold' }}> Таро</span>.
                 </Typography>
 
                 <Box sx={{position: 'relative'}}>
@@ -190,7 +217,7 @@ const ProfilePage = () => {
                     disabled={isLoading}
                     className={styles.skipButton}
                 >
-                    {t('skip')}
+                    {t('skipProfileCompletion')}
                 </Button>
             </Box>
         </Box>

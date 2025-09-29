@@ -154,8 +154,13 @@ const convertDateFormat = (dateString) => {
 
 // Обновление профиля
 app.put('/profile', async (req, res) => {
-    const { birthDate, birthTime, birthPlace } = req.body;
+    const { birthDate, birthTime, birthPlace, onboardingCompleted } = req.body;
     let userProfile = (await db.getProfile(req.userId)) || {};
+
+    // Устанавливаем флаг завершения регистрации, если он был передан
+    if (onboardingCompleted !== undefined) {
+        userProfile.onboardingCompleted = onboardingCompleted;
+    }
 
     // Преобразуем и обновляем дату
     const convertedBirthDate = convertDateFormat(birthDate);

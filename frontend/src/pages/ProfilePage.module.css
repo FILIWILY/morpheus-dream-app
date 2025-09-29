@@ -1,64 +1,93 @@
 .container {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 24px;
-    height: 100%;
+    min-height: 100vh;
+    padding: 1rem;
     box-sizing: border-box;
 }
 
 .glassCard {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 32px;
-    max-width: 400px;
+    border-radius: 15px;
+    padding: 3vh 1.25rem; /* Responsive vertical padding, consistent horizontal */
     width: 100%;
+    max-width: 500px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    gap: 1.5vh; /* Responsive gap between elements */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 }
 
 .title {
-    text-align: center;
-    font-weight: bold !important;
-    color: white;
-}
-
-.subtitle {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.7);
-    margin-top: -8px !important;
-    margin-bottom: 8px !important;
-}
-
-.button {
-    margin-top: 8px !important;
-    border-radius: 20px !important;
-    padding: 10px 20px !important;
-    font-weight: bold !important;
-    background: linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%);
     color: white !important;
-    box-shadow: 0 3px 5px 2px rgba(255, 105, 135, .3);
+    font-weight: bold !important;
+    font-size: 1rem !important;
+    /* margin-bottom is now controlled by sx prop in JSX */
+    text-align: left;
+    line-height: 1.4 !important;
 }
 
-.skipButton {
-    color: rgba(255, 255, 255, 0.5) !important;
-    text-transform: none !important;
+.explanation {
+    color: var(--text-secondary) !important;
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important; /* Reduced line height */
+    /* Styles like text-align, text-indent, and margin are now controlled by sx prop in JSX */
 }
+
+/* These rules are no longer needed as the new text is a single paragraph */
+/*
+.explanation:first-of-type {
+    margin-bottom: 1rem !important;
+}
+*/
 
 .suggestionsList {
     position: absolute;
     width: 100%;
-    background: #1e1e32;
+    background: var(--background-secondary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    margin-top: 8px;
+    margin-top: 4px;
     z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     max-height: 200px;
     overflow-y: auto;
+}
+
+.button {
+    background-color: var(--accent-primary) !important;
+    color: white !important;
+    font-weight: bold !important;
+    padding: 12px 0 !important; /* Reverted padding */
+    border-radius: 8px !important;
+    width: 100%;
+    align-self: center;
+    max-width: 300px; /* Reverted max-width */
+    transition: background-color 0.3s ease !important;
+    border: none !important; /* Ensure no border on main button */
+}
+
+.button:hover {
+    background-color: #00bfa5 !important;
+}
+
+.skipButton {
+    color: var(--accent-primary) !important;
+    border: 2px solid var(--accent-primary) !important;
+    background-color: transparent !important;
+    font-weight: bold !important;
+    padding: 10px 0 !important; /* Reverted padding */
+    border-radius: 8px !important;
+    width: 100%;
+    align-self: center;
+    max-width: 300px; /* Reverted max-width */
+    transition: all 0.3s ease !important;
+}
+
+.skipButton:hover {
+    background-color: rgba(3, 218, 197, 0.1) !important; /* Subtle glow on hover */
+    color: #03dac5 !important;
 }

@@ -20,5 +20,8 @@
   "homepage": "https://github.com/FILIWILY/morpheus-dream-app#readme",
   "devDependencies": {
     "concurrently": "^9.2.0"
+  },
+  "dependencies": {
+    "vite-plugin-svgr": "^4.5.0"
   }
 }
