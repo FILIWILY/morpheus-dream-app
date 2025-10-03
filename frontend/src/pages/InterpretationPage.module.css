@@ -1,18 +1,50 @@
 .pageWrapper {
-    padding: 60px 8px 120px 8px;
-    max-width: 680px;
-    margin: 0 auto;
+    /* Устанавливаем flex-контейнер на всю высоту экрана */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    
+    /* Отступы теперь здесь, чтобы фон не выходил за них */
+    padding: 60px 16px 24px 16px; /* Верхний 60, боковые 16, нижний 24 */
+    box-sizing: border-box; /* Важно для корректного расчета высоты */
+    
+    /* Убираем старые свойства, которые теперь не нужны */
+    max-width: none;
+    margin: 0;
 }
 
 .content {
+    /* Растягиваем этот блок на все доступное пространство */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 16px; /* Уменьшаем отступ между блоками */
-    background-color: rgba(0, 0, 0, 0.7); /* Менее прозрачный черный фон */
-    padding: 14px; /* Уменьшаем внутренние отступы */
-    border-radius: 12px; /* Скругляем углы */
-    backdrop-filter: blur(5px); /* Добавляем эффект блюра */
+
+    /* Стили фона и рамки остаются */
+    background-color: rgba(0, 0, 0, 0.7); /* Возвращаем полупрозрачный черный */
+    border-radius: 12px; /* Возвращаем скругление */
+    backdrop-filter: blur(5px); /* Возвращаем эффект блюра */
     -webkit-backdrop-filter: blur(5px); /* Префикс для Safari */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    /* Убираем внутренний отступ, он будет в .contentInner */
+    padding: 0;
+    
+    /* Добавляем overflow-y: auto, чтобы скролл появлялся внутри этого блока */
+    overflow-y: auto;
+}
+
+/* Новый внутренний контейнер для контента с отступами */
+.contentInner {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Новый контейнер для содержимого линзы */
+.lensContentContainer {
+    margin-top: 8px; /* Небольшой отступ сверху от табов */
 }
 
 /* ✅ Новый контейнер для сплошного текста */
@@ -42,6 +74,7 @@
     color: var(--text-primary);
     margin: 0;
     text-align: justify;
+    white-space: pre-wrap; /* Добавляем для сохранения переносов строк из БД */
 }
 
 /* ✅ Стили для заглушки с замком */

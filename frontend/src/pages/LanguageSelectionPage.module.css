@@ -38,8 +38,11 @@
     width: fit-content;
 }
 
+.formControlLabel {
+    color: var(--text-primary) !important; /* This will make the label text white */
+}
+
 .formControlLabel .MuiTypography-root {
-    color: var(--text-primary);
     font-size: 1rem; /* Slightly smaller labels */
 }
 

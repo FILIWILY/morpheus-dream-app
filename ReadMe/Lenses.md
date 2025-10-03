@@ -278,3 +278,21 @@ You are a culturologist and somnologist with expertise in psychoanalysis, specia
 - The frontend will render three main sections: "Preface," "Deep Analysis," and "Key Insight."
 - The `analysis` array will be mapped to display each archetype in its own card or block.
 - `react-markdown` will be used to correctly render Markdown content, including bold text for emphasis.
+
+---
+
+## 5. Dreambook Lens ("Сонник")
+
+### Core Principle
+The Dreambook Lens provides a concise, direct interpretation of key symbols from the dream, similar to a traditional dream dictionary. It's designed to be the fastest and most accessible interpretation, delivered as part of the very first AI response.
+
+### Data Structure
+The structure is simple, containing the interpretation text and an array of keywords that should be highlighted on the frontend.
+
+```json
+"dreambook": {
+  "title": "Сонник",
+  "content": "Текст толкования, объясняющий значение ключевых символов сна, таких как пещера, река и кристаллы...",
+  "highlightWords": ["пещера", "река", "кристаллы"]
+}
+```

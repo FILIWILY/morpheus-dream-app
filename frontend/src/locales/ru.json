@@ -41,12 +41,21 @@
   "birthPlaceLabel": "Место рождения (Город, Страна)",
   "birthPlacePlaceholder": "Начните вводить город...",
   "birthPlaceHint": "Выберите город из списка",
+  "genderLabel": "Укажите пол:",
+  "male": "Мужской",
+  "female": "Женский",
   "saveData": "Сохранить",
   "profileSaveSuccess": "Данные профиля успешно сохранены!",
   "profileSaveError": "Не удалось сохранить данные. Попробуйте снова.",
   "profileSaveErrorRequired": "Пожалуйста, заполните все поля.",
   "birthPlaceValidationError": "Пожалуйста, выберите место из списка.",
   "birthPlaceMigrationError": "Пожалуйста, подтвердите город, выбрав его из списка.",
+  
+  "generatingInterpretation": "Генерируем толкование...",
+  "aiAnalyzingDream": "ИИ анализирует ваш сон через разные линзы",
+  "pleaseWait": "Это может занять несколько минут. Пожалуйста, не закрывайте страницу.",
+  "waitingForAI": "Ожидаем толкование от ИИ...",
+  "thisMayTakeTime": "Это может занять несколько минут",
   
   "continue": "Продолжить",
   "profileTitle": "Расскажите о себе",
@@ -56,14 +65,18 @@
   "profileSkipError": "Произошла ошибка. Пожалуйста, попробуйте снова.",
 
   "lenses": {
+    "dreambook": "Сонник",
     "psychoanalytic": "Психоанализ",
     "tarot": "Таро",
     "astrology": "Астрология"
   },
+  "selectLensPrompt": "Выберите линзу толкования ниже",
+  "viewTranscript": "Расшифровка",
+  "dreamTranscript": "Расшифровка сна",
   "sayYourDream": "Произнесите свой сон...",
   "dreamTitle": "Заголовок сна",
-  "interpretation": "Интерпретация",
-  "dreamText": "Текст сна",
+  "interpretation": "Толкование",
+  "dreamText": "Запись Сна",
   "selectLanguagePrompt": "Пожалуйста, выберите язык приложения",
   "featureRecord": "Ведите дневник своих снов, записывая их голосом сразу после пробуждения, чтобы ничего не забыть.",
   "featureDecode_part1": "Расшифровывайте сны с помощью ИИ через 3 Линзы: ",
@@ -85,5 +98,6 @@
   "skipProfileCompletion": "Заполнить позже в профиле",
   "morpheus": "Морфей",
   "tarot": "Таро",
-  "welcomeNewTitle": "ИИ-дневник для записи и расшифровки снов"
+  "welcomeNewTitle": "ИИ-дневник для записи и расшифровки снов",
+  "mockProcessedText": "Это пример обработанного текста для мокового сна."
 }

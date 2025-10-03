@@ -10,6 +10,10 @@
   margin-bottom: 12px;
   overflow: hidden;
   transition: background-color 0.3s ease, border-color 0.3s ease;
+  padding: 12px; /* Уменьшаем внутренние отступы */
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
 }
 
 .dreamItemContainer.selected {
@@ -19,4 +23,83 @@
 
 .listItem {
   background-color: transparent !important;
+}
+
+.dreamItemContent {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.dreamItemText {
+  flex-grow: 1;
+}
+
+.dreamItemActions {
+  display: flex;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+.cardContent {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Уменьшаем и унифицируем отступы */
+}
+
+.dreamTitle {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.dreamDate {
+  color: var(--text-secondary);
+  font-size: 0.65rem !important; /* Принудительно уменьшаем шрифт в ~2 раза */
+  line-height: 1;
+  margin-top: 4px; /* Небольшой отступ сверху */
+}
+
+.cardActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* Общий стиль для кастомных кнопок */
+.cardButton {
+  flex: 1; /* Кнопки занимают равное пространство */
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important; /* Убираем КАПС */
+  line-height: 1.5 !important;
+  transition: all 0.2s ease-in-out !important;
+  border: 1px solid transparent !important;
+}
+
+/* Стили для "контурной" кнопки */
+.outlined {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+.outlined:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: var(--accent-primary) !important;
+}
+
+/* Стили для "залитой" кнопки */
+.contained {
+  background-color: var(--accent-primary) !important;
+  color: #fff !important;
+  border: none !important;
+}
+.contained:hover {
+  background-color: var(--accent-primary-dark) !important; /* Нужно определить этот цвет в :root */
 }

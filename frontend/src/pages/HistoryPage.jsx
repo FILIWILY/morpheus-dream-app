@@ -8,10 +8,12 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import MenuIcon from '@mui/icons-material/Menu'; // Import menu icon
+import EditIcon from '@mui/icons-material/Edit'; // Import edit icon
 import { LocalizationContext } from '../context/LocalizationContext';
 import styles from './HistoryPage.module.css';
 import { useDreams } from '../hooks/useDreams'; // Corrected the import path
 import { format } from 'date-fns';
+import TranscriptModal from '../components/TranscriptModal'; // Import the modal
 
 
 const HistoryPage = () => {
@@ -23,14 +25,33 @@ const HistoryPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedDreams, setSelectedDreams] = useState(new Set());
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isTranscriptModalOpen, setTranscriptModalOpen] = useState(false);
+  const [selectedDreamText, setSelectedDreamText] = useState('');
+  const [selectedDreamTitle, setSelectedDreamTitle] = useState('');
 
-  const handleItemClick = (dream) => {
-    if (isEditMode) {
-      const newSelection = new Set(selectedDreams);
-      newSelection.has(dream.id) ? newSelection.delete(dream.id) : newSelection.add(dream.id);
-      setSelectedDreams(newSelection);
+  const handleToggleSelect = (dreamId) => {
+    const newSelection = new Set(selectedDreams);
+    if (newSelection.has(dreamId)) {
+      newSelection.delete(dreamId);
     } else {
-      navigate(`/interpretation/${dream.id}`); // Navigate by ID
+      newSelection.add(dreamId);
+    }
+    setSelectedDreams(newSelection);
+  };
+
+  const handleInterpretationClick = (dreamId) => {
+    if (!isEditMode) {
+      navigate(`/interpretation/${dreamId}`);
+    }
+  };
+  
+  const handleDreamTextClick = (dream) => {
+    if (!isEditMode) {
+        const isMock = dream.title && dream.title.toLowerCase().startsWith('mock');
+        const textForModal = dream.processedText || (isMock ? t('mockProcessedText') : '');
+        setSelectedDreamText(textForModal);
+        setSelectedDreamTitle(dream.title);
+        setTranscriptModalOpen(true);
     }
   };
 
@@ -94,18 +115,11 @@ const HistoryPage = () => {
             ) : (
               <>
                 <IconButton 
-                  edge="end" 
-                  onClick={() => navigate('/')}
-                  sx={{ color: 'var(--accent-primary)' }}
-                >
-                  <AddIcon />
-                </IconButton>
-                <Button 
                   onClick={toggleEditMode}
                   sx={{ color: 'var(--accent-primary)' }}
                 >
-                  {t('edit')}
-                </Button>
+                  <EditIcon />
+                </IconButton>
               </>
             )}
           </Toolbar>
@@ -121,41 +135,63 @@ const HistoryPage = () => {
                     {t('historyEmptyNew')}
                 </Typography>
             ) : (
-                <List sx={{ pt: 1, p: 0 }}>
+                <List sx={{ pt: 1, p: 0, listStyle: 'none' }}>
                     {dreams.map((dream) => {
                     const isSelected = selectedDreams.has(dream.id);
                     const formattedDate = dream.date ? format(new Date(dream.date), 'dd.MM.yyyy') : '';
+                    const isMock = dream.title && dream.title.toLowerCase().startsWith('mock');
+                    const hasProcessedText = dream.processedText || (isMock && !dream.processedText);
+                    const textForModal = dream.processedText || (isMock ? t('mockProcessedText') : '');
+
                     return (
-                        <div key={dream.id} className={`${styles.dreamItemContainer} ${isSelected ? styles.selected : ''}`}>
-                            <ListItem
-                                disablePadding
-                                className={styles.listItem}
-                                secondaryAction={ 
-                                  isEditMode && 
-                                  <Checkbox 
-                                    edge="end" 
-                                    onChange={() => handleItemClick(dream)} 
+                        <li key={dream.id} style={{ position: 'relative' }}>
+                            <div 
+                                className={`${styles.dreamItemContainer} ${isSelected ? styles.selected : ''}`}
+                                onClick={() => !isEditMode && handleInterpretationClick(dream.id)}
+                            >
+                                <div className={styles.cardContent}>
+                                    <h2 className={styles.dreamTitle}>{dream.title}</h2>
+
+                                    {!isEditMode && (
+                                        <div className={styles.cardActions}>
+                                            <Button 
+                                                className={`${styles.cardButton} ${styles.outlined}`}
+                                                onClick={(e) => { e.stopPropagation(); handleInterpretationClick(dream.id); }}
+                                            >
+                                                {t('interpretation')}
+                                            </Button>
+                                            {dream.processedText && (
+                                                <Button 
+                                                    className={`${styles.cardButton} ${styles.contained}`}
+                                                    onClick={(e) => { e.stopPropagation(); handleDreamTextClick(dream); }}
+                                                >
+                                                    {t('dreamText')}
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    <Typography component="p" className={styles.dreamDate}>
+                                        {formattedDate}
+                                    </Typography>
+                                </div>
+                            </div>
+                            {isEditMode && (
+                                <Checkbox 
+                                    onChange={() => handleToggleSelect(dream.id)} 
                                     checked={isSelected}
                                     sx={{
-                                      color: 'var(--text-secondary)', 
-                                      '&.Mui-checked': {
-                                        color: 'var(--accent-primary)',
-                                      },
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        color: 'var(--text-secondary)', 
+                                        '&.Mui-checked': {
+                                            color: 'var(--accent-primary)',
+                                        },
                                     }}
-                                  /> 
-                                }
-                            >
-                                <ListItemButton onClick={() => handleItemClick(dream)} sx={{ borderRadius: '14px' }}>
-                                    <ListItemIcon> <NightsStayIcon sx={{ color: 'var(--accent-primary)' }} /> </ListItemIcon>
-                                    <ListItemText
-                                        primary={dream.title}
-                                        secondary={formattedDate}
-                                        primaryTypographyProps={{ fontWeight: '500', color: 'var(--text-primary)' }}
-                                        secondaryTypographyProps={{ style: { color: 'var(--text-secondary)' } }}
-                                    />
-                                </ListItemButton>
-                            </ListItem>
-                        </div>
+                                />
+                            )}
+                        </li>
                     );
                     })}
                 </List>
@@ -173,6 +209,13 @@ const HistoryPage = () => {
           <Button onClick={handleDeleteDreams} autoFocus color="error">{t('yesDelete')}</Button>
         </DialogActions>
       </Dialog>
+
+      <TranscriptModal
+        open={isTranscriptModalOpen}
+        onClose={() => setTranscriptModalOpen(false)}
+        transcript={selectedDreamText}
+        title={selectedDreamTitle}
+      />
     </>
   );
 };

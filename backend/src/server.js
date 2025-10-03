@@ -25,6 +25,8 @@ import { getDreamAtmosphere, calculateTopTransits, getCosmicPassport } from './s
 import { calculateNatalChart } from './services/natalChart.js';
 import { verifyTelegramAuth } from './middleware/auth.js';
 import TelegramBot from 'node-telegram-bot-api';
+import { WebSocketServer } from 'ws';
+import http from 'http';
 
 // --- Telegram Bot Setup ---
 const setupTelegramBot = () => {
@@ -80,6 +82,8 @@ await db.initializeDatabase();
 setupTelegramBot();
 
 const app = express();
+const server = http.createServer(app); // Создаем HTTP сервер для Express
+const wss = new WebSocketServer({ server }); // Создаем WebSocket сервер поверх HTTP сервера
 const PORT = process.env.PORT || 9000;
 
 // --- Константы для Таро ---
@@ -154,8 +158,13 @@ const convertDateFormat = (dateString) => {
 
 // Обновление профиля
 app.put('/profile', async (req, res) => {
-    const { birthDate, birthTime, birthPlace, onboardingCompleted } = req.body;
+    const { birthDate, birthTime, birthPlace, gender, onboardingCompleted } = req.body;
     let userProfile = (await db.getProfile(req.userId)) || {};
+
+    if (process.env.NODE_ENV !== 'production') {
+        console.log(`[SERVER] 📥 Received profile update for user ${req.userId}:`, req.body);
+        console.log(`[SERVER] 🚻 Gender from request body:`, gender);
+    }
 
     // Устанавливаем флаг завершения регистрации, если он был передан
     if (onboardingCompleted !== undefined) {
@@ -170,45 +179,53 @@ app.put('/profile', async (req, res) => {
     
     userProfile.birthDate = convertedBirthDate;
     userProfile.birthTime = birthTime;
+    userProfile.gender = gender;
     
-    console.log(`[SERVER] Date conversion: "${birthDate}" -> "${convertedBirthDate}"`);
+    if (process.env.NODE_ENV !== 'production') {
+        console.log(`[SERVER] Date conversion: "${birthDate}" -> "${convertedBirthDate}"`);
+        console.log(`[SERVER] 🚻 Gender assigned to userProfile:`, userProfile.gender);
+    }
 
-    // Если передан placeId, получаем координаты
-    if (birthPlace && birthPlace.placeId) {
-        try {
-            const apiKey = process.env.GOOGLE_GEOCODING_API_KEY;
-            const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
-                params: {
-                    place_id: birthPlace.placeId,
-                    key: apiKey,
-                    language: 'ru' // Можно сделать динамическим в будущем
-                }
+    // Новая, более надежная логика обработки birthPlace
+    try {
+        const apiKey = process.env.GOOGLE_GEOCODING_API_KEY;
+        let geocodeResponse = null;
+
+        if (birthPlace && birthPlace.placeId) {
+            console.log(`[Geocode] Attempting geocoding with placeId: ${birthPlace.placeId}`);
+            // 1. Предпочтительный способ: геокодирование по placeId
+            geocodeResponse = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+                params: { place_id: birthPlace.placeId, key: apiKey, language: 'ru' }
             });
+        } else if (birthPlace && birthPlace.description) {
+            console.log(`[Geocode] Attempting geocoding with address: "${birthPlace.description}"`);
+            // 2. Запасной способ: геокодирование по текстовому описанию
+            geocodeResponse = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+                params: { address: birthPlace.description, key: apiKey, language: 'ru' }
+            });
+        }
 
-            const { data } = response;
-            if (data.status === 'OK' && data.results.length > 0) {
-                const location = data.results[0].geometry.location;
-                userProfile.birthPlace = data.results[0].formatted_address;
-                userProfile.birthLatitude = location.lat;
-                userProfile.birthLongitude = location.lng;
-                console.log(`Геокодирование успешно: ${userProfile.birthPlace} [${location.lat}, ${location.lng}]`);
-            } else {
-                console.error(`Ошибка геокодирования: ${data.status}`, data.error_message || '');
-                // Если геокодирование не удалось, сохраняем только текстовое описание
-                userProfile.birthPlace = birthPlace.description;
-                delete userProfile.birthLatitude;
-                delete userProfile.birthLongitude;
+        if (geocodeResponse && geocodeResponse.data.status === 'OK' && geocodeResponse.data.results.length > 0) {
+            const result = geocodeResponse.data.results[0];
+            const location = result.geometry.location;
+            userProfile.birthPlace = result.formatted_address;
+            userProfile.birthLatitude = location.lat;
+            userProfile.birthLongitude = location.lng;
+            console.log(`[Geocode] ✅ Success: ${userProfile.birthPlace} [${location.lat}, ${location.lng}]`);
+        } else {
+            // Если геокодирование не удалось или не было данных
+            if (geocodeResponse) {
+                console.error(`[Geocode] ❌ Failed: ${geocodeResponse.data.status}`, geocodeResponse.data.error_message || '');
             }
-        } catch (error) {
-            console.error('Error fetching geocoding data:', error);
-            // В случае ошибки сохраняем текстовое описание
-            userProfile.birthPlace = birthPlace.description;
+            // Сохраняем только текстовое описание, если оно есть
+            userProfile.birthPlace = (birthPlace && typeof birthPlace === 'object') ? birthPlace.description : birthPlace;
             delete userProfile.birthLatitude;
             delete userProfile.birthLongitude;
         }
-    } else {
-        // Сохраняем как есть (для обратной совместимости)
-        userProfile.birthPlace = birthPlace;
+    } catch (error) {
+        console.error('[Geocode] 💥 Hard error during geocoding:', error.message);
+        // В случае критической ошибки сохраняем только текстовое описание
+        userProfile.birthPlace = (birthPlace && typeof birthPlace === 'object') ? birthPlace.description : birthPlace;
         delete userProfile.birthLatitude;
         delete userProfile.birthLongitude;
     }
@@ -263,7 +280,7 @@ app.get('/dreams', async (req, res) => {
 // Получение одного сна по id
 app.get('/dreams/:dreamId', async (req, res) => {
   const { dreamId } = req.params;
-  console.log(`[Server] Fetching dream by ID: ${dreamId} for user: ${req.userId}`);
+  console.log(`[Server] 🔍 Fetching dream by ID: ${dreamId} for user: ${req.userId}`);
   console.log(`[Server] Request headers:`, {
     'X-Telegram-Init-Data': req.headers['x-telegram-init-data'] ? '[PRESENT]' : '[MISSING]',
     'X-Telegram-User-ID': req.headers['x-telegram-user-id'] || '[MISSING]'
@@ -272,9 +289,19 @@ app.get('/dreams/:dreamId', async (req, res) => {
       const dream = await db.getDreamById(req.userId, dreamId);
       if (!dream) {
         console.log(`[Server] ❌ Dream not found: ${dreamId} for user: ${req.userId}`);
+        console.log(`[Server] 💡 This could mean:`);
+        console.log(`[Server]    1. Dream doesn't exist in DB`);
+        console.log(`[Server]    2. Dream belongs to different user`);
+        console.log(`[Server]    3. Dream was not saved properly (check title/summary)`);
         return res.status(404).json({ error: 'Dream not found' });
       }
       console.log(`[Server] ✅ Dream found: ${dreamId}`);
+      console.log(`[Server] 📊 Dream data:`, { 
+        id: dream.id, 
+        title: dream.title || '[NULL]', 
+        hasLenses: !!dream.lenses,
+        lensCount: dream.lenses ? Object.keys(dream.lenses).length : 0
+      });
       res.status(200).json(dream);
   } catch (error) {
       console.error(`[Server] Error fetching dream ${dreamId}:`, error);
@@ -299,79 +326,88 @@ app.delete('/dreams', async (req, res) => {
 
 // Обработка текстового сна
 app.post('/processDreamText', async (req, res) => {
-  const { text, lang, date } = req.body;
-  console.log(`[Server] Processing dream text for user: ${req.userId}`);
-  console.log(`[Server] Request headers:`, {
-    'X-Telegram-Init-Data': req.headers['x-telegram-init-data'] ? '[PRESENT]' : '[MISSING]',
-    'X-Telegram-User-ID': req.headers['x-telegram-user-id'] || '[MISSING]'
-  });
-  if (!text || !date) {
-    return res.status(400).json({ error: "Поля text и date обязательны." });
-  }
-  try {
-    const tarotSpread = generateTarotSpread();
-    const userProfile = await db.getProfile(req.userId);
-    const dreamDate = date === 'today' ? new Date().toISOString().split('T')[0] : date;
-
-    let interpretation;
-
-    if (process.env.USE_MOCK_API === 'true') {
-        const mockDataPath = path.join(process.cwd(), 'mock-interpretation.json');
-        const mockData = fs.readFileSync(mockDataPath, 'utf-8');
-        interpretation = JSON.parse(mockData);
-
-        // --- Линза Таро: соединяем сгенерированные карты с мок-интерпретациями ---
-        const mockTarotInterpretations = interpretation.lenses.tarot.spread;
-        const mockSummary = interpretation.lenses.tarot.summary;
-        const interpretedSpread = tarotSpread.map((generatedCard, index) => {
-            const mockInterpretationData = mockTarotInterpretations[index] || {};
-            return {
-                ...generatedCard,
-                interpretation: (mockInterpretationData.interpretation || "Интерпретация не найдена.").replace(/<<cardName>>/g, generatedCard.cardName)
-            };
-        });
-        interpretation.lenses.tarot = {
-            title: interpretation.lenses.tarot.title || "Таро",
-            spread: interpretedSpread,
-            summary: mockSummary,
-            state: { isRevealed: false }
-        };
-    } else {
-        // --- БОЕВОЙ РЕЖИМ ---
-        // 1. Рассчитываем астро-данные, если профиль заполнен
-        let astrologyCalculations = null;
-        if (userProfile?.natalChart) {
-            console.log('[Server] Профиль заполнен, рассчитываем астрологию...');
-            const [dreamAtmosphere, topTransits, cosmicPassport] = await Promise.all([
-                getDreamAtmosphere(dreamDate),
-                calculateTopTransits(userProfile.natalChart, dreamDate),
-                getCosmicPassport(userProfile.natalChart)
-            ]);
-            // Собираем только расчетные данные для передачи в AI
-            astrologyCalculations = { dreamAtmosphere, topTransits, cosmicPassport };
-        } else {
-            console.log('[Server] Профиль неполный, пропускаем расчет астрологии.');
-        }
-
-        // 2. Вызываем AI-провайдер со всеми доступными данными
-        console.log('[Server] Calling AI provider...');
-        interpretation = await getDreamInterpretation(text, lang, userProfile, tarotSpread, astrologyCalculations);
-        console.log('[Server] ✅ AI interpretation received successfully');
+    const { text, lang, date } = req.body;
+    console.log(`[Server] Initializing dream processing for user: ${req.userId}`);
+    if (!text || !date) {
+        return res.status(400).json({ error: "Поля text и date обязательны." });
     }
+    try {
+        const dreamDate = date === 'today' ? new Date().toISOString().split('T')[0] : date;
+        
+        // Создаем "пустую" запись сна, чтобы получить ID
+        const newDreamEntry = {
+            id: uuidv4(),
+            date: dreamDate,
+            originalText: text,
+            title: null, // Будет заполнено через WebSocket
+            snapshotSummary: null, // Будет заполнено через WebSocket
+            lenses: {}, // Линзы будут добавлены через WebSocket
+            activeLens: null
+        };
+        
+        await db.saveDream(req.userId, newDreamEntry);
+        console.log(`[Server] ✅ Dream shell created with ID: ${newDreamEntry.id}`);
+        
+        // Отправляем клиенту ID для подключения по WebSocket
+        res.status(202).json({ dreamId: newDreamEntry.id });
+        
+    } catch (error) {
+        console.error('[Server] Ошибка при создании "пустой" записи сна:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
-    console.log('[Server] Creating dream entry...');
-    const newDreamEntry = { id: uuidv4(), date: dreamDate, originalText: text, activeLens: null, ...interpretation };
-    
-    console.log('[Server] Saving dream to database...');
-    await db.saveDream(req.userId, newDreamEntry);
-    console.log('[Server] ✅ Dream saved successfully, ID:', newDreamEntry.id);
-    
-    console.log('[Server] Sending response to client...');
-    res.status(200).json(newDreamEntry);
-  } catch (error) {
-    console.error('[Server] Ошибка при обработке сна:', error);
-    res.status(500).json({ error: error.message });
-  }
+wss.on('connection', (ws, req) => {
+    // В реальном приложении здесь должна быть аутентификация,
+    // например, через токен, переданный в URL
+    console.log('[WebSocket] ✅ Client connected');
+
+    ws.on('message', async (message) => {
+        try {
+            const data = JSON.parse(message);
+            console.log('[WebSocket] Received message:', data);
+
+            if (data.type === 'startInterpretation') {
+                const { dreamId, userId, lang } = data.payload;
+
+                // Получаем сон из БД
+                const dream = await db.getDreamById(userId, dreamId);
+                if (!dream) {
+                    ws.send(JSON.stringify({ type: 'error', payload: { message: 'Dream not found' } }));
+                    return;
+                }
+                
+                // Получаем профиль пользователя
+                const userProfile = await db.getProfile(userId);
+                
+                // Генерируем расклад Таро
+                const tarotSpread = generateTarotSpread();
+
+                // Рассчитываем астро-данные
+                let astrologyCalculations = null;
+                // Убедимся, что natalChart существует и не пустой объект
+                if (userProfile?.natalChart && Object.keys(userProfile.natalChart).length > 0) {
+                    const dreamDate = dream.date;
+                    const [dreamAtmosphere, topTransits, cosmicPassport] = await Promise.all([
+                        getDreamAtmosphere(dreamDate),
+                        calculateTopTransits(userProfile.natalChart, dreamDate),
+                        getCosmicPassport(userProfile.natalChart)
+                    ]);
+                    astrologyCalculations = { dreamAtmosphere, topTransits, cosmicPassport };
+                }
+
+                // Запускаем стриминг
+                await getDreamInterpretationStream(ws, dream.originalText, lang, userProfile, tarotSpread, astrologyCalculations, userId, dreamId);
+            }
+        } catch (error) {
+            console.error('[WebSocket] Error processing message:', error);
+            ws.send(JSON.stringify({ type: 'error', payload: { message: 'Internal server error' } }));
+        }
+    });
+
+    ws.on('close', () => {
+        console.log('[WebSocket] ❌ Client disconnected');
+    });
 });
 
 // Обновление состояния линзы
@@ -430,6 +466,9 @@ app.post('/processDreamAudio', (req, res) => {
     res.status(501).json({ message: "Обработка аудио еще не реализована" });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`✨ Бэкенд запущен на http://localhost:${PORT}`);
 });
+
+// Импорт ai_provider после всех настроек
+import { getDreamInterpretationStream } from './services/ai_provider.js';

@@ -36,7 +36,8 @@ Stores each dream and its full interpretation.
 | `user_id` | `TEXT` | Foreign key referencing `users.telegram_id`. Ensures dreams are linked to a user. |
 | `dream_date` | `TIMESTAMP WITH TIME ZONE` | The date and time the dream occurred, as specified by the user. |
 | `dream_text` | `TEXT NOT NULL` | The raw text of the dream. |
-| `interpretation` | `JSONB NOT NULL` | The complete JSON object received from the AI, including `title`, `snapshotSummary`, and all `lenses`. |
+| `processed_text` | `TEXT` | LLM-processed version of the dream text with proper formatting and punctuation. |
+| `interpretation` | `JSONB NOT NULL` | The complete JSON object received from the AI, including `title` and all `lenses`. |
 | `active_lens` | `VARCHAR(50)` | Stores which lens the user last viewed for this dream. |
 | `created_at` | `TIMESTAMPTZ` | Timestamp of when the dream was saved. |
 
@@ -48,9 +49,13 @@ For local development and testing, the application can be configured to use a si
 
 ### Usage
 
-This mode is controlled by the `USE_MOCK_API` environment variable.
+This mode is controlled by the `DATABASE_TYPE` environment variable.
 
--   `USE_MOCK_API=true`: The data access layer will read from and write to `backend/db.json`.
--   `USE_MOCK_API=false`: The data access layer will connect to the PostgreSQL database specified by `DATABASE_URL`.
+-   `DATABASE_TYPE=json`: The data access layer will read from and write to `backend/db.json`.
+-   `DATABASE_TYPE=postgres`: The data access layer will connect to the PostgreSQL database specified by `DATABASE_URL`.
 
 The structure of `db.json` mirrors the production schema in a nested format.
+
+**Note:** `DATABASE_TYPE` is independent from `USE_MOCK_AI`. You can use mock AI responses with any database type:
+- `DATABASE_TYPE=json` + `USE_MOCK_AI=true` - JSON database with mock AI
+- `DATABASE_TYPE=postgres` + `USE_MOCK_AI=true` - PostgreSQL with mock AI

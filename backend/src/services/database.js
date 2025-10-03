@@ -42,9 +42,6 @@ if (process.env.DATABASE_TYPE === 'postgres' && useJsonDatabase) {
   console.error(`   Проверьте правильность загрузки .env файла`);
 }
 
-// Для обратной совместимости
-const useMockApi = useJsonDatabase;
-
 // --- Database Connection (PostgreSQL) ---
 let pool = null;
 
@@ -222,7 +219,7 @@ export async function getProfile(telegramId) {
 
     try {
         const res = await pool.query(
-            'SELECT birth_date, birth_time, birth_place, birth_latitude, birth_longitude, "natalChart", onboarding_completed FROM users WHERE telegram_id = $1',
+            'SELECT birth_date, birth_time, birth_place, birth_latitude, birth_longitude, gender, "natalChart", onboarding_completed FROM users WHERE telegram_id = $1',
             [telegramId]
         );
 
@@ -255,6 +252,7 @@ export async function getProfile(telegramId) {
                 birthPlace: profile.birth_place,
                 birthLatitude: profile.birth_latitude,
                 birthLongitude: profile.birth_longitude,
+                gender: profile.gender,
                 natalChart: profile.natalChart,
                 onboardingCompleted: profile.onboarding_completed
             };
@@ -270,6 +268,7 @@ export async function getProfile(telegramId) {
                 birthPlace: null,
                 birthLatitude: null,
                 birthLongitude: null,
+                gender: null,
                 natalChart: null,
                 onboardingCompleted: false
             };
@@ -297,7 +296,12 @@ export async function updateProfile(telegramId, profileData) {
         return profileData;
     }
 
-    const { birthDate, birthTime, birthPlace, birthLatitude, birthLongitude, natalChart, onboardingCompleted } = profileData;
+    if (isDevelopment) {
+        console.log('[DB] 📥 updateProfile called for user:', telegramId);
+        console.log('[DB] 📦 Received profileData:', JSON.stringify(profileData, null, 2));
+    }
+
+    const { birthDate, birthTime, birthPlace, birthLatitude, birthLongitude, gender, natalChart, onboardingCompleted } = profileData;
 
     // Build the query dynamically to only update provided fields
     const fields = [];
@@ -309,6 +313,13 @@ export async function updateProfile(telegramId, profileData) {
     if (birthPlace !== undefined) { fields.push(`birth_place = $${queryIndex++}`); values.push(birthPlace); }
     if (birthLatitude !== undefined) { fields.push(`birth_latitude = $${queryIndex++}`); values.push(birthLatitude); }
     if (birthLongitude !== undefined) { fields.push(`birth_longitude = $${queryIndex++}`); values.push(birthLongitude); }
+    if (gender !== undefined) { 
+        if (isDevelopment) {
+            console.log('[DB] 🚻 Gender field detected:', gender);
+        }
+        fields.push(`gender = $${queryIndex++}`); 
+        values.push(gender); 
+    }
     if (natalChart !== undefined) { fields.push(`"natalChart" = $${queryIndex++}`); values.push(natalChart); }
     if (onboardingCompleted !== undefined) { fields.push(`onboarding_completed = $${queryIndex++}`); values.push(onboardingCompleted); }
 
@@ -322,7 +333,7 @@ export async function updateProfile(telegramId, profileData) {
         UPDATE users SET
             ${fields.join(', ')}
         WHERE telegram_id = $${queryIndex}
-        RETURNING birth_date, birth_time, birth_place, birth_latitude, birth_longitude, "natalChart", onboarding_completed
+        RETURNING birth_date, birth_time, birth_place, birth_latitude, birth_longitude, gender, "natalChart", onboarding_completed
     `;
 
     try {
@@ -356,15 +367,22 @@ export async function updateProfile(telegramId, profileData) {
             return timeString.split(':').slice(0, 2).join(':');
         };
         
-        return {
+        const result = {
             birthDate: formatDateForFrontend(profile.birth_date),
             birthTime: formatTimeForFrontend(profile.birth_time),
             birthPlace: profile.birth_place,
             birthLatitude: profile.birth_latitude,
             birthLongitude: profile.birth_longitude,
+            gender: profile.gender,
             natalChart: profile.natalChart,
             onboardingCompleted: profile.onboarding_completed
         };
+        
+        if (isDevelopment) {
+            console.log('[DB] 📤 Returning updated profile:', JSON.stringify(result, null, 2));
+        }
+        
+        return result;
     } catch (error) {
         console.error('Error updating profile:', error);
         throw error;
@@ -377,6 +395,43 @@ export async function updateProfile(telegramId, profileData) {
  * @param {object} dreamData - The full dream object to save.
  * @returns {Promise<object>} The saved dream object.
  */
+function mergeDreamData(existingDream, updatePayload) {
+    const merged = { ...existingDream };
+
+    if (!updatePayload || typeof updatePayload !== 'object') {
+        return merged;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updatePayload, 'title')) {
+        merged.title = updatePayload.title;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updatePayload, 'snapshotSummary')) {
+        merged.snapshotSummary = updatePayload.snapshotSummary;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updatePayload, 'lenses')) {
+        merged.lenses = { ...merged.lenses };
+        const incomingLenses = updatePayload.lenses || {};
+
+        for (const lensKey of Object.keys(incomingLenses)) {
+            const incomingLensData = incomingLenses[lensKey];
+            const existingLensData = merged.lenses[lensKey] || {};
+
+            merged.lenses[lensKey] = {
+                ...existingLensData,
+                ...incomingLensData,
+            };
+        }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updatePayload, 'activeLens')) {
+        merged.activeLens = updatePayload.activeLens;
+    }
+
+    return merged;
+}
+
 export async function saveDream(telegramId, dreamData) {
     if (!usePostgresDatabase) {
         const db = readDB();
@@ -389,19 +444,128 @@ export async function saveDream(telegramId, dreamData) {
     }
     
     // In Postgres, we separate the core fields from the 'interpretation' JSONB field.
-    const { id, date, originalText, activeLens, ...interpretationData } = dreamData;
+    const { id, date, originalText, processedText, activeLens, ...interpretationData } = dreamData;
     
     try {
-        console.log(`[DB] Saving dream to PostgreSQL: ID=${id}, user=${telegramId}, date=${date}`);
+        if (isDevelopment) {
+            console.log(`[DB] Saving dream to PostgreSQL: ID=${id}, user=${telegramId}, date=${date}`);
+        }
         await pool.query(
-            `INSERT INTO dreams (id, user_id, dream_date, dream_text, interpretation, active_lens)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
-            [id, telegramId, date, originalText, interpretationData, activeLens]
+            `INSERT INTO dreams (id, user_id, dream_date, dream_text, processed_text, interpretation, active_lens)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [id, telegramId, date, originalText, processedText, interpretationData, activeLens]
         );
-        console.log(`[DB] ✅ Dream saved successfully: ${id}`);
+        if (isDevelopment) {
+            console.log(`[DB] ✅ Dream saved successfully: ${id}`);
+        }
         return dreamData; // Return the original, complete object for consistency
     } catch (error) {
         console.error('[DB] Error saving dream:', error);
+        throw error;
+    }
+}
+
+export async function updateDreamPartial(telegramId, dreamId, updatePayload) {
+    if (!usePostgresDatabase) {
+        const db = readDB();
+        const userDreams = db.users[telegramId]?.dreams;
+        if (!userDreams) {
+            throw new Error('User not found in mock DB');
+        }
+        const dreamIndex = userDreams.findIndex((dream) => dream.id === dreamId);
+        if (dreamIndex === -1) {
+            throw new Error('Dream not found in mock DB');
+        }
+        const existingDream = userDreams[dreamIndex];
+        const mergedDream = mergeDreamData(existingDream, updatePayload);
+        userDreams[dreamIndex] = JSON.parse(JSON.stringify(mergedDream));
+        writeDB(db);
+        return mergedDream;
+    }
+
+    if (isDevelopment) {
+        console.log(`[DB UPDATE] Received payload for dream ${dreamId}:`, JSON.stringify(updatePayload, null, 2));
+    }
+
+    try {
+        const { title, processedText, activeLens, lenses, ...otherInterpretationFields } = updatePayload;
+
+        const updates = [];
+        const values = [];
+        let paramIndex = 1;
+
+        if (processedText !== undefined) {
+            updates.push(`processed_text = $${paramIndex++}`);
+            values.push(processedText);
+        }
+        if (activeLens !== undefined) {
+            updates.push(`active_lens = $${paramIndex++}`);
+            values.push(activeLens);
+        }
+        
+        // ✅ КРИТИЧНО: Объединяем все обновления interpretation в ОДИН SET
+        // Сначала применяем jsonb_set для каждой линзы, затем слияние для остальных полей
+        
+        let interpretationExpression = 'interpretation';
+        
+        // 1. Для lenses используем глубокое слияние через jsonb_set
+        if (lenses) {
+            const lensKeys = Object.keys(lenses);
+            for (const lensKey of lensKeys) {
+                interpretationExpression = `jsonb_set(${interpretationExpression}, '{lenses,${lensKey}}', $${paramIndex++}::jsonb, true)`;
+                values.push(JSON.stringify(lenses[lensKey]));
+            }
+        }
+
+        // 2. Для других полей (title, snapshotSummary и т.д.) используем обычное слияние
+        const shallowFields = { ...otherInterpretationFields };
+        if (title !== undefined) {
+            shallowFields.title = title;
+        }
+        
+        if (Object.keys(shallowFields).length > 0) {
+            interpretationExpression = `${interpretationExpression} || $${paramIndex++}`;
+            values.push(JSON.stringify(shallowFields));
+        }
+
+        // 3. Добавляем итоговое выражение как ОДИН SET
+        if (interpretationExpression !== 'interpretation') {
+            updates.push(`interpretation = ${interpretationExpression}`);
+        }
+
+        if (updates.length === 0) {
+            if (isDevelopment) {
+                console.log('[DB UPDATE] No fields to update.');
+            }
+            return {};
+        }
+
+        values.push(telegramId, dreamId);
+        const query = `
+            UPDATE dreams
+            SET ${updates.join(', ')}
+            WHERE user_id = $${paramIndex++} AND id = $${paramIndex++}
+            RETURNING *;
+        `;
+
+        if (isDevelopment) {
+            console.log('[DB UPDATE] Executing query:', query);
+            console.log('[DB UPDATE] With values:', values);
+        }
+
+        const { rows } = await pool.query(query, values);
+        
+        if (rows.length === 0) {
+            throw new Error('Dream not found or user mismatch during update.');
+        }
+
+        if (isDevelopment) {
+            console.log(`[DB UPDATE] ✅ Successfully updated dream ${dreamId}.`);
+        }
+        return rows[0]; // Возвращаем обновленную строку из БД
+
+    } catch (error) {
+        console.error('[DB UPDATE] Error updating dream partially:', error);
         throw error;
     }
 }
@@ -423,6 +587,7 @@ export async function getDreams(telegramId) {
           id,
           dream_date AS date,
           dream_text AS "originalText",
+          processed_text AS "processedText",
           active_lens AS "activeLens",
           interpretation
         FROM dreams
@@ -430,6 +595,10 @@ export async function getDreams(telegramId) {
         ORDER BY created_at DESC
       `;
       const { rows } = await pool.query(query, [telegramId]);
+      
+      if (isDevelopment) {
+        console.log(`[DB GET] Found ${rows.length} dreams for user ${telegramId}.`);
+      }
 
       // Reconstruct the full dream object, merging the interpretation fields
       // back to the top level to match the structure of db.json.
@@ -437,6 +606,7 @@ export async function getDreams(telegramId) {
           id: row.id,
           date: row.date,
           originalText: row.originalText,
+          processedText: row.processedText,
           activeLens: row.activeLens,
           ...row.interpretation
       }));
@@ -456,30 +626,42 @@ export async function getDreamById(telegramId, dreamId) {
     if (!usePostgresDatabase) {
         const db = readDB();
         const userDreams = db.users[telegramId]?.dreams || [];
-        return userDreams.find(d => d.id === dreamId) || null;
+        const dream = userDreams.find(d => d.id === dreamId);
+        if (!dream) {
+            return null;
+        }
+
+        return JSON.parse(JSON.stringify(dream));
     }
 
     try {
-        console.log(`[DB] Fetching dream from PostgreSQL: ID=${dreamId}, user=${telegramId}`);
+        if (isDevelopment) {
+            console.log(`[DB] Fetching dream from PostgreSQL: ID=${dreamId}, user=${telegramId}`);
+        }
         const res = await pool.query(
-            `SELECT id, dream_date AS date, dream_text AS "originalText", active_lens AS "activeLens", interpretation
+            `SELECT id, dream_date AS date, dream_text AS "originalText", processed_text AS "processedText", active_lens AS "activeLens", interpretation
              FROM dreams
              WHERE user_id = $1 AND id = $2`,
             [telegramId, dreamId]
         );
 
         if (res.rows.length === 0) {
-            console.log(`[DB] ❌ Dream not found in PostgreSQL: ID=${dreamId}, user=${telegramId}`);
+            if (isDevelopment) {
+                console.log(`[DB] ❌ Dream not found in PostgreSQL: ID=${dreamId}, user=${telegramId}`);
+            }
             return null;
         }
 
         const row = res.rows[0];
-        console.log(`[DB] ✅ Dream found in PostgreSQL: ${dreamId}`);
+        if (isDevelopment) {
+            console.log(`[DB GET BY ID] ✅ Dream found in PostgreSQL: ${dreamId}. Data:`, row);
+        }
         // Reconstruct the full dream object to match db.json structure
         return {
             id: row.id,
             date: row.date,
             originalText: row.originalText,
+            processedText: row.processedText,
             activeLens: row.activeLens,
             ...row.interpretation
         };
@@ -533,16 +715,27 @@ export async function deleteDreams(telegramId, dreamIds) {
 export async function updateLensState(telegramId, dreamId, lens, stateUpdate) {
     if (!usePostgresDatabase) {
         const db = readDB();
-        const dream = db.users[telegramId]?.dreams.find(d => d.id === dreamId);
-        if (!dream) throw new Error("Dream not found in mock DB");
+        const dreamIndex = db.users[telegramId]?.dreams.findIndex(d => d.id === dreamId);
+        if (dreamIndex === undefined || dreamIndex === -1) {
+            throw new Error("Dream not found in mock DB");
+        }
 
-        if (!dream.lenses[lens]) dream.lenses[lens] = {};
-        if (!dream.lenses[lens].state) dream.lenses[lens].state = {};
-        
-        dream.lenses[lens].state = { ...dream.lenses[lens].state, ...stateUpdate };
+        const dream = db.users[telegramId].dreams[dreamIndex];
+        const updatedDream = mergeDreamData(dream, {
+            lenses: {
+                [lens]: {
+                    ...dream.lenses?.[lens],
+                    state: {
+                        ...(dream.lenses?.[lens]?.state || {}),
+                        ...stateUpdate
+                    }
+                }
+            }
+        });
 
+        db.users[telegramId].dreams[dreamIndex] = updatedDream;
         writeDB(db);
-        return dream.lenses[lens];
+        return updatedDream.lenses[lens];
     }
     
     try {
@@ -583,9 +776,11 @@ export async function updateLensState(telegramId, dreamId, lens, stateUpdate) {
 export async function updateActiveLens(telegramId, dreamId, activeLens) {
     if (!usePostgresDatabase) {
         const db = readDB();
-        const dream = db.users[telegramId]?.dreams.find(d => d.id === dreamId);
-        if (dream) {
-            dream.activeLens = activeLens;
+        const dreamIndex = db.users[telegramId]?.dreams.findIndex(d => d.id === dreamId);
+        if (dreamIndex !== undefined && dreamIndex !== -1) {
+            const dream = db.users[telegramId].dreams[dreamIndex];
+            const updatedDream = mergeDreamData(dream, { activeLens });
+            db.users[telegramId].dreams[dreamIndex] = updatedDream;
             writeDB(db);
         }
         return;

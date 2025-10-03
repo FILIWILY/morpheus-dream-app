@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     birth_place VARCHAR(255),
     birth_latitude REAL,
     birth_longitude REAL,
+    gender VARCHAR(10),
     "natalChart" JSONB,
     onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS dreams (
     user_id TEXT REFERENCES users(telegram_id) ON DELETE CASCADE,
     dream_date TIMESTAMP WITH TIME ZONE NOT NULL,
     dream_text TEXT NOT NULL,
+    processed_text TEXT,
     interpretation JSONB NOT NULL,
     active_lens VARCHAR(50),
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -35,3 +37,4 @@ CREATE INDEX IF NOT EXISTS idx_dreams_user_id ON dreams(user_id);
 -- Optional: Add a comment to the tables to describe their purpose.
 COMMENT ON TABLE users IS 'Stores user profile information, including data for astrological calculations.';
 COMMENT ON TABLE dreams IS 'Stores individual dream records and their multi-faceted interpretations from the AI.';
+COMMENT ON COLUMN dreams.processed_text IS 'LLM-processed version of the dream text with proper formatting';

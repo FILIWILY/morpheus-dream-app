@@ -30,7 +30,15 @@ export const calculateNatalChart = async (birthDate, birthTime, latitude, longit
         }
 
         // 1. Преобразование времени в UTC и Юлианский день
-        const [day, month, year] = birthDate.split('.').map(Number);
+        // birthDate может быть в формате 'YYYY-MM-DD' или 'DD.MM.YYYY'
+        let year, month, day;
+        if (birthDate.includes('-')) {
+            // Формат YYYY-MM-DD
+            [year, month, day] = birthDate.split('-').map(Number);
+        } else {
+            // Формат DD.MM.YYYY
+            [day, month, year] = birthDate.split('.').map(Number);
+        }
         const [hour, minute] = birthTime.split(':').map(Number);
         const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
         

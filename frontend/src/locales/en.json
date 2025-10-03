@@ -38,6 +38,9 @@
   "birthPlaceLabel": "Place of Birth",
   "birthPlacePlaceholder": "e.g., London, UK",
   "birthPlaceHint": "Please select your city from the dropdown list for accurate calculations.",
+  "genderLabel": "Gender:",
+  "male": "Male",
+  "female": "Female",
   "saveData": "Save",
   "profileSaveSuccess": "Profile data saved successfully!",
   "profileSaveError": "Error saving profile. Please try again.",
@@ -45,11 +48,28 @@
   "birthPlaceValidationError": "Please select a location from the list.",
   "birthPlaceMigrationError": "Please confirm your city by selecting it from the list.",
   
+  "generatingInterpretation": "Generating interpretation...",
+  "aiAnalyzingDream": "AI is analyzing your dream through different lenses",
+  "pleaseWait": "This may take a few minutes. Please don't close the page.",
+  "waitingForAI": "Waiting for AI interpretation...",
+  "thisMayTakeTime": "This may take a few minutes",
+  
   "continue": "Continue",
   "profileTitle": "Tell Us About Yourself",
   "profileSubtitle": "This information will help us personalize your astrological interpretations.",
   "saveAndContinue": "Save and Continue",
   "skip": "Skip for now",
+  "lenses": {
+    "dreambook": "Dream Book",
+    "psychoanalytic": "Psychoanalysis",
+    "tarot": "Tarot",
+    "astrology": "Astrology"
+  },
+  "interpretation": "Interpretation",
+  "dreamText": "Dream",
+  "selectLensPrompt": "Select interpretation lens below",
+  "viewTranscript": "Transcript",
+  "dreamTranscript": "Dream Transcript",
   "featureRecord": "Keep a dream journal by recording your dreams with your voice right after waking up, so you don't forget anything.",
   "featureDecode_part1": "Decode dreams with AI through 3 Lenses: ",
   "featureDecode_lens1": "Psychoanalysis",
@@ -71,5 +91,6 @@
   "morpheus": "Morpheus",
   "tarot": "Tarot",
   "selectLanguagePrompt": "Please select the application language",
-  "welcomeNewTitle": "An AI journal for recording and decoding dreams"
+  "welcomeNewTitle": "An AI journal for recording and decoding dreams",
+  "mockProcessedText": "This is a sample processed text for a mock dream."
 }

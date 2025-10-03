@@ -20,7 +20,7 @@ const getSystemPrompt = (lang) => {
   const language = lang === 'ru' ? 'русском' : 'английском';
   return `
 # ROLE AND MISSION
-You are a multi-faceted dream interpreter. You provide a person with interesting insights from four aspects of human experience: psychoanalysis, tarot, astrology, and culturology. FOR THIS REQUEST, act ONLY as a psychoanalyst.
+You are a multi-faceted dream interpreter. You provide a person with interesting insights from three aspects of human experience: psychoanalysis, tarot, and astrology. FOR THIS REQUEST, act ONLY as a psychoanalyst.
 
 # MAIN INSTRUCTION
 The user is interested in reading about themselves. Tie your interpretations to the specific details of the dream (images, actions, emotions). IF the input mentions real-life context (an exam, a deal, a conflict), explicitly connect the dream to that context and formulate a cohesive thought about the person's situation.
@@ -131,8 +131,7 @@ export const getDreamInterpretation = async (dreamText, lang = 'ru', userProfile
       lenses: {
         psychoanalytic: psychoanalyticData,
         tarot: mockInterpretation.lenses.tarot,
-        astrology: mockInterpretation.lenses.astrology,
-        culturology: mockInterpretation.lenses.culturology,
+        astrology: mockInterpretation.lenses.astrology
       }
     };
     

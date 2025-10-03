@@ -94,7 +94,7 @@
 .card {
     margin-bottom: 16px;
     position: relative;
-    max-width: 250px;
+    max-width: 150px; /* Уменьшаем максимальную ширину карты */
     margin-left: auto;
     margin-right: auto;
 }

@@ -32,6 +32,7 @@
     font-size: clamp(1.1rem, 4vw, 1.3rem) !important; /* Further reduced font size */
     font-weight: 500 !important;
     text-align: center;
+    color: var(--text-primary) !important; /* Светлый цвет текста */
     
     /* Centering trick */
     position: absolute;

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useProfile } from '../context/ProfileContext';
 import { LocalizationContext } from '../context/LocalizationContext';
 import usePlacesAutocomplete from 'use-places-autocomplete';
-import { Drawer, Box, AppBar, Toolbar, IconButton, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, Button, Alert, CircularProgress } from '@mui/material';
+import { Drawer, Box, AppBar, Toolbar, IconButton, Typography, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, Button, Alert, CircularProgress, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -53,6 +53,7 @@ const SettingsDrawer = ({ open, onClose }) => {
     
     const [birthDate, setBirthDate] = useState('');
     const [birthTime, setBirthTime] = useState('');
+    const [gender, setGender] = useState('');
     const [placeId, setPlaceId] = useState(null);
     const [initialProfile, setInitialProfile] = useState(null);
     const suggestionsRef = React.useRef(null);
@@ -76,10 +77,13 @@ const SettingsDrawer = ({ open, onClose }) => {
     const [isLangModalOpen, setIsLangModalOpen] = useState(false);
 
     useEffect(() => {
-        if (profile) {
-            let birthPlaceText = '';
-            let initialPlaceId = null;
+        // Инициализируем профиль даже если он null или пустой
+        let birthPlaceText = '';
+        let initialPlaceId = null;
 
+        console.log('[SettingsDrawer] 🔍 Profile loaded:', profile);
+
+        if (profile) {
             if (typeof profile.birthPlace === 'string') {
                 try {
                     // Пытаемся распарсить, если это JSON-строка
@@ -99,19 +103,24 @@ const SettingsDrawer = ({ open, onClose }) => {
                 birthPlaceText = profile.birthPlace.description;
                 initialPlaceId = profile.birthPlace.placeId || null;
             }
-            
-            const initialData = {
-                birthDate: profile.birthDate || '',
-                birthTime: profile.birthTime || '',
-                birthPlace: birthPlaceText,
-                placeId: initialPlaceId,
-            };
-            setBirthDate(initialData.birthDate);
-            setBirthTime(initialData.birthTime);
-            setBirthPlace(initialData.birthPlace, false);
-            setPlaceId(initialData.placeId);
-            setInitialProfile(initialData);
         }
+        
+        const initialData = {
+            birthDate: profile?.birthDate || '',
+            birthTime: profile?.birthTime || '',
+            birthPlace: birthPlaceText,
+            gender: profile?.gender || '',
+            placeId: initialPlaceId,
+        };
+        
+        console.log('[SettingsDrawer] 📝 Setting initial gender:', initialData.gender);
+        
+        setBirthDate(initialData.birthDate);
+        setBirthTime(initialData.birthTime);
+        setBirthPlace(initialData.birthPlace, false);
+        setGender(initialData.gender);
+        setPlaceId(initialData.placeId);
+        setInitialProfile(initialData);
     }, [profile, setBirthPlace, t]);
 
     useEffect(() => {
@@ -140,6 +149,7 @@ const SettingsDrawer = ({ open, onClose }) => {
         initialProfile.birthDate !== birthDate ||
         initialProfile.birthTime !== birthTime ||
         initialProfile.birthPlace !== birthPlace ||
+        initialProfile.gender !== gender ||
         initialProfile.placeId !== placeId
     );
 
@@ -178,19 +188,27 @@ const SettingsDrawer = ({ open, onClose }) => {
                 birthDate,
                 birthTime,
                 birthPlace: { description: birthPlace, placeId: placeId || null },
+                gender,
             };
+            console.log('[SettingsDrawer] 💾 Saving profile with gender:', gender);
+            console.log('[SettingsDrawer] 📤 Full profileData:', profileData);
+            
             await updateProfile(profileData);
+            
+            console.log('[SettingsDrawer] ✅ Profile saved successfully');
             setSuccess(t('profileSaveSuccess'));
             setInitialProfile({
                 birthDate,
                 birthTime,
                 birthPlace,
+                gender,
                 placeId,
             });
             setTimeout(() => {
                 onClose();
             }, 500);
         } catch (err) {
+            console.error('[SettingsDrawer] ❌ Error saving profile:', err);
             setError(t('profileSaveError'));
         } finally {
             setIsSaving(false);
@@ -267,7 +285,7 @@ const SettingsDrawer = ({ open, onClose }) => {
                                         fullWidth
                                         value={birthPlace}
                                         onChange={handlePlaceInputChange}
-                                        disabled={!ready}
+                                        disabled={!ready || isSaving}
                                         inputProps={{ placeholder: "Москва, Россия" }}
                                         sx={textFieldStyles}
                                     />
@@ -308,6 +326,31 @@ const SettingsDrawer = ({ open, onClose }) => {
                                     inputProps={{ maxLength: 5, placeholder: "14:30" }}
                                     sx={textFieldStyles}
                                 />
+                                
+                                <FormControl component="fieldset" sx={{ width: '100%', mt: 2 }}>
+                                    <FormLabel component="legend" sx={{ color: 'var(--text-secondary)', '&.Mui-focused': { color: 'var(--accent-primary)' } }}>
+                                        {t('genderLabel')}
+                                    </FormLabel>
+                                    <RadioGroup
+                                        row
+                                        value={gender}
+                                        onChange={(e) => setGender(e.target.value)}
+                                        sx={{ mt: 1 }}
+                                    >
+                                        <FormControlLabel 
+                                            value="male" 
+                                            control={<Radio sx={{ color: 'var(--text-secondary)', '&.Mui-checked': { color: 'var(--accent-primary)' } }} />} 
+                                            label={t('male')}
+                                            sx={{ color: 'var(--text-primary)' }}
+                                        />
+                                        <FormControlLabel 
+                                            value="female" 
+                                            control={<Radio sx={{ color: 'var(--text-secondary)', '&.Mui-checked': { color: 'var(--accent-primary)' } }} />} 
+                                            label={t('female')}
+                                            sx={{ color: 'var(--text-primary)' }}
+                                        />
+                                    </RadioGroup>
+                                </FormControl>
                                 
                                 {error && <Alert severity="error" sx={{mt: 2}}>{error}</Alert>}
                                 {success && 

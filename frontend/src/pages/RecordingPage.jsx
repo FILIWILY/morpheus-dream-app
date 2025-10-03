@@ -12,11 +12,15 @@ import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { LocalizationContext } from '../context/LocalizationContext';
 import DateSelectionModal from '../components/DateSelectionModal';
 import { preloadTarotImages } from '../utils/imagePreloader';
+import { useProfile } from '../context/ProfileContext';
+
+const DEV_USER_ID = import.meta.env.DEV ? 'dev_test_user_123' : null;
 
 const RecordingPage = () => {
   const navigate = useNavigate();
   const { openDrawer } = useOutletContext(); // Get the function from Layout
   const { t, locale } = useContext(LocalizationContext);
+  const { profile } = useProfile();
 
   const [dreamText, setDreamText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +114,23 @@ const RecordingPage = () => {
         date: date,
       });
       preloadTarotImages(); // Start preloading images
-      navigate(`/interpretation/${response.data.id}`);
+      // Теперь мы используем новый ответ, который содержит только dreamId
+      const dreamId = response.data.dreamId;
+      const effectiveUserId = profile?.userId || profile?.telegramId || DEV_USER_ID;
+      const initialData = {
+          id: dreamId,
+          date: date,
+          originalText: dreamText,
+          // Новые поля не добавляем, т.к. их вернет первый WebSocket 'part'
+          title: null, 
+          lenses: {},
+          activeLens: null, 
+          userId: effectiveUserId
+      };
+      
+      navigate(`/interpretation/${dreamId}`, { 
+          state: { isNew: true, initialData, userId: effectiveUserId } 
+      });
     } catch (err) {
       setError(err.response?.data?.error || err.message || t('unknownError'));
     } finally {
@@ -129,7 +149,12 @@ const RecordingPage = () => {
 
       <main className={styles.content}>
         <header className={styles.header}>
-          <IconButton size="large" color="inherit" aria-label="menu" onClick={openDrawer}>
+          <IconButton 
+            size="large" 
+            aria-label="menu" 
+            onClick={openDrawer}
+            sx={{ color: 'var(--text-primary)' }}
+          >
             <MenuIcon />
           </IconButton>
           <Typography 

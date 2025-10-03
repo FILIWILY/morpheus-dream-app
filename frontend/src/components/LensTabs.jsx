@@ -1,54 +1,47 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './LensTabs.module.css';
 
+// Жесткий порядок для сетки 2x2
+const LENS_ORDER = ['dreambook', 'psychoanalytic', 'astrology', 'tarot'];
+
 const LensTabs = ({ lenses, activeLens, setActiveLens, accentColor }) => {
-    const tabsRef = useRef([]);
-    const desiredOrder = ['psychoanalytic', 'tarot', 'astrology'];
+    const { t } = useTranslation();
 
-    useEffect(() => {
-        // This effect can be kept for potential future logic if needed,
-        // but for now, it's empty as styling is handled by CSS.
-    }, [activeLens, lenses, accentColor]);
+    // Сортируем линзы согласно жесткому порядку LENS_ORDER
+    const sortedLenses = useMemo(() => {
+        return LENS_ORDER.map(key => ({
+            key,
+            ...lenses[key]
+        })).filter(lens => lens.title); // Отфильтровываем линзы, которые еще не загрузились
+    }, [lenses]);
 
-    const lensKeys = Object.keys(lenses).sort((a, b) => {
-        const indexA = desiredOrder.indexOf(a);
-        const indexB = desiredOrder.indexOf(b);
-        if (indexA === -1) return 1;
-        if (indexB === -1) return -1;
-        return indexA - indexB;
-    });
+    const renderTab = (lens) => (
+        <button
+            key={lens.key}
+            className={`${styles.tabBtn} ${activeLens === lens.key ? styles.active : ''}`}
+            onClick={() => setActiveLens(lens.key)}
+            style={{
+                // Передаем акцентный цвет в CSS-переменную для активного состояния
+                color: activeLens === lens.key ? accentColor : 'var(--text-secondary)'
+            }}
+        >
+            {lens.title}
+        </button>
+    );
 
-    const psychoanalyticKey = lensKeys.find(key => key === 'psychoanalytic');
-    const otherKeys = lensKeys.filter(key => key !== 'psychoanalytic');
+    // Делим отсортированный массив на два ряда
+    const firstRow = sortedLenses.slice(0, 2);
+    const secondRow = sortedLenses.slice(2, 4);
 
     return (
         <div className={styles.tabsContainer}>
-            {psychoanalyticKey && (
+            <div className={styles.tabsRow}>
+                {firstRow.map(renderTab)}
+            </div>
+            {secondRow.length > 0 && (
                 <div className={styles.tabsRow}>
-                    <button
-                        key={psychoanalyticKey}
-                        ref={el => tabsRef.current[0] = el}
-                        className={`${styles.tabBtn} ${styles.fullWidth} ${activeLens === psychoanalyticKey ? styles.active : ''}`}
-                        onClick={() => setActiveLens(psychoanalyticKey)}
-                        style={{ color: activeLens === psychoanalyticKey ? accentColor : 'var(--text-secondary)' }}
-                    >
-                        {lenses[psychoanalyticKey].title}
-                    </button>
-                </div>
-            )}
-            {otherKeys.length > 0 && (
-                <div className={styles.tabsRow}>
-                    {otherKeys.map((key, index) => (
-                        <button
-                            key={key}
-                            ref={el => tabsRef.current[index + 1] = el}
-                            className={`${styles.tabBtn} ${styles.halfWidth} ${activeLens === key ? styles.active : ''}`}
-                            onClick={() => setActiveLens(key)}
-                            style={{ color: activeLens === key ? accentColor : 'var(--text-secondary)' }}
-                        >
-                            {lenses[key].title}
-                        </button>
-                    ))}
+                    {secondRow.map(renderTab)}
                 </div>
             )}
         </div>

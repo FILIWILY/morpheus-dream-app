@@ -1,0 +1,33 @@
+{
+  "name": "dream_initial_processing",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "Короткий заголовок сна (3-5 слов) для истории снов"
+      },
+      "dreambook": {
+        "type": "object",
+        "description": "Толкование сна в стиле классических сонников",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Текст толкования из 5 абзацев. Ключевые образы выделены символами ** (например: **пещера**). Эти слова будут подсвечиваться в интерфейсе."
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "title",
+      "dreambook"
+    ],
+    "additionalProperties": false
+  }
+}
+

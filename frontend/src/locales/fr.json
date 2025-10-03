@@ -35,6 +35,9 @@
   "birthDateLabel": "Date de naissance (jj.mm.aaaa)",
   "birthTimeLabel": "Heure de naissance (hh:mm)",
   "birthPlaceLabel": "Lieu de naissance (Ville, Pays)",
+  "genderLabel": "Sexe:",
+  "male": "Masculin",
+  "female": "Féminin",
   "saveData": "Enregistrer",
   "profileSaveSuccess": "Données du profil enregistrées avec succès !",
   "profileSaveError": "Échec de l'enregistrement des données du profil.",
@@ -42,16 +45,26 @@
   "birthPlaceValidationError": "Veuillez sélectionner un emplacement dans la liste.",
   "birthPlaceMigrationError": "Veuillez confirmer votre ville en la sélectionnant dans la liste.",
   "birthPlaceHint": "Sélectionnez un emplacement dans la liste",
+  
+  "generatingInterpretation": "Génération de l'interprétation...",
+  "aiAnalyzingDream": "L'IA analyse votre rêve à travers différentes perspectives",
+  "pleaseWait": "Cela peut prendre quelques minutes. Veuillez ne pas fermer la page.",
+  "waitingForAI": "En attente de l'interprétation de l'IA...",
+  "thisMayTakeTime": "Cela peut prendre quelques minutes",
 
   "lenses": {
+    "dreambook": "Livre de rêves",
     "psychoanalytic": "Psychanalyse",
     "tarot": "Tarot",
     "astrology": "Astrologie"
   },
+  "selectLensPrompt": "Sélectionnez l'objectif d'interprétation ci-dessous",
+  "viewTranscript": "Transcription",
+  "dreamTranscript": "Transcription du rêve",
   "sayYourDream": "Racontez votre rêve...",
   "dreamTitle": "Titre du rêve",
   "interpretation": "Interprétation",
-  "dreamText": "Texte du rêve",
+  "dreamText": "Rêve",
   "continue": "Continuer",
   "profileTitle": "Parlez-nous de vous",
   "profileSubtitle": "Ces informations nous aideront à personnaliser vos interprétations astrologiques.",
@@ -76,5 +89,6 @@
   "skipProfileCompletion": "Compléter plus tard dans le profil",
   "morpheus": "Morphée",
   "tarot": "Tarot",
-  "welcomeNewTitle": "Un journal d'IA pour enregistrer et décoder les rêves"
+  "welcomeNewTitle": "Un journal d'IA pour enregistrer et décoder les rêves",
+  "mockProcessedText": "Ceci est un exemple de texte traité pour un rêve fictif."
 }

@@ -155,7 +155,9 @@ async function calculateTopTransits(natalChart, dreamDate) {
             acc[name] = transitPositionsRaw[index];
             return acc;
         }, {});
-        const foundAspects = [];
+
+        const bestAspectsPerPlanet = {};
+
         for (const transitPlanetName of transitPlanetsToCalc) {
             for (const natalPlanetName in natalChart.planets) {
                 const transitPlanetLon = transitPositions[transitPlanetName].longitude;
@@ -171,12 +173,24 @@ async function calculateTopTransits(natalChart, dreamDate) {
                         const orbBonus = Math.round(10 - orb_exactness);
                         const moonBonus = natalPlanetName === 'moon' ? 15 : 0;
                         const totalScore = planetScore + aspectScore + orbBonus + moonBonus;
-                        foundAspects.push({ transit_planet: transitPlanetName, aspect_type: aspectName, natal_planet: natalPlanetName, score: totalScore, orb: orb_exactness });
+
+                        const currentBest = bestAspectsPerPlanet[transitPlanetName];
+                        if (!currentBest || currentBest.score < totalScore) {
+                            bestAspectsPerPlanet[transitPlanetName] = {
+                                transit_planet: transitPlanetName,
+                                aspect_type: aspectName,
+                                natal_planet: natalPlanetName,
+                                score: totalScore,
+                                orb: orb_exactness
+                            };
+                        }
                     }
                 }
             }
         }
-        const top3Aspects = foundAspects.sort((a, b) => b.score - a.score).slice(0, 3);
+
+        const bestAspects = Object.values(bestAspectsPerPlanet);
+        const top3Aspects = bestAspects.sort((a, b) => b.score - a.score).slice(0, 3);
 
         console.log('[Astro] Top 3 Transits calculated:', JSON.stringify(top3Aspects.map(a => ({ transit: a.transit_planet, aspect: a.aspect_type, natal: a.natal_planet, score: a.score })), null, 2));
 
@@ -240,7 +254,10 @@ function getMockInterpretation(aspect) {
 
 async function getCosmicPassport(natalChart) {
     console.log('[Astro] Calculating Cosmic Passport...');
-    if (!natalChart || !natalChart.planets || !natalChart.planets.sun || !natalChart.planets.moon) {
+    // Усиленная проверка: убеждаемся, что все уровни вложенности существуют
+    if (!natalChart || !natalChart.planets || !natalChart.planets.sun || !natalChart.planets.moon ||
+        typeof natalChart.planets.sun.longitude === 'undefined' ||
+        typeof natalChart.planets.moon.longitude === 'undefined') {
         console.error("[Astro] Natal chart is missing or invalid for Cosmic Passport calculation.");
         return {
             title: "Ваш Космический Паспорт",

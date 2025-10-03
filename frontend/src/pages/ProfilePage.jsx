@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
 import { LocalizationContext } from '../context/LocalizationContext';
 import usePlacesAutocomplete from 'use-places-autocomplete';
-import { Typography, TextField, Button, Box, Alert, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
+import { Typography, TextField, Button, Box, Alert, List, ListItem, ListItemText, CircularProgress, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 import styles from './ProfilePage.module.css';
 
 const LENS_COLORS = {
@@ -44,6 +44,7 @@ const ProfilePage = () => {
     const { t, locale: lang } = useContext(LocalizationContext) || { locale: 'ru', t: (key) => key };
     const [birthDate, setBirthDate] = useState('');
     const [birthTime, setBirthTime] = useState('');
+    const [gender, setGender] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [placeId, setPlaceId] = useState(null);
@@ -63,7 +64,7 @@ const ProfilePage = () => {
     });
     
     // Moved this line to after birthPlace is defined to prevent a crash.
-    const isSaveDisabled = !birthDate || !birthTime || !birthPlace || !placeId;
+    const isSaveDisabled = !birthDate || !birthTime || !birthPlace || !placeId || !gender;
 
     const handleInputChange = (e) => {
         setBirthPlace(e.target.value);
@@ -85,12 +86,18 @@ const ProfilePage = () => {
                     birthDate,
                     birthTime,
                     birthPlace: { description: birthPlace, placeId },
+                    gender,
                     onboardingCompleted: true,
                 };
+                console.log('[ProfilePage] 💾 Saving profile with gender:', gender);
+                console.log('[ProfilePage] 📤 Full profileData:', profileData);
+                
                 await updateProfile(profileData);
-                console.log('[ProfilePage] User completed registration, redirecting to main app');
+                
+                console.log('[ProfilePage] ✅ User completed registration, redirecting to main app');
                 navigate('/record');
             } catch (err) {
+                console.error('[ProfilePage] ❌ Error saving profile:', err);
                 setError(t('profileSaveError'));
             } finally {
                 setIsLoading(false);
@@ -199,6 +206,31 @@ const ProfilePage = () => {
                     sx={textFieldStyles}
                     inputProps={{ maxLength: 5 }}
                 />
+                
+                <FormControl component="fieldset" sx={{ width: '100%' }}>
+                    <FormLabel component="legend" sx={{ color: 'var(--text-secondary)', '&.Mui-focused': { color: 'var(--accent-primary)' } }}>
+                        {t('genderLabel')}
+                    </FormLabel>
+                    <RadioGroup
+                        row
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        sx={{ mt: 1 }}
+                    >
+                        <FormControlLabel 
+                            value="male" 
+                            control={<Radio sx={{ color: 'var(--text-secondary)', '&.Mui-checked': { color: 'var(--accent-primary)' } }} />} 
+                            label={t('male')}
+                            sx={{ color: 'var(--text-primary)' }}
+                        />
+                        <FormControlLabel 
+                            value="female" 
+                            control={<Radio sx={{ color: 'var(--text-secondary)', '&.Mui-checked': { color: 'var(--accent-primary)' } }} />} 
+                            label={t('female')}
+                            sx={{ color: 'var(--text-primary)' }}
+                        />
+                    </RadioGroup>
+                </FormControl>
                 
                 {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
 

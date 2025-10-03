@@ -61,9 +61,10 @@ DANGEROUSLY_BYPASS_AUTH=true
 # Database type: 'json' for db.json file, 'postgres' for PostgreSQL
 DATABASE_TYPE=postgres
 
-# Mock API: 'true' to use mock data (no AI API calls), 'false' for real AI API calls
+# Mock AI: 'true' to use mock data (no AI API calls), 'false' for real AI API calls
 # Useful for UI development to avoid spending API credits
-USE_MOCK_API=false
+# Works independently from DATABASE_TYPE - you can use mock AI with any database
+USE_MOCK_AI=false
 
 # Node environment - определяет режим работы приложения
 NODE_ENV=development
@@ -88,36 +89,58 @@ NODE_ENV=development
 ```bash
 NODE_ENV=development
 DANGEROUSLY_BYPASS_AUTH=true
-DATABASE_TYPE=postgres
-USE_MOCK_API=true  # 🎭 Используем mock данные
+DATABASE_TYPE=json         # или postgres, если хотите тестировать с реальной БД
+USE_MOCK_AI=true          # 🎭 Используем mock данные AI
 ```
 
-### Для тестирования AI (с реальными API):
+### Для тестирования AI с JSON БД (с реальными API):
+```bash
+NODE_ENV=development
+DANGEROUSLY_BYPASS_AUTH=true
+DATABASE_TYPE=json
+USE_MOCK_AI=false         # 🤖 Используем настоящие AI API
+```
+
+### Для тестирования AI с PostgreSQL (с реальными API):
 ```bash
 NODE_ENV=development
 DANGEROUSLY_BYPASS_AUTH=true
 DATABASE_TYPE=postgres
-USE_MOCK_API=false  # 🤖 Используем настоящие AI API
+USE_MOCK_AI=false         # 🤖 Используем настоящие AI API
 ```
 
 ### Для продакшена:
 ```bash
 NODE_ENV=production
 DANGEROUSLY_BYPASS_AUTH=false
-DATABASE_TYPE=postgres
-USE_MOCK_API=false  # 🚀 Всегда настоящие AI API
+DATABASE_TYPE=postgres    # 🚀 Всегда PostgreSQL в продакшене
+USE_MOCK_AI=false         # 🚀 Всегда настоящие AI API
 ```
 
-## 🎭 USE_MOCK_API - экономия API кредитов
+## 🎭 USE_MOCK_AI - экономия API кредитов
 
-**Когда USE_MOCK_API=true:**
+**Когда USE_MOCK_AI=true:**
 - ✅ Никаких запросов к OpenAI/DeepSeek
 - ✅ Мгновенные ответы
 - ✅ Экономия API кредитов
 - ✅ Идеально для разработки UI/UX
+- ✅ Работает с любым DATABASE_TYPE (json или postgres)
 
-**Когда USE_MOCK_API=false:**
+**Когда USE_MOCK_AI=false:**
 - 🤖 Настоящие AI интерпретации
 - 💰 Тратятся API кредиты
 - ⏱️ Реальное время ответа API
 - 🎯 Для тестирования функциональности
+- 🎯 Работает с любым DATABASE_TYPE (json или postgres)
+
+## 🔑 Важно: DATABASE_TYPE и USE_MOCK_AI - независимые переменные!
+
+Эти переменные теперь **НЕ связаны** друг с другом:
+- `DATABASE_TYPE` - выбирает где хранятся данные (json файл или PostgreSQL)
+- `USE_MOCK_AI` - выбирает откуда брать AI интерпретации (моки или настоящий API)
+
+**Все комбинации работают:**
+- `DATABASE_TYPE=json` + `USE_MOCK_AI=true` ✅ - Быстрая UI разработка
+- `DATABASE_TYPE=json` + `USE_MOCK_AI=false` ✅ - Тест AI без PostgreSQL
+- `DATABASE_TYPE=postgres` + `USE_MOCK_AI=true` ✅ - UI разработка с реальной БД
+- `DATABASE_TYPE=postgres` + `USE_MOCK_AI=false` ✅ - Полное тестирование / продакшен

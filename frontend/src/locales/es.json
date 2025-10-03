@@ -40,17 +40,35 @@
   "birthPlaceLabel": "Lugar de nacimiento",
   "birthPlacePlaceholder": "p. ej., Madrid, España",
   "birthPlaceHint": "Por favor, seleccione su ciudad de la lista desplegable para obtener cálculos precisos.",
+  "genderLabel": "Género:",
+  "male": "Masculino",
+  "female": "Femenino",
   "saveData": "Guardar",
   "profileSaveSuccess": "¡Datos del perfil guardados con éxito!",
   "profileSaveError": "Error al guardar el perfil. Por favor, inténtalo de nuevo.",
   "profileSaveErrorRequired": "Por favor, rellene todos los campos.",
   "birthPlaceValidationError": "Por favor, seleccione una ubicación de la lista.",
   "birthPlaceMigrationError": "Por favor, confirme su ciudad seleccionándola de la lista.",
+  
+  "generatingInterpretation": "Generando interpretación...",
+  "aiAnalyzingDream": "La IA está analizando su sueño a través de diferentes lentes",
+  "pleaseWait": "Esto puede tardar unos minutos. Por favor, no cierre la página.",
+  "waitingForAI": "Esperando interpretación de la IA...",
+  "thisMayTakeTime": "Esto puede tardar unos minutos",
+  
   "sayYourDream": "Diga su sueño...",
   "dreamTitle": "Título del sueño",
   "interpretation": "Interpretación",
-  "dreamText": "Texto del sueño",
-  "lenses": "Lentes",
+  "dreamText": "Sueño",
+  "lenses": {
+    "dreambook": "Libro de sueños",
+    "psychoanalytic": "Psicoanálisis",
+    "tarot": "Tarot",
+    "astrology": "Astrología"
+  },
+  "selectLensPrompt": "Seleccione la lente de interpretación a continuación",
+  "viewTranscript": "Transcripción",
+  "dreamTranscript": "Transcripción del sueño",
   "continue": "Continuar",
   "profileTitle": "Háblanos de ti",
   "profileSubtitle": "Esta información nos ayudará a personalizar tus interpretaciones astrológicas.",
@@ -80,5 +98,6 @@
   "skipProfileCompletion": "Completar más tarde en el perfil",
   "morpheus": "Morfeo",
   "tarot": "Tarot",
-  "welcomeNewTitle": "Un diario de IA para grabar y decodificar sueños"
+  "welcomeNewTitle": "Un diario de IA para grabar y decodificar sueños",
+  "mockProcessedText": "Este es un ejemplo de texto procesado para un sueño de prueba."
 }

@@ -154,8 +154,8 @@ For ease of testing outside the Telegram client (e.g., in a local browser), auth
     ```
 
 ### `POST /processDreamText`
-- **Description**: Processes a textual dream description using the configured AI provider for interpretation. The interpretation is then saved to the user's dream history. A 5-card Tarot spread is automatically generated and included in the interpretation.
-- **Request Body**: JSON object with the dream `text`, `lang` (language of the dream, e.g., 'en', 'ru'), and `date` (date of the dream in YYYY-MM-DD format, or 'today').
+- **Description**: This is the **first step** in the dream processing workflow. It creates a placeholder dream entry in the database (with `title`, `processedText`, etc., set to `null`) and returns a `dreamId`. The client must then use this ID to open a WebSocket connection to receive the full interpretation.
+- **Request Body**: JSON object with `text`, `lang`, and `date`.
     ```json
     {
         "text": "I dreamt about flying...",
@@ -163,43 +163,80 @@ For ease of testing outside the Telegram client (e.g., in a local browser), auth
         "date": "2023-10-26"
     }
     ```
-- **Headers**: `X-Telegram-Init-Data` (Production) or `X-Telegram-User-ID` (Development).
+- **Headers**: Standard authentication headers.
 - **Response**: 
-    - **Success (200 OK)**: The new dream entry, including its generated ID, date, original text, and the full AI interpretation.
+    - **Success (202 Accepted)**: The request has been accepted for processing. The body contains the `dreamId` needed for the WebSocket connection.
     ```json
     {
-        "id": "uuid3",
-        "date": "2023-10-26",
-        "originalText": "I dreamt about flying...",
-        "title": "Soaring Dreams",
-        "snapshotSummary": "A dream about flying often symbolizes a sense of freedom and control over one's life. It can also represent escaping from reality or overcoming obstacles.",
-        "activeLens": null,
-        "lenses": {
-          /* ... other lenses ... */
-          "culturology": {
-            "title": "Культурный Код",
-            "preface": {
-              "title": "Макро-анализ Сновидения",
-              "content": "Markdown text for the preface..."
-            },
-            "analysis": [
-              {
-                "title": "Архетип: Дорогостоящая Ошибка",
-                "content": "Markdown text analyzing the first archetype..."
-              },
-              {
-                "title": "Архетип: Неожиданный Мудрец",
-                "content": "Markdown text analyzing the second archetype..."
-              }
-            ],
-            "insight": {
-              "title": "Ключевой Инсайт и Практический Совет",
-              "content": "Markdown text for the key insight...",
-              "recommendation": "Markdown text for the practical advice..."
-            }
-          }
+        "dreamId": "uuid-for-the-new-dream"
+    }
+    ```
+    - **Error (500 Internal Server Error)**: If the initial dream shell cannot be saved.
+
+### WebSocket Endpoint: `/`
+- **Description**: This is the **second step**. After getting a `dreamId` from `POST /processDreamText`, the client connects to this endpoint to receive interpretation data in real-time.
+- **Connection**: The WebSocket server is running on the same port as the HTTP server. The client should connect to `ws://your-backend-url/` or `wss://your-backend-url/`.
+
+- **Client to Server Messages**:
+  - Once connected, the client must send a message to start the interpretation process:
+    ```json
+    {
+        "type": "startInterpretation",
+        "payload": {
+            "dreamId": "uuid-from-step-1",
+            "userId": "current-user-id",
+            "lang": "en"
         }
     }
+    ```
+
+- **Server to Client Messages**:
+  - The server will send a series of messages as data becomes available.
+  - **Partial Data**: Each message contains a piece of the final interpretation object. The client should merge these pieces.
+    ```json
+    {
+        "type": "part",
+        "payload": {
+            "lenses": {
+                "psychoanalytic": { ... }
+            }
+        }
+    }
+    ```
+    ```json
+    {
+        "type": "part",
+        "payload": {
+            "lenses": {
+                "astrology": { ... }
+            }
+        }
+    }
+    ```
+    ```json
+    {
+        "type": "part",
+        "payload": {
+            "lenses": {
+                "tarot": { ... }
+            }
+        }
+    }
+    ```
+  - **Completion**: A final message indicates that the process is complete.
+    ```json
+    {
+        "type": "done"
+    }
+    ```
+  - **Error**: If an error occurs during processing.
+    ```json
+    {
+        "type": "error",
+        "payload": { "message": "Failed to get interpretation from AI." }
+    }
+    ```
+
 ### `PUT /dreams/:dreamId/activeLens`
 - **Description**: Persists which lens is currently active for this dream.
 - **Body**:
@@ -230,6 +267,33 @@ For ease of testing outside the Telegram client (e.g., in a local browser), auth
 { "isRevealed": true }
 ```
 - **Response**: Updated `lenses.tarot` object.
+
+---
+
+## Data Structures
+
+### Dream Object
+The final, fully-formed dream object (as stored in the DB and returned by `GET /dreams/:dreamId`) has the following structure:
+```json
+{
+  "id": "uuid-string",
+  "date": "YYYY-MM-DD",
+  "originalText": "User's raw dream text...",
+  "processedText": "LLM-cleaned version of the dream text.",
+  "activeLens": "psychoanalytic",
+  "title": "AI Generated Title",
+  "lenses": {
+    "dreambook": {
+      "title": "Сонник",
+      "content": "Interpretation text...",
+      "highlightWords": ["word1", "word2"]
+    },
+    "psychoanalytic": { "..." },
+    "astrology": { "..." },
+    "tarot": { "... " }
+  }
+}
+```
     ```
     - **Error (500 Internal Server Error)**: If there's an issue with AI interpretation or saving the dream.
     ```json

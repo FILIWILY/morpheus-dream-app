@@ -60,7 +60,8 @@ export const ProfileProvider = ({ children }) => {
 
   const updateProfile = async (newProfileData) => {
     const oldProfile = profile; // Save the old profile in case of an error
-    console.log('[ProfileContext] Optimistically updating profile with data:', newProfileData);
+    console.log('[ProfileContext] 📨 Optimistically updating profile with data:', newProfileData);
+    console.log('[ProfileContext] 🚻 Gender in update:', newProfileData.gender);
     
     // Optimistically update the local state immediately
     setProfile(prevProfile => ({
@@ -71,9 +72,11 @@ export const ProfileProvider = ({ children }) => {
     setError(null);
     
     try {
+      console.log('[ProfileContext] 📤 Sending PUT /profile with:', newProfileData);
       // Then, send the update to the server
       const response = await api.put('/profile', newProfileData);
-      console.log('[ProfileContext] Profile updated on server successfully:', response.data);
+      console.log('[ProfileContext] ✅ Profile updated on server successfully:', response.data);
+      console.log('[ProfileContext] 🚻 Gender in response:', response.data.gender);
       
       // Update the local state with the final, authoritative data from the server
       setProfile(response.data);

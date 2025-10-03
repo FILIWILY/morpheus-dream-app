@@ -39,6 +39,9 @@
   "birthTimeLabel": "Geburtszeit (hh:mm)",
   "birthPlaceLabel": "Geburtsort (Stadt, Land)",
   "birthPlacePlaceholder": "Beginnen Sie, eine Stadt einzugeben...",
+  "genderLabel": "Geschlecht:",
+  "male": "Männlich",
+  "female": "Weiblich",
   "saveData": "Speichern",
   "profileSaveSuccess": "Profildaten erfolgreich gespeichert!",
   "profileSaveError": "Daten konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
@@ -46,19 +49,29 @@
   "birthPlaceValidationError": "Bitte wählen Sie einen Ort aus der Liste aus.",
   "birthPlaceMigrationError": "Bitte bestätigen Sie Ihre Stadt, indem Sie sie aus der Liste auswählen.",
   "birthPlaceHint": "Wählen Sie eine Stadt aus der Liste",
+  
+  "generatingInterpretation": "Interpretation wird generiert...",
+  "aiAnalyzingDream": "KI analysiert Ihren Traum durch verschiedene Linsen",
+  "pleaseWait": "Dies kann einige Minuten dauern. Bitte schließen Sie die Seite nicht.",
+  "waitingForAI": "Warten auf KI-Interpretation...",
+  "thisMayTakeTime": "Dies kann einige Minuten dauern",
   "saveAndContinue": "Speichern und weiter",
   "skip": "Überspringen",
   "profileSkipError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
 
   "lenses": {
+    "dreambook": "Traumbuch",
     "psychoanalytic": "Psychoanalyse",
     "tarot": "Tarot",
     "astrology": "Astrologie"
   },
+  "selectLensPrompt": "Wählen Sie unten eine Interpretationslinse aus",
+  "viewTranscript": "Transkript",
+  "dreamTranscript": "Traum Transkript",
   "sayYourDream": "Sprechen Sie Ihren Traum...",
   "dreamTitle": "Traumtitel",
-  "interpretation": "Interpretation",
-  "dreamText": "Traumtext",
+  "interpretation": "Deutung",
+  "dreamText": "Traum",
   "continue": "Weiter",
   "profileTitle": "Erzählen Sie uns von sich",
   "profileSubtitle": "Diese Informationen helfen uns, Ihre astrologischen Deutungen zu personalisieren.",
@@ -83,5 +96,6 @@
   "skipProfileCompletion": "Später im Profil ausfüllen",
   "morpheus": "Morpheus",
   "tarot": "Tarot",
-  "welcomeNewTitle": "Ein KI-Tagebuch zum Aufzeichnen und Entschlüsseln von Träumen"
+  "welcomeNewTitle": "Ein KI-Tagebuch zum Aufzeichnen und Entschlüsseln von Träumen",
+  "mockProcessedText": "Dies ist ein Beispiel für verarbeiteten Text für einen Mock-Traum."
 }
