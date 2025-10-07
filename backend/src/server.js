@@ -83,8 +83,41 @@ setupTelegramBot();
 
 const app = express();
 const server = http.createServer(app); // Создаем HTTP сервер для Express
-const wss = new WebSocketServer({ server }); // Создаем WebSocket сервер поверх HTTP сервера
+const wss = new WebSocketServer({ noServer: true }); // WebSocket НЕ привязан к серверу автоматически
 const PORT = process.env.PORT || 9000;
+
+// --- WebSocket Authentication ---
+server.on('upgrade', (req, socket, head) => {
+  // Мы "перехватываем" запрос на обновление протокола до WebSocket
+  // и сначала пропускаем его через наш middleware аутентификации.
+
+  console.log('[WebSocket] Attempting to upgrade connection...');
+
+  // WebSocket-соединения не имеют стандартного res объекта,
+  // поэтому мы создаем "пустышку" для совместимости с middleware.
+  const res = new http.ServerResponse(req);
+
+  verifyTelegramAuth(req, res, () => {
+    // Эта функция будет вызвана, если аутентификация в verifyTelegramAuth пройдет успешно.
+    
+    if (!req.userId) {
+      // Если по какой-то причине userId не был установлен, принудительно разрываем соединение.
+      console.log('[WebSocket] Auth successful, but userId is missing. Destroying socket.');
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+
+    console.log(`[WebSocket] Auth successful for user: ${req.userId}. Handling upgrade.`);
+    // Если аутентификация успешна, передаем управление WebSocket-серверу
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      // Привязываем userId к конкретному соединению для дальнейшего использования
+      ws.userId = req.userId;
+      wss.emit('connection', ws, req);
+    });
+  });
+});
+
 
 // --- Константы для Таро ---
 const MAJOR_ARCANA = [
@@ -358,9 +391,10 @@ app.post('/processDreamText', async (req, res) => {
 });
 
 wss.on('connection', (ws, req) => {
-    // В реальном приложении здесь должна быть аутентификация,
-    // например, через токен, переданный в URL
-    console.log('[WebSocket] ✅ Client connected');
+    // Благодаря 'upgrade' хендлеру, мы теперь уверены, что каждое соединение здесь
+    // уже аутентифицировано и имеет ws.userId.
+    const userIdFromSocket = ws.userId;
+    console.log(`[WebSocket] ✅ Client connected with userId: ${userIdFromSocket}`);
 
     ws.on('message', async (message) => {
         try {
@@ -368,7 +402,10 @@ wss.on('connection', (ws, req) => {
             console.log('[WebSocket] Received message:', data);
 
             if (data.type === 'startInterpretation') {
-                const { dreamId, userId, lang } = data.payload;
+                // ВАЖНО: Используем userId, полученный при аутентификации сокета,
+                // а не тот, что пришел от клиента, для безопасности.
+                const { dreamId, lang } = data.payload;
+                const userId = userIdFromSocket;
 
                 // Получаем сон из БД
                 const dream = await db.getDreamById(userId, dreamId);
