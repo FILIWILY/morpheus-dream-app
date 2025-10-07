@@ -23,6 +23,7 @@ export const getDreamInterpretation = async (dreamText, lang, userProfile, tarot
 const simulateDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getDreamInterpretationStream = async (ws, dreamText, lang, userProfile, tarotSpread, astrologyData, userId, dreamId) => {
+    console.log(`[AI-DIAGNOSTIC] Starting interpretation stream for dreamId: ${dreamId}`);
     
     const onDataPart = async (data) => {
         if (ws.readyState !== 1) { // 1 === OPEN
@@ -98,48 +99,77 @@ export const getDreamInterpretationStream = async (ws, dreamText, lang, userProf
     }
 
     try {
-        // 1. Dreambook (первый запрос: title, processedText, dreambook lens)
-        console.log('[STREAM] Getting Dreambook interpretation (1st request)...');
-        
-        // Получаем dreamAtmosphere для расчёта фазы/знака Луны
-        const { getDreamAtmosphere } = await import('./astrology.js');
-        const dreamAtmosphere = await getDreamAtmosphere(userProfile.birthDate || new Date().toISOString().split('T')[0]);
-        
-        // Получаем дату сна из dreamId или текущую дату
-        const dream = await db.getDreamById(userId, dreamId);
-        const dreamDate = dream?.date || new Date().toISOString().split('T')[0];
-        
-        // Получаем пол пользователя
-        const userGender = userProfile.gender || 'male';
-        
-        const dreambookData = await getDreambookInterpretation(dreamText, dreamAtmosphere, dreamDate, userGender, lang);
-        await db.updateDreamPartial(userId, dreamId, dreambookData); // ОБНОВЛЯЕМ БД ЗДЕСЬ
-        await onDataPart({ type: 'part', payload: dreambookData });
-        console.log('[STREAM] Sent Dreambook data (title + processedText + dreambook lens).');
+        console.log('[AI-DIAGNOSTIC] Starting ALL interpretation requests in parallel.');
 
-        // 2. Psychoanalysis
-        console.log('[STREAM] Getting Psychoanalytic data...');
-        const psychoanalyticData = await getPsychoanalyticInterpretation(dreamText, lang);
-        await db.updateDreamPartial(userId, dreamId, psychoanalyticData); // ОБНОВЛЯЕМ БД ЗДЕСЬ
-        await onDataPart({ type: 'part', payload: psychoanalyticData });
-        console.log('[STREAM] Sent Psychoanalytic data.');
+        const interpretationPromises = [];
 
-        // 3. Astrology (теперь 3-й шаг)
-        console.log('[STREAM] Getting Astrology data...');
-        const astrologyDataResult = await getAstrologyInterpretation(dreamText, astrologyData, lang);
-        await db.updateDreamPartial(userId, dreamId, astrologyDataResult); // ОБНОВЛЯЕМ БД ЗДЕСЬ
-        await onDataPart({ type: 'part', payload: astrologyDataResult });
-        console.log('[STREAM] Sent Astrology data.');
+        // --- 1. Dreambook ---
+        interpretationPromises.push((async () => {
+            try {
+                console.log('[STREAM] Getting Dreambook interpretation...');
+                const { getDreamAtmosphere } = await import('./astrology.js');
+                const dreamAtmosphere = await getDreamAtmosphere(userProfile.birthDate || new Date().toISOString().split('T')[0]);
+                const dream = await db.getDreamById(userId, dreamId);
+                const dreamDate = dream?.date || new Date().toISOString().split('T')[0];
+                const userGender = userProfile.gender || 'male';
+                
+                const dreambookData = await getDreambookInterpretation(dreamText, dreamAtmosphere, dreamDate, userGender, lang);
+                await db.updateDreamPartial(userId, dreamId, dreambookData);
+                await onDataPart({ type: 'part', payload: dreambookData });
+                console.log('[STREAM] ✅ Sent Dreambook data.');
+            } catch (e) {
+                console.error('❌ Failed to process Dreambook lens:', e.message);
+            }
+        })());
 
-        // 4. Tarot (теперь 4-й шаг)
-        console.log('[STREAM] Getting Tarot data...');
-        const tarotData = await getTarotInterpretation(dreamText, tarotSpread, lang);
-        await db.updateDreamPartial(userId, dreamId, tarotData); // ОБНОВЛЯЕМ БД ЗДЕСЬ
-        await onDataPart({ type: 'part', payload: tarotData });
-        console.log('[STREAM] Sent Tarot data.');
+        // --- 2. Psychoanalysis ---
+        interpretationPromises.push((async () => {
+            try {
+                console.log('[STREAM] Getting Psychoanalytic data...');
+                const psychoanalyticData = await getPsychoanalyticInterpretation(dreamText, lang);
+                await db.updateDreamPartial(userId, dreamId, psychoanalyticData);
+                await onDataPart({ type: 'part', payload: psychoanalyticData });
+                console.log('[STREAM] ✅ Sent Psychoanalytic data.');
+            } catch (e) {
+                console.error('❌ Failed to process Psychoanalytic lens:', e.message);
+            }
+        })());
+
+        // --- 3. Astrology (only if data is available) ---
+        if (astrologyData) {
+            interpretationPromises.push((async () => {
+                try {
+                    console.log('[STREAM] Getting Astrology data...');
+                    const astrologyDataResult = await getAstrologyInterpretation(dreamText, astrologyData, lang);
+                    await db.updateDreamPartial(userId, dreamId, astrologyDataResult);
+                    await onDataPart({ type: 'part', payload: astrologyDataResult });
+                    console.log('[STREAM] ✅ Sent Astrology data.');
+                } catch (e) {
+                    console.error('❌ Failed to process Astrology lens:', e.message);
+                }
+            })());
+        } else {
+            console.log('[STREAM] ⏭️ Skipping Astrology data: No natal chart data provided.');
+        }
+
+        // --- 4. Tarot ---
+        interpretationPromises.push((async () => {
+            try {
+                console.log('[STREAM] Getting Tarot data...');
+                const tarotData = await getTarotInterpretation(dreamText, tarotSpread, lang);
+                await db.updateDreamPartial(userId, dreamId, tarotData);
+                await onDataPart({ type: 'part', payload: tarotData });
+                console.log('[STREAM] ✅ Sent Tarot data.');
+            } catch (e) {
+                console.error('❌ Failed to process Tarot lens:', e.message);
+            }
+        })());
+        
+        // Wait for all interpretations to finish
+        await Promise.allSettled(interpretationPromises);
 
         await onDataPart({ type: 'done' });
-        console.log('[STREAM] All parts sent.');
+        console.log('[AI-DIAGNOSTIC] All interpretation streams finished.');
 
     } catch (error) {
         console.error('❌ Error during interpretation stream:', error);
