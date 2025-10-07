@@ -157,9 +157,9 @@ const InterpretationPage = () => {
             return;
         }
 
-        const effectiveUserId = storedUserId ?? interpretationData.userId ?? profile?.userId ?? profile?.telegramId ?? (import.meta.env.DEV ? 'dev_test_user_123' : null);
+        const effectiveUserId = storedUserId ?? profile?.telegramId;
         if (!effectiveUserId) {
-            console.warn('[WS] Cannot start interpretation: unknown userId');
+            console.warn('[WS] Cannot start interpretation: userId is not available yet. Waiting for profile load.');
             return;
         }
 
@@ -229,7 +229,7 @@ const InterpretationPage = () => {
             }
         };
 
-    }, [interpretationData?.id, location.state?.isNew, storedUserId]);
+    }, [interpretationData?.id, location.state?.isNew, storedUserId, profile]);
 
     const activeAccentColor = useMemo(() => {
         if (!activeLensKey) return 'var(--text-secondary)'; // neutral
