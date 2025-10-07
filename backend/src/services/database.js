@@ -51,23 +51,17 @@ export async function initializeDatabase() {
     try {
       const { Pool } = await import('pg');
       
-      // Определяем строку подключения в зависимости от окружения
-      let connectionString;
-      
-      if (isDevelopment) {
-        // В Docker dev окружении используем имя сервиса 'postgres'
-        // В локальном dev окружении используем localhost:5433 (Docker PostgreSQL)
-        connectionString = process.env.DEV_DATABASE_URL || 
-          (process.env.DOCKER_ENV === 'true' 
-            ? 'postgresql://di_admin:didi1234didi@postgres:5432/di'
-            : 'postgresql://di_admin:didi1234didi@localhost:5433/di');
-      } else {
-        // Production всегда использует DATABASE_URL
-        connectionString = process.env.DATABASE_URL;
+      // Строка подключения ВСЕГДА берется из DATABASE_URL, который формируется в docker-compose.
+      const connectionString = process.env.DATABASE_URL;
+
+      if (!connectionString) {
+        console.error('❌ FATAL: DATABASE_URL is not defined in environment variables!');
+        process.exit(1);
       }
       
       // В Docker окружении SSL не используется, даже в продакшене
-      const useSSL = isProduction && !process.env.DATABASE_URL?.includes('@postgres:');
+      // Проверяем, что подключение идет к сервису 'postgres' внутри Docker
+      const useSSL = isProduction && !connectionString.includes('@postgres:');
       
       console.log(`🔧 PostgreSQL connection config:`, {
         isProduction,
