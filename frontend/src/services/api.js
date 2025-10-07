@@ -41,7 +41,8 @@ api.connectWebSocket = () => {
         ? window.location.host 
         : 'localhost:9000'; // Используем порт бэкенда для разработки
 
-    const wsUrl = `${proto}//${host}`;
+    const path = process.env.NODE_ENV === 'production' ? '/ws' : '';
+    const wsUrl = `${proto}//${host}${path}`;
     
     console.log(`[WS] Connecting to ${wsUrl}...`);
     
