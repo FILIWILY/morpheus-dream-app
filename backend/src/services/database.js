@@ -223,7 +223,7 @@ export async function getProfile(telegramId) {
 
     try {
         const res = await pool.query(
-            'SELECT birth_date, birth_time, birth_place, birth_latitude, birth_longitude, gender, "natalChart", onboarding_completed FROM users WHERE telegram_id = $1',
+            'SELECT telegram_id, birth_date, birth_time, birth_place, birth_latitude, birth_longitude, gender, "natalChart", onboarding_completed FROM users WHERE telegram_id = $1',
             [telegramId]
         );
 
@@ -251,6 +251,7 @@ export async function getProfile(telegramId) {
             
             // Convert DB naming to camelCase for consistency with the frontend
             return {
+                telegramId: profile.telegram_id, // ✅ ДОБАВЛЕНО
                 birthDate: formatDateForFrontend(profile.birth_date),
                 birthTime: formatTimeForFrontend(profile.birth_time),
                 birthPlace: profile.birth_place,
@@ -267,6 +268,7 @@ export async function getProfile(telegramId) {
                 [telegramId, false]
             );
             return {
+                telegramId: telegramId, // ✅ ДОБАВЛЕНО
                 birthDate: null,
                 birthTime: null,
                 birthPlace: null,
