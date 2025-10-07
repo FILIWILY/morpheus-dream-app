@@ -157,7 +157,8 @@ const InterpretationPage = () => {
             return;
         }
 
-        const effectiveUserId = storedUserId ?? profile?.telegramId;
+        // ПРАВИЛЬНЫЙ ПОРЯДОК: Сначала ждем profile, потом используем storedUserId как fallback
+        const effectiveUserId = profile?.telegramId ?? storedUserId;
         if (!effectiveUserId) {
             console.warn('[WS] Cannot start interpretation: userId is not available yet. Waiting for profile load.');
             return;
