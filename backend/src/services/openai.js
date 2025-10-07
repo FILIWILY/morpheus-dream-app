@@ -50,7 +50,7 @@ export const getPsychoanalyticInterpretation = async (dreamText, lang) => {
         response = await client.responses.create({
             prompt: {
                 id: 'pmpt_68d7f53ee3dc8196a3e8deb1ff519bf30aab471abf686834',
-                version: '6',
+                version: '7',
                 variables: {
                     language: preferredLanguage
                 }
@@ -118,7 +118,7 @@ export const getTarotInterpretation = async (dreamText, tarotSpread, lang) => {
         response = await client.responses.create({
             prompt: {
                 id: 'pmpt_68dad324026c8197a3c6165739958baf0107458bf5f870c0',
-                version: '3',
+                version: '4',
                 variables: {
                     language: preferredLanguage
                 }
@@ -186,7 +186,7 @@ export const getAstrologyInterpretation = async (dreamText, astrologyData, lang)
         response = await client.responses.create({
             prompt: {
                 id: 'pmpt_68dad9e3764081939ac8d161532bb222053768a86cdd549f',
-                version: '5',
+                version: '6',
                 variables: {
                     language: preferredLanguage
                 }
@@ -308,7 +308,7 @@ export const getDreambookInterpretation = async (dreamText, dreamAtmosphere, dre
         response = await client.responses.create({
             prompt: {
                 id: 'pmpt_68de883ddb2c8194af2c136bf403a7410bebe0a38c798ba8',
-                version: '7',
+                version: '8',
                 variables: {
                     language: preferredLanguage  // ← ТОЛЬКО язык в variables
                 }

@@ -51,11 +51,21 @@ export async function initializeDatabase() {
     try {
       const { Pool } = await import('pg');
       
-      // Строка подключения ВСЕГДА берется из DATABASE_URL, который формируется в docker-compose.
-      const connectionString = process.env.DATABASE_URL;
+      // Определяем строку подключения в зависимости от окружения
+      let connectionString;
+
+      if (process.env.DOCKER_ENV === 'true') {
+        // Внутри Docker (включая прод) всегда используем DATABASE_URL,
+        // который формируется в docker-compose.yml
+        connectionString = process.env.DATABASE_URL;
+      } else {
+        // Локальная разработка (npm run dev на хост-машине)
+        // Подключаемся к PostgreSQL, который запущен в Docker, через localhost
+        connectionString = process.env.DEV_DATABASE_URL || 'postgresql://di_admin:didi1234didi@localhost:5433/di';
+      }
 
       if (!connectionString) {
-        console.error('❌ FATAL: DATABASE_URL is not defined in environment variables!');
+        console.error('❌ FATAL: Could not determine database connection string!');
         process.exit(1);
       }
       
