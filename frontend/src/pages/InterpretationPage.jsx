@@ -139,6 +139,12 @@ const InterpretationPage = () => {
 
     // WebSocket logic
     useEffect(() => {
+        // ЯВНАЯ ПРОВЕРКА: Ничего не делаем, пока профиль не будет полностью загружен.
+        if (isProfileLoading) {
+            console.log('[WS] Waiting for profile to load before starting WebSocket...');
+            return;
+        }
+
         const dreamId = interpretationData?.id;
         if (!dreamId) {
             return;
@@ -160,7 +166,7 @@ const InterpretationPage = () => {
         // ПРАВИЛЬНЫЙ ПОРЯДОК: Сначала ждем profile, потом используем storedUserId как fallback
         const effectiveUserId = profile?.telegramId ?? storedUserId;
         if (!effectiveUserId) {
-            console.warn('[WS] Cannot start interpretation: userId is not available yet. Waiting for profile load.');
+            console.warn('[WS] Cannot start interpretation: userId is still not available after profile load.');
             return;
         }
 
@@ -230,7 +236,7 @@ const InterpretationPage = () => {
             }
         };
 
-    }, [interpretationData?.id, location.state?.isNew, storedUserId, profile]);
+    }, [interpretationData?.id, location.state?.isNew, storedUserId, profile, isProfileLoading]);
 
     const activeAccentColor = useMemo(() => {
         if (!activeLensKey) return 'var(--text-secondary)'; // neutral
