@@ -305,6 +305,7 @@ export const getDreambookInterpretation = async (dreamText, dreamAtmosphere, dre
 
     let response;
     try {
+        console.log('[AI-DIAGNOSTIC] Sending request to client.responses.create... Waiting for full response.');
         response = await client.responses.create({
             prompt: {
                 id: 'pmpt_68de883ddb2c8194af2c136bf403a7410bebe0a38c798ba8',
@@ -324,6 +325,7 @@ export const getDreambookInterpretation = async (dreamText, dreamAtmosphere, dre
                 }
             })
         });
+        console.log('[AI-DIAGNOSTIC] Successfully received full response from client.responses.create.');
     } catch (error) {
         console.error('[AI] Error calling OpenAI Responses API for dreambook:', error);
         console.error('[AI] Error details:', error.message);
