@@ -11,7 +11,6 @@ import RecordingOrb from '../components/RecordingOrb';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { LocalizationContext } from '../context/LocalizationContext';
 import DateSelectionModal from '../components/DateSelectionModal';
-import { preloadTarotImages } from '../utils/imagePreloader';
 import { useProfile } from '../context/ProfileContext';
 
 const DEV_USER_ID = import.meta.env.DEV ? 'dev_test_user_123' : null;
@@ -49,7 +48,6 @@ const RecordingPage = () => {
       formData.append('audiofile', audioBlob, `dream-recording-${Date.now()}.webm`);
       try {
         const response = await api.post('/processDreamAudio', formData);
-        preloadTarotImages(); // Start preloading images
         navigate(`/interpretation/${response.data.id}`);
       } catch (err) {
         setError(err.response?.data?.error || err.message || t('unknownError'));
@@ -108,30 +106,22 @@ const RecordingPage = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await api.post('/processDreamText', {
+      console.log('[RecordingPage] Starting interpretation...');
+      
+      // Simple POST request - may take 30-60 seconds
+      const response = await api.post('/interpretDream', {
         text: dreamText,
-        lang: locale,
         date: date,
       });
-      preloadTarotImages(); // Start preloading images
-      // Теперь мы используем новый ответ, который содержит только dreamId
-      const dreamId = response.data.dreamId;
-      const effectiveUserId = profile?.userId || profile?.telegramId || DEV_USER_ID;
-      const initialData = {
-          id: dreamId,
-          date: date,
-          originalText: dreamText,
-          // Новые поля не добавляем, т.к. их вернет первый WebSocket 'part'
-          title: null, 
-          lenses: {},
-          activeLens: null, 
-          userId: effectiveUserId
-      };
       
-      navigate(`/interpretation/${dreamId}`, { 
-          state: { isNew: true, initialData, userId: effectiveUserId } 
-      });
+      console.log('[RecordingPage] Interpretation complete:', response.data);
+      
+      // Navigate to interpretation page with dream ID
+      const dreamId = response.data.id;
+      navigate(`/interpretation/${dreamId}`);
+      
     } catch (err) {
+      console.error('[RecordingPage] Error:', err);
       setError(err.response?.data?.error || err.message || t('unknownError'));
     } finally {
       setIsLoading(false);

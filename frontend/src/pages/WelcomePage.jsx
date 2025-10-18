@@ -1,69 +1,80 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { LocalizationContext } from '../context/LocalizationContext';
+import { Box, Button, Typography } from '@mui/material';
 import styles from './WelcomePage.module.css';
-
-const LENS_COLORS = {
-  psycho: '#03A9F4',
-  astro: '#C850FF',
-  tarot: '#FF9800',
-};
 
 const WelcomePage = () => {
   const navigate = useNavigate();
-  const { t } = useContext(LocalizationContext);
 
   const handleContinue = () => {
     navigate('/profile');
   };
 
-  const features = [
-    t('featureRecord'),
-    <>
-      {t('featureDecode_part1')}
-      <span style={{ color: LENS_COLORS.psycho, fontWeight: 'bold' }}>{t('featureDecode_lens1')}</span>
-      {t('featureDecode_part2')}
-      <span style={{ color: LENS_COLORS.astro, fontWeight: 'bold' }}>{t('featureDecode_lens2')}</span>
-      {t('featureDecode_part3')}
-      <span style={{ color: LENS_COLORS.tarot, fontWeight: 'bold' }}>{t('featureDecode_lens3')}</span>
-      {t('featureDecode_part4')}
-    </>,
-    t('featureTrack'),
-  ];
-
   return (
-    <div className={styles.welcomeContainer}>
+    <div className={styles.container}>
       <Box className={styles.glassCard}>
         <Typography 
           variant="h1" 
           component="h1" 
-          className={styles.newTitle}
+          className={styles.title}
         >
-          {t('welcomeNewTitle')}
+          Добро пожаловать в Morpheus
         </Typography>
-        
-        <List sx={{ width: '100%', color: 'white', p: 0 }}>
-          {features.map((feature, index) => (
-            <ListItem key={index} sx={{ p: 0, mb: 1.5, alignItems: 'flex-start' }}>
-              <ListItemIcon sx={{ minWidth: 'auto', mr: 1.5, mt: '3px', color: 'var(--accent-primary)' }}>
-                <CheckCircleOutlineIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText 
-                primary={feature} 
-                primaryTypographyProps={{ style: { fontSize: '0.95rem', lineHeight: '1.4' } }}
-              />
-            </ListItem>
-          ))}
-        </List>
 
-        <Button 
-          variant="contained" 
-          onClick={handleContinue}
-          className={styles.button}
+        <Typography 
+          className={styles.subtitle}
         >
-          {t('continue')}
+          Ваш персональный толкователь снов
+        </Typography>
+
+        <div className={styles.content}>
+          <Typography className={styles.paragraph}>
+            <strong>Morpheus</strong> — это современное приложение для толкования снов, основанное на мудрости традиционных сонников.
+          </Typography>
+
+          <Typography className={styles.paragraph}>
+            Мы анализируем ключевые образы из ваших снов и находим их значения в проверенных временем источниках: сонниках Миллера, Ванги, Фрейда и других известных толкователей.
+          </Typography>
+
+          <Typography className={styles.paragraph}>
+            <strong>Что вы получите:</strong>
+          </Typography>
+
+          <ul className={styles.list}>
+            <li>Краткую характеристику вашего сна</li>
+            <li>Разбор ключевых образов с толкованиями из разных сонников</li>
+            <li>Практические советы и рекомендации</li>
+            <li>Историю всех ваших снов с возможностью пересмотра</li>
+          </ul>
+
+          <Typography className={styles.paragraph}>
+            Просто опишите свой сон текстом, и наш ИИ найдет в нем важные символы и растолкует их через призму народной мудрости и классических сонников.
+          </Typography>
+        </div>
+
+        <Button
+          variant="contained"
+          size="large"
+          onClick={handleContinue}
+          className={styles.continueButton}
+          sx={{
+            mt: 4,
+            py: 1.5,
+            px: 4,
+            fontSize: '1.1rem',
+            fontWeight: 600,
+            textTransform: 'none',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)',
+            },
+            transition: 'all 0.3s ease',
+          }}
+        >
+          Начать
         </Button>
       </Box>
     </div>
@@ -71,3 +82,4 @@ const WelcomePage = () => {
 };
 
 export default WelcomePage;
+

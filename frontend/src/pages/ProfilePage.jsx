@@ -6,12 +6,6 @@ import usePlacesAutocomplete from 'use-places-autocomplete';
 import { Typography, TextField, Button, Box, Alert, List, ListItem, ListItemText, CircularProgress, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 import styles from './ProfilePage.module.css';
 
-const LENS_COLORS = {
-  psycho: '#03A9F4',
-  astro: '#C850FF',
-  tarot: '#FF9800',
-};
-
 // Styles for input fields on a dark background
 const textFieldStyles = {
     '& .MuiInputBase-input': { color: 'var(--text-primary)' },
@@ -145,16 +139,12 @@ const ProfilePage = () => {
                     sx={{
                         textAlign: 'justify',
                         textIndent: 0,
-                        margin: 0 // Remove all margins
+                        margin: 0
                     }}
                 >
-                    Эти данные нужны для построения вашей натальной карты, которая используется в 
-                    <span style={{ color: LENS_COLORS.astro, fontWeight: 'bold' }}> Астрологической Линзе</span>
-                    . Мы анализируем положение планет в момент вашего рождения и их взаимодействие с текущими транзитами, чтобы дать максимально точное толкование. 
-                    Если вы пропустите этот шаг, вам будут доступны только линзы 
-                    <span style={{ color: LENS_COLORS.psycho, fontWeight: 'bold' }}> Психоанализа </span> 
-                    и 
-                    <span style={{ color: LENS_COLORS.tarot, fontWeight: 'bold' }}> Таро</span>.
+                    Эти данные помогут нам создать для вас персональный профиль. 
+                    Место, дата и время рождения могут использоваться для расширенных функций приложения в будущем.
+                    Если вы хотите пропустить этот шаг, это не помешает вам пользоваться основными функциями толкования снов.
                 </Typography>
 
                 <Box sx={{position: 'relative'}}>

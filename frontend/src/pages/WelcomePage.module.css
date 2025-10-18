@@ -1,51 +1,126 @@
-.welcomeContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 2rem;
-    box-sizing: border-box;
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: transparent;
 }
 
 .glassCard {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 3vh 1.5rem; /* Responsive vertical padding */
-    width: 100%;
-    max-width: 550px;
-    text-align: left; /* Align text to the left */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch; /* Stretch items to fill the width */
-    gap: 1.5vh; /* Added responsive gap */
+  background: rgba(15, 15, 25, 0.85);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 48px 40px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.6s ease-out;
 }
 
-.newTitle {
-    color: white !important;
-    font-weight: bold !important;
-    font-size: 1rem !important; /* Reduced font size by half from original design */
-    margin-bottom: 0 !important; /* Let the parent gap handle spacing */
-    text-align: left;
-    line-height: 1.4 !important;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.button {
-    background-color: var(--accent-primary) !important;
-    color: white !important;
-    font-weight: bold !important;
-    padding: 12px 0 !important;
-    margin-top: 0 !important; /* Let the parent gap handle spacing */
-    border-radius: 8px !important;
-    width: 100%;
-    align-self: center; /* Center the button itself */
-    max-width: 300px;
-    transition: background-color 0.3s ease !important;
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.button:hover {
-    background-color: #00bfa5 !important; /* A slightly lighter shade for hover */
+.subtitle {
+  font-size: 1.1rem;
+  text-align: center;
+  color: var(--text-secondary, #b0b0b0);
+  margin-bottom: 32px;
+  font-weight: 400;
 }
+
+.content {
+  color: var(--text-primary, #ffffff);
+  line-height: 1.7;
+}
+
+.paragraph {
+  margin-bottom: 20px;
+  font-size: 1rem;
+  color: var(--text-secondary, #d0d0d0);
+}
+
+.paragraph strong {
+  color: var(--text-primary, #ffffff);
+  font-weight: 600;
+}
+
+.list {
+  margin: 16px 0 24px 24px;
+  padding: 0;
+  color: var(--text-secondary, #d0d0d0);
+}
+
+.list li {
+  margin-bottom: 12px;
+  font-size: 1rem;
+  line-height: 1.6;
+  position: relative;
+}
+
+.list li::marker {
+  color: #667eea;
+}
+
+.continueButton {
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .glassCard {
+    padding: 32px 24px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .paragraph,
+  .list li {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .glassCard {
+    padding: 28px 20px;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+  }
+}
+

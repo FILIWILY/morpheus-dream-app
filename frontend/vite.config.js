@@ -14,7 +14,8 @@ export default defineConfig({
   ],
   envDir: '..',
   server: {
-    port: 5174, // Using a different port to avoid conflicts
+    host: '127.0.0.1',
+    port: 3001, // Using a different port to avoid conflicts
     proxy: {
       '/api': {
         target: 'http://localhost:9000',

@@ -5,7 +5,7 @@ import { LocalizationProvider as MuiLocalizationProvider } from '@mui/x-date-pic
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import {ru, enUS, de, es, fr} from 'date-fns/locale';
 import WelcomePage from './pages/WelcomePage';
-import LanguageSelectionPage from './pages/LanguageSelectionPage'; // Import the new page
+import LanguageSelectionPage from './pages/LanguageSelectionPage';
 import RecordingPage from './pages/RecordingPage';
 import HistoryPage from './pages/HistoryPage';
 import InterpretationPage from './pages/InterpretationPage';

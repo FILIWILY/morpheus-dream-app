@@ -64,10 +64,15 @@ export const ProfileProvider = ({ children }) => {
     console.log('[ProfileContext] 🚻 Gender in update:', newProfileData.gender);
     
     // Optimistically update the local state immediately
-    setProfile(prevProfile => ({
-      ...prevProfile,
-      ...newProfileData,
-    }));
+    // Handle case where prevProfile might be null (new user)
+    setProfile(prevProfile => {
+      if (prevProfile === null) {
+        // New user - create profile object
+        return { ...newProfileData };
+      }
+      // Existing user - merge
+      return { ...prevProfile, ...newProfileData };
+    });
     
     setError(null);
     
@@ -77,6 +82,7 @@ export const ProfileProvider = ({ children }) => {
       const response = await api.put('/profile', newProfileData);
       console.log('[ProfileContext] ✅ Profile updated on server successfully:', response.data);
       console.log('[ProfileContext] 🚻 Gender in response:', response.data.gender);
+      console.log('[ProfileContext] ✅ onboardingCompleted:', response.data.onboardingCompleted);
       
       // Update the local state with the final, authoritative data from the server
       setProfile(response.data);

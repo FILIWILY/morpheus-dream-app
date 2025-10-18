@@ -5,60 +5,8 @@ const API_BASE_URL = '/api'; // Vite proxy will handle this
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 180000, // Увеличиваем таймаут до 180 секунд
+  timeout: 180000, // 180 seconds for OpenAI response
 });
-
-let webSocket = null;
-let reconnectTimeout = null;
-
-const cleanupWebSocket = () => {
-    if (webSocket) {
-        try {
-            webSocket.onopen = null;
-            webSocket.onmessage = null;
-            webSocket.onclose = null;
-            webSocket.onerror = null;
-        } catch (err) {
-            console.warn('[WS] Error during cleanup:', err);
-        }
-    }
-    webSocket = null;
-};
-
-api.connectWebSocket = () => {
-    if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-        reconnectTimeout = null;
-    }
-
-    if (webSocket && webSocket.readyState < 2) { // 0: CONNECTING, 1: OPEN
-        console.log('[WS] Returning existing connection.');
-        return webSocket;
-    }
-
-    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = process.env.NODE_ENV === 'production' 
-        ? window.location.host 
-        : 'localhost:9000'; // Используем порт бэкенда для разработки
-
-    const path = process.env.NODE_ENV === 'production' ? '/ws' : '';
-    const wsUrl = `${proto}//${host}${path}`;
-    
-    console.log(`[WS] Connecting to ${wsUrl}...`);
-    
-    webSocket = new WebSocket(wsUrl);
-
-    webSocket.onclose = (event) => {
-        console.log('[WS] Connection closed:', event.code, event.reason);
-        cleanupWebSocket();
-    };
-
-    webSocket.onerror = (error) => {
-        console.error('[WS] WebSocket Error:', error);
-    };
-
-    return webSocket;
-};
 
 // Centralized request interceptor for authentication
 api.interceptors.request.use(
