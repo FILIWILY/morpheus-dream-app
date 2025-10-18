@@ -48,8 +48,20 @@ const RecordingPage = () => {
       formData.append('audiofile', audioBlob, `dream-recording-${Date.now()}.webm`);
       try {
         const response = await api.post('/processDreamAudio', formData);
-        navigate(`/interpretation/${response.data.id}`);
+        
+        // Check if interpretation failed but transcription succeeded
+        if (response.data.success === false && response.data.transcribedText) {
+          console.log('[RecordingPage] ✅ Transcription OK, but interpretation failed');
+          console.log('[RecordingPage] 📝 Transcribed text:', response.data.transcribedText);
+          setError(`✅ Расшифровка: "${response.data.transcribedText}"\n\n❌ ${response.data.error}`);
+        } else if (response.data.id) {
+          // Success - navigate to interpretation
+          navigate(`/interpretation/${response.data.id}`);
+        } else {
+          setError(t('unknownError'));
+        }
       } catch (err) {
+        console.error('[RecordingPage] Audio processing error:', err);
         setError(err.response?.data?.error || err.message || t('unknownError'));
       } finally {
         setIsLoading(false);

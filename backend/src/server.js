@@ -19,8 +19,10 @@ console.log('[ENV] DANGEROUSLY_BYPASS_AUTH:', process.env.DANGEROUSLY_BYPASS_AUT
 // Import services
 import * as db from './services/database.js';
 import { interpretDream } from './services/dreamInterpreter.js';
+import { transcribeAudio } from './services/whisper.js';
 import { verifyTelegramAuth } from './middleware/auth.js';
 import axios from 'axios';
+import multer from 'multer';
 
 // Initialize database
 await db.initializeDatabase();
@@ -28,6 +30,14 @@ await db.initializeDatabase();
 // Express app
 const app = express();
 const PORT = process.env.PORT || 9000;
+
+// Multer for file uploads (store in memory)
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
+});
 
 app.use(cors());
 app.use(express.json());
@@ -195,6 +205,73 @@ app.delete('/dreams', async (req, res) => {
 });
 
 // --- NEW: Simple Dream Interpretation (no WebSocket!) ---
+
+// --- NEW: Process Dream Audio with Whisper ---
+app.post('/processDreamAudio', upload.single('audiofile'), async (req, res) => {
+  console.log(`[Server] 🎤 Audio transcription request from user: ${req.userId}`);
+  
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No audio file provided' });
+    }
+    
+    const { lang, date } = req.body;
+    const audioBuffer = req.file.buffer;
+    
+    console.log(`[Server] 📝 Transcribing audio (${audioBuffer.length} bytes, lang: ${lang})...`);
+    
+    // Step 1: Transcribe audio with Whisper
+    const transcribedText = await transcribeAudio(audioBuffer, lang || 'ru');
+    
+    if (!transcribedText || transcribedText.trim().length === 0) {
+      return res.status(400).json({ error: 'Transcription resulted in empty text' });
+    }
+    
+    console.log(`[Server] ✅ Transcription successful!`);
+    console.log(`[Server] 📝 ПОЛНЫЙ РАСШИФРОВАННЫЙ ТЕКСТ:`);
+    console.log(`─────────────────────────────────────────────────────────────`);
+    console.log(transcribedText);
+    console.log(`─────────────────────────────────────────────────────────────`);
+    console.log(`[Server] Длина текста: ${transcribedText.length} символов\n`);
+    
+    // Step 2: Get user profile for gender
+    const userProfile = await db.getProfile(req.userId);
+    const userGender = userProfile?.gender || 'male';
+    
+    // Step 3: Convert date format
+    const dreamDate = date === 'today' ? new Date().toISOString().split('T')[0] : convertDateFormat(date);
+    
+    if (!dreamDate) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+    
+    console.log(`[Server] 🤖 Starting interpretation for transcribed dream... (gender: ${userGender})`);
+    
+    // Step 4: Interpret the transcribed dream (with error handling)
+    try {
+      const result = await interpretDream(req.userId, transcribedText, dreamDate, userGender);
+      console.log(`[Server] ✅ Dream interpretation complete for ${result.id}`);
+      res.status(200).json(result);
+    } catch (interpretError) {
+      console.error('[Server] ❌ OpenAI interpretation failed:', interpretError.message);
+      
+      // Return the transcribed text so it's not lost
+      return res.status(200).json({
+        success: false,
+        transcribedText: transcribedText,
+        error: 'Не удалось получить толкование (возможно, проблема с VPN или OpenAI API)',
+        details: interpretError.message
+      });
+    }
+    
+  } catch (error) {
+    console.error('[Server] ❌ Audio processing error:', error);
+    res.status(500).json({ 
+      error: 'Failed to process audio',
+      details: error.message 
+    });
+  }
+});
 
 app.post('/interpretDream', async (req, res) => {
   const { text, date } = req.body;

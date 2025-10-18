@@ -29,6 +29,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      whisper:
+        condition: service_started
     ports:
       - "${BACKEND_PORT}:9000"
     environment:
@@ -41,12 +43,30 @@ services:
       - GOOGLE_GEOCODING_API_KEY=${GOOGLE_GEOCODING_API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_WEB_APP_URL=${TELEGRAM_WEB_APP_URL}
+      - WHISPER_URL=http://whisper:8000
       # --- Development/Production Settings ---
       - NODE_ENV=${NODE_ENV:-production}
       - DOCKER_ENV=true
       - DANGEROUSLY_BYPASS_AUTH=${DANGEROUSLY_BYPASS_AUTH:-false}
       - DATABASE_TYPE=${DATABASE_TYPE:-postgres}
       - USE_MOCK_API=${USE_MOCK_API:-false}
+
+  whisper:
+    image: fedirz/faster-whisper-server:latest-cpu
+    container_name: morpheus-whisper
+    restart: always
+    ports:
+      - "127.0.0.1:${WHISPER_PORT:-8000}:8000"
+    volumes:
+      - whisper_models:/root/.cache/huggingface
+    environment:
+      - MODEL=tiny
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
   frontend:
     build:
@@ -62,3 +82,4 @@ services:
 
 volumes:
   morpheus_pg_data:
+  whisper_models:
