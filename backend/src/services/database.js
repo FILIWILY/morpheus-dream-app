@@ -432,6 +432,7 @@ export async function getDreams(userId) {
       date: dream.dream_date,
       title: dream.title,
       introduction: dream.introduction,
+      dreamText: dream.dream_text,
       symbolCount: parseInt(dream.symbol_count)
     }));
   } else {
@@ -444,6 +445,7 @@ export async function getDreams(userId) {
         date: dream.dream_date,
         title: dream.title,
         introduction: dream.introduction,
+        dreamText: dream.dream_text,
         symbolCount: (dream.symbols || []).length
       }));
   }

@@ -47,9 +47,7 @@ const HistoryPage = () => {
   
   const handleDreamTextClick = (dream) => {
     if (!isEditMode) {
-        const isMock = dream.title && dream.title.toLowerCase().startsWith('mock');
-        const textForModal = dream.processedText || (isMock ? t('mockProcessedText') : '');
-        setSelectedDreamText(textForModal);
+        setSelectedDreamText(dream.dreamText || '');
         setSelectedDreamTitle(dream.title);
         setTranscriptModalOpen(true);
     }
@@ -139,9 +137,6 @@ const HistoryPage = () => {
                     {dreams.map((dream) => {
                     const isSelected = selectedDreams.has(dream.id);
                     const formattedDate = dream.date ? format(new Date(dream.date), 'dd.MM.yyyy') : '';
-                    const isMock = dream.title && dream.title.toLowerCase().startsWith('mock');
-                    const hasProcessedText = dream.processedText || (isMock && !dream.processedText);
-                    const textForModal = dream.processedText || (isMock ? t('mockProcessedText') : '');
 
                     return (
                         <li key={dream.id} style={{ position: 'relative' }}>
@@ -160,7 +155,7 @@ const HistoryPage = () => {
                                             >
                                                 {t('interpretation')}
                                             </Button>
-                                            {dream.processedText && (
+                                            {dream.dreamText && (
                                                 <Button 
                                                     className={`${styles.cardButton} ${styles.contained}`}
                                                     onClick={(e) => { e.stopPropagation(); handleDreamTextClick(dream); }}

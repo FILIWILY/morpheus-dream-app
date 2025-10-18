@@ -3,20 +3,25 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 1rem;
   background: transparent;
+  box-sizing: border-box;
 }
 
 .glassCard {
   background: rgba(15, 15, 25, 0.85);
   backdrop-filter: blur(20px);
-  border-radius: 24px;
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 48px 40px;
-  max-width: 600px;
+  padding: 3vh 2rem;
+  max-width: 500px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   animation: fadeIn 0.6s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes fadeIn {
@@ -31,33 +36,36 @@
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: 1.5rem;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 12px;
+  margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.3;
 }
 
 .subtitle {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   text-align: center;
   color: var(--text-secondary, #b0b0b0);
-  margin-bottom: 32px;
+  margin-bottom: 1.5rem;
   font-weight: 400;
+  line-height: 1.4;
 }
 
 .content {
   color: var(--text-primary, #ffffff);
-  line-height: 1.7;
+  line-height: 1.5;
 }
 
 .paragraph {
-  margin-bottom: 20px;
-  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.85rem;
   color: var(--text-secondary, #d0d0d0);
+  line-height: 1.4;
 }
 
 .paragraph strong {
@@ -66,15 +74,15 @@
 }
 
 .list {
-  margin: 16px 0 24px 24px;
+  margin: 0.5rem 0 1rem 1.5rem;
   padding: 0;
   color: var(--text-secondary, #d0d0d0);
 }
 
 .list li {
-  margin-bottom: 12px;
-  font-size: 1rem;
-  line-height: 1.6;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
   position: relative;
 }
 
@@ -84,43 +92,65 @@
 
 .continueButton {
   width: 100%;
+  margin-top: auto !important;
+  padding-top: 1rem !important;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .glassCard {
-    padding: 32px 24px;
+    padding: 2.5vh 1.5rem;
   }
 
   .title {
-    font-size: 2rem;
+    font-size: 1.4rem;
   }
 
   .subtitle {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .paragraph,
   .list li {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
   }
 }
 
 @media (max-width: 480px) {
   .container {
-    padding: 12px;
+    padding: 0.75rem;
   }
 
   .glassCard {
-    padding: 28px 20px;
+    padding: 2vh 1.2rem;
+    max-height: 92vh;
   }
 
   .title {
-    font-size: 1.75rem;
+    font-size: 1.3rem;
   }
 
   .subtitle {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .paragraph,
+  .list li {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .paragraph {
+    margin-bottom: 0.6rem;
+  }
+
+  .list {
+    margin: 0.4rem 0 0.8rem 1.2rem;
+  }
+
+  .list li {
+    margin-bottom: 0.3rem;
   }
 }
 

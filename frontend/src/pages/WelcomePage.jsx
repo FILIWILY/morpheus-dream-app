@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Typography } from '@mui/material';
+import { LocalizationContext } from '../context/LocalizationContext';
 import styles from './WelcomePage.module.css';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
+  const { t } = useContext(LocalizationContext);
 
   const handleContinue = () => {
     navigate('/profile');
@@ -18,37 +20,37 @@ const WelcomePage = () => {
           component="h1" 
           className={styles.title}
         >
-          Добро пожаловать в Morpheus
+          {t('welcomeTitle')}
         </Typography>
 
         <Typography 
           className={styles.subtitle}
         >
-          Ваш персональный толкователь снов
+          {t('welcomeSubtitle')}
         </Typography>
 
         <div className={styles.content}>
           <Typography className={styles.paragraph}>
-            <strong>Morpheus</strong> — это современное приложение для толкования снов, основанное на мудрости традиционных сонников.
+            <strong>{t('welcomeIntro').split('—')[0]}</strong> — {t('welcomeIntro').split('—')[1]}
           </Typography>
 
           <Typography className={styles.paragraph}>
-            Мы анализируем ключевые образы из ваших снов и находим их значения в проверенных временем источниках: сонниках Миллера, Ванги, Фрейда и других известных толкователей.
+            {t('welcomeDescription')}
           </Typography>
 
           <Typography className={styles.paragraph}>
-            <strong>Что вы получите:</strong>
+            <strong>{t('welcomeWhatYouGet')}</strong>
           </Typography>
 
           <ul className={styles.list}>
-            <li>Краткую характеристику вашего сна</li>
-            <li>Разбор ключевых образов с толкованиями из разных сонников</li>
-            <li>Практические советы и рекомендации</li>
-            <li>Историю всех ваших снов с возможностью пересмотра</li>
+            <li>{t('welcomeFeature1')}</li>
+            <li>{t('welcomeFeature2')}</li>
+            <li>{t('welcomeFeature3')}</li>
+            <li>{t('welcomeFeature4')}</li>
           </ul>
 
           <Typography className={styles.paragraph}>
-            Просто опишите свой сон текстом, и наш ИИ найдет в нем важные символы и растолкует их через призму народной мудрости и классических сонников.
+            {t('welcomeClosing')}
           </Typography>
         </div>
 
@@ -74,7 +76,7 @@ const WelcomePage = () => {
             transition: 'all 0.3s ease',
           }}
         >
-          Начать
+          {t('welcomeStart')}
         </Button>
       </Box>
     </div>
