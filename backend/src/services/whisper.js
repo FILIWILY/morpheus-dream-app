@@ -24,11 +24,11 @@ export async function transcribeAudio(audioBuffer, language = 'ru') {
     formData.append('language', language);
     formData.append('response_format', 'json'); // или 'text', 'verbose_json'
     
-    console.log(`[Whisper] Sending request... (this may take 3-5 min on first run while model loads)`);
+    console.log(`[Whisper] Sending request... (this may take 3-6 min on first run while model downloads)`);
     
-    // Длинный timeout для первой загрузки модели (5 минут)
+    // Длинный timeout для первой загрузки модели (6 минут для small)
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 minutes
+    const timeout = setTimeout(() => controller.abort(), 6 * 60 * 1000); // 6 minutes
     
     const response = await fetch(`${WHISPER_URL}/v1/audio/transcriptions`, {
       method: 'POST',
@@ -53,7 +53,7 @@ export async function transcribeAudio(audioBuffer, language = 'ru') {
   } catch (error) {
     console.error('[Whisper] Transcription failed:', error);
     if (error.name === 'AbortError') {
-      throw new Error('Whisper transcription timeout (5 minutes). Model might be loading for the first time.');
+      throw new Error('Whisper transcription timeout (6 minutes). Model might be loading for the first time.');
     }
     throw new Error(`Failed to transcribe audio: ${error.message}`);
   }

@@ -60,13 +60,13 @@ services:
     volumes:
       - whisper_models:/root/.cache/huggingface
     environment:
-      - MODEL=tiny
+      - MODEL=small
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health\")' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 120s
+      start_period: 180s # 3 minutes for Whisper small model
 
   frontend:
     build:
