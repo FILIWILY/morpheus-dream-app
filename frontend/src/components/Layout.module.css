@@ -11,7 +11,8 @@
     flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden; /* Prevent horizontal scroll */
-    /* No padding-top - pages handle their own top spacing */
+    /* Standard top padding for most pages (RecordingPage, HistoryPage, etc) */
+    padding-top: 16px;
     /* 56px (nav height) + safe area */
     padding-bottom: calc(56px + env(safe-area-inset-bottom));
 }
