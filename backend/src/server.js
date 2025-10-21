@@ -21,7 +21,7 @@ import * as db from './services/database.js';
 import { interpretDream } from './services/dreamInterpreter.js';
 import { transcribeAudio } from './services/whisper.js';
 import { verifyTelegramAuth } from './middleware/auth.js';
-import { errorNotificationMiddleware, notifyFrontendError } from './services/telegramNotifier.js';
+import { errorNotificationMiddleware, notifyFrontendError, notifyAdmin } from './services/telegramNotifier.js';
 import axios from 'axios';
 import multer from 'multer';
 
@@ -282,6 +282,20 @@ app.post('/processDreamAudio', upload.single('audiofile'), async (req, res) => {
     
         } catch (error) {
     console.error('[Server] ❌ Audio processing error:', error);
+    
+    // Notify admin about critical error
+    notifyAdmin({
+      error: error.message || 'Audio processing failed',
+      endpoint: 'POST /processDreamAudio',
+      statusCode: 500,
+      userId: req.userId,
+      metadata: {
+        audioSize: req.file?.size || 'unknown',
+        language: req.body?.lang || 'unknown',
+        stack: error.stack?.split('\n').slice(0, 3).join('\n') || 'No stack trace'
+      }
+    });
+    
     res.status(500).json({ 
       error: 'Failed to process audio',
       details: error.message 
@@ -320,6 +334,20 @@ app.post('/interpretDream', async (req, res) => {
     
   } catch (error) {
     console.error('[Server] ❌ Dream interpretation error:', error);
+    
+    // Notify admin about critical error
+    notifyAdmin({
+      error: error.message || 'Text interpretation failed',
+      endpoint: 'POST /interpretDream',
+      statusCode: 500,
+      userId: req.userId,
+      metadata: {
+        textLength: req.body?.text?.length || 0,
+        date: req.body?.date || 'unknown',
+        stack: error.stack?.split('\n').slice(0, 3).join('\n') || 'No stack trace'
+      }
+    });
+    
     res.status(500).json({ 
       error: 'Failed to interpret dream',
       details: error.message 

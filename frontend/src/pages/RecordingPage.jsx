@@ -43,7 +43,15 @@ const RecordingPage = () => {
   useEffect(() => {
     if (!audioBlob) return;
     const sendAudio = async () => {
+      const isDev = import.meta.env.DEV || import.meta.env.MODE === 'development';
+      
       console.log('[RecordingPage] 🎤 Starting audio processing...');
+      if (isDev) {
+        console.log('[RecordingPage] 🔧 DEV MODE: Enhanced logging enabled');
+        console.log('[RecordingPage] 📊 Audio blob size:', audioBlob.size, 'bytes');
+        console.log('[RecordingPage] 📊 Audio type:', audioBlob.type);
+      }
+      
       setIsLoading(true);
       setLoadingStage(0); // Stage 0: Transcribing
       setError(null);
@@ -54,14 +62,32 @@ const RecordingPage = () => {
       formData.append('audiofile', audioBlob, `dream-recording-${Date.now()}.webm`);
       
       try {
+        const startTime = Date.now();
         console.log('[RecordingPage] 📤 Sending audio to backend...');
+        if (isDev) {
+          console.log('[RecordingPage] ⏰ Start time:', new Date(startTime).toISOString());
+        }
         
         // Simulate stage progression for better UX
-        const stageTimer1 = setTimeout(() => setLoadingStage(1), 5000); // Stage 1: Extracting after 5s
-        const stageTimer2 = setTimeout(() => setLoadingStage(2), 10000); // Stage 2: Analyzing after 10s
-        const stageTimer3 = setTimeout(() => setLoadingStage(3), 20000); // Stage 3: Finalizing after 20s
+        const stageTimer1 = setTimeout(() => {
+          setLoadingStage(1);
+          if (isDev) console.log('[RecordingPage] 🔄 Stage 1: Extracting symbols');
+        }, 5000);
+        
+        const stageTimer2 = setTimeout(() => {
+          setLoadingStage(2);
+          if (isDev) console.log('[RecordingPage] 🔄 Stage 2: Analyzing dreambooks');
+        }, 10000);
+        
+        const stageTimer3 = setTimeout(() => {
+          setLoadingStage(3);
+          if (isDev) console.log('[RecordingPage] 🔄 Stage 3: Finalizing interpretation');
+        }, 20000);
         
         const response = await api.post('/processDreamAudio', formData);
+        
+        const endTime = Date.now();
+        const duration = (endTime - startTime) / 1000;
         
         // Clear timers
         clearTimeout(stageTimer1);
@@ -69,6 +95,11 @@ const RecordingPage = () => {
         clearTimeout(stageTimer3);
         
         console.log('[RecordingPage] 📥 Response received:', response.data);
+        if (isDev) {
+          console.log('[RecordingPage] ⏱️ Total processing time:', duration.toFixed(2), 'seconds');
+          console.log('[RecordingPage] 📦 Response structure:', Object.keys(response.data));
+          console.log('[RecordingPage] 🔍 Full response:', JSON.stringify(response.data, null, 2));
+        }
         
         // Check if interpretation failed but transcription succeeded
         if (response.data.success === false && response.data.transcribedText) {

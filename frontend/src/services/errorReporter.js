@@ -10,17 +10,34 @@ import api from './api';
  * @param {Object} errorDetails - Error information
  */
 export async function reportCriticalError(errorDetails) {
+  const isDev = import.meta.env.DEV || import.meta.env.MODE === 'development';
+  
   try {
+    if (isDev) {
+      console.log('[ErrorReporter] 📤 Sending error to Telegram:', errorDetails);
+    }
+    
     // Send to backend which will forward to Telegram
-    await api.post('/reportFrontendError', {
+    const response = await api.post('/reportFrontendError', {
       ...errorDetails,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       url: window.location.href
     });
+    
+    if (isDev) {
+      console.log('[ErrorReporter] ✅ Error reported successfully:', response.data);
+    }
   } catch (err) {
     // Silent fail - don't break user experience
-    console.error('[ErrorReporter] Failed to report error:', err);
+    console.error('[ErrorReporter] ❌ Failed to report error:', err);
+    if (isDev) {
+      console.error('[ErrorReporter] 🔍 Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+    }
   }
 }
 
