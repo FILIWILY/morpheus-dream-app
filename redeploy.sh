@@ -24,24 +24,53 @@ echo "💣  Starting FULL redeployment for Morpheus Dream App..."
 echo "⚠️  WARNING: This will delete the database volume."
 echo " "
 
-# --- Step 1: Stop and Remove Everything ---
-echo "🔄 [1/4] Stopping containers and removing volumes..."
+# --- Step 1: Update Environment for Cache Busting ---
+ENV_FILE=".env"
+
+if [ ! -f "$ENV_FILE" ]; then
+    echo "❌ ERROR: .env file not found. Please create it from env.example."
+    exit 1
+fi
+
+# Source the .env file to read BASE_WEB_APP_URL
+set +u
+source "$ENV_FILE"
+set -u
+
+if [ -z "${BASE_WEB_APP_URL}" ]; then
+    echo "❌ ERROR: BASE_WEB_APP_URL is not set in your .env file."
+    exit 1
+fi
+
+echo "🔄 [1/5] Generating new version for cache busting..."
+NEW_VERSION=$(date +%Y%m%d%H%M%S)
+NEW_WEB_APP_URL="${BASE_WEB_APP_URL}?v=${NEW_VERSION}"
+
+if grep -q "^TELEGRAM_WEB_APP_URL=" "$ENV_FILE"; then
+    sed -i "s|^TELEGRAM_WEB_APP_URL=.*|TELEGRAM_WEB_APP_URL=${NEW_WEB_APP_URL}|" "$ENV_FILE"
+else
+    echo -e "\nTELEGRAM_WEB_APP_URL=${NEW_WEB_APP_URL}" >> "$ENV_FILE"
+fi
+echo "✅  New URL set in .env: ${NEW_WEB_APP_URL}"
+
+# --- Step 2: Stop and Remove Everything ---
+echo "🔄 [2/5] Stopping containers and removing volumes..."
 docker compose down -v --remove-orphans
 echo "✅  All containers and volumes have been removed."
 
 
-# --- Step 2: Pull Latest Changes from Git ---
-echo "🔄 [2/4] Pulling latest changes from Git..."
+# --- Step 3: Pull Latest Changes from Git ---
+echo "🔄 [3/5] Pulling latest changes from Git..."
 git pull
 echo "✅  Code updated."
 
-# --- Step 3: Rebuild Docker Images ---
-echo "🔄 [3/4] Rebuilding Docker images without cache..."
+# --- Step 4: Rebuild Docker Images ---
+echo "🔄 [4/5] Rebuilding Docker images without cache..."
 docker compose build --no-cache
 echo "✅  Images rebuilt successfully."
 
-# --- Step 4: Start Docker Containers ---
-echo "🔄 [4/4] Starting Docker containers in detached mode..."
+# --- Step 5: Start Docker Containers ---
+echo "🔄 [5/5] Starting Docker containers in detached mode..."
 docker compose up -d
 echo "✅  Containers started successfully."
 

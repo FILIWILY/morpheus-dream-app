@@ -21,6 +21,7 @@ import * as db from './services/database.js';
 import { interpretDream } from './services/dreamInterpreter.js';
 import { transcribeAudio } from './services/whisper.js';
 import { verifyTelegramAuth } from './middleware/auth.js';
+import { errorNotificationMiddleware } from './services/telegramNotifier.js';
 import axios from 'axios';
 import multer from 'multer';
 
@@ -58,117 +59,117 @@ app.use(verifyTelegramAuth);
 // --- Profile Routes ---
 
 app.get('/profile', async (req, res) => {
-  try {
-    const userProfile = await db.getProfile(req.userId);
-    if (userProfile) {
-      res.status(200).json(userProfile);
-    } else {
-      res.status(404).json({ error: 'Profile not found or empty' });
+    try {
+        const userProfile = await db.getProfile(req.userId);
+        if (userProfile) {
+            res.status(200).json(userProfile);
+        } else {
+            res.status(404).json({ error: 'Profile not found or empty' });
+        }
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ error: 'Failed to fetch profile' });
     }
-  } catch (error) {
-    console.error('Error fetching profile:', error);
-    res.status(500).json({ error: 'Failed to fetch profile' });
-  }
 });
 
 // Date conversion helper
 const convertDateFormat = (dateString) => {
-  if (!dateString) return null;
-  
-  if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+    if (!dateString) return null;
+    
+    if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
     return dateString.split('T')[0];
-  }
-  
-  const match = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-  if (match) {
-    const [, day, month, year] = match;
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  }
-  
-  console.warn(`[SERVER] Invalid date format received: ${dateString}`);
-  return null;
+    }
+    
+    const match = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (match) {
+        const [, day, month, year] = match;
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    
+    console.warn(`[SERVER] Invalid date format received: ${dateString}`);
+    return null;
 };
 
 app.put('/profile', async (req, res) => {
-  const { birthDate, birthTime, birthPlace, gender, onboardingCompleted } = req.body;
-  let userProfile = (await db.getProfile(req.userId)) || {};
+    const { birthDate, birthTime, birthPlace, gender, onboardingCompleted } = req.body;
+    let userProfile = (await db.getProfile(req.userId)) || {};
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(`[SERVER] 📥 Received profile update for user ${req.userId}:`, req.body);
-  }
+    if (process.env.NODE_ENV !== 'production') {
+        console.log(`[SERVER] 📥 Received profile update for user ${req.userId}:`, req.body);
+    }
 
-  if (onboardingCompleted !== undefined) {
-    userProfile.onboardingCompleted = onboardingCompleted;
-  }
+    if (onboardingCompleted !== undefined) {
+        userProfile.onboardingCompleted = onboardingCompleted;
+    }
 
-  const convertedBirthDate = convertDateFormat(birthDate);
-  if (birthDate && !convertedBirthDate) {
-    return res.status(400).json({ error: 'Invalid birth date format. Expected DD.MM.YYYY or YYYY-MM-DD' });
-  }
-  
-  userProfile.birthDate = convertedBirthDate;
-  userProfile.birthTime = birthTime;
-  userProfile.gender = gender;
-  
+    const convertedBirthDate = convertDateFormat(birthDate);
+    if (birthDate && !convertedBirthDate) {
+        return res.status(400).json({ error: 'Invalid birth date format. Expected DD.MM.YYYY or YYYY-MM-DD' });
+    }
+    
+    userProfile.birthDate = convertedBirthDate;
+    userProfile.birthTime = birthTime;
+    userProfile.gender = gender;
+    
   // Geocoding logic
-  try {
-    const apiKey = process.env.GOOGLE_GEOCODING_API_KEY;
-    let geocodeResponse = null;
+    try {
+        const apiKey = process.env.GOOGLE_GEOCODING_API_KEY;
+        let geocodeResponse = null;
 
-    if (birthPlace && birthPlace.placeId) {
-      console.log(`[Geocode] Attempting geocoding with placeId: ${birthPlace.placeId}`);
-      geocodeResponse = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
-        params: { place_id: birthPlace.placeId, key: apiKey, language: 'ru' }
-      });
-    } else if (birthPlace && birthPlace.description) {
-      console.log(`[Geocode] Attempting geocoding with address: "${birthPlace.description}"`);
-      geocodeResponse = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
-        params: { address: birthPlace.description, key: apiKey, language: 'ru' }
-      });
+        if (birthPlace && birthPlace.placeId) {
+            console.log(`[Geocode] Attempting geocoding with placeId: ${birthPlace.placeId}`);
+            geocodeResponse = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+                params: { place_id: birthPlace.placeId, key: apiKey, language: 'ru' }
+            });
+        } else if (birthPlace && birthPlace.description) {
+            console.log(`[Geocode] Attempting geocoding with address: "${birthPlace.description}"`);
+            geocodeResponse = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+                params: { address: birthPlace.description, key: apiKey, language: 'ru' }
+            });
+        }
+
+        if (geocodeResponse && geocodeResponse.data.status === 'OK' && geocodeResponse.data.results.length > 0) {
+            const result = geocodeResponse.data.results[0];
+            const location = result.geometry.location;
+            userProfile.birthPlace = result.formatted_address;
+            userProfile.birthLatitude = location.lat;
+            userProfile.birthLongitude = location.lng;
+            console.log(`[Geocode] ✅ Success: ${userProfile.birthPlace} [${location.lat}, ${location.lng}]`);
+        } else {
+            if (geocodeResponse) {
+                console.error(`[Geocode] ❌ Failed: ${geocodeResponse.data.status}`, geocodeResponse.data.error_message || '');
+            }
+            userProfile.birthPlace = (birthPlace && typeof birthPlace === 'object') ? birthPlace.description : birthPlace;
+            delete userProfile.birthLatitude;
+            delete userProfile.birthLongitude;
+        }
+    } catch (error) {
+        console.error('[Geocode] 💥 Hard error during geocoding:', error.message);
+        userProfile.birthPlace = (birthPlace && typeof birthPlace === 'object') ? birthPlace.description : birthPlace;
+        delete userProfile.birthLatitude;
+        delete userProfile.birthLongitude;
     }
 
-    if (geocodeResponse && geocodeResponse.data.status === 'OK' && geocodeResponse.data.results.length > 0) {
-      const result = geocodeResponse.data.results[0];
-      const location = result.geometry.location;
-      userProfile.birthPlace = result.formatted_address;
-      userProfile.birthLatitude = location.lat;
-      userProfile.birthLongitude = location.lng;
-      console.log(`[Geocode] ✅ Success: ${userProfile.birthPlace} [${location.lat}, ${location.lng}]`);
-    } else {
-      if (geocodeResponse) {
-        console.error(`[Geocode] ❌ Failed: ${geocodeResponse.data.status}`, geocodeResponse.data.error_message || '');
-      }
-      userProfile.birthPlace = (birthPlace && typeof birthPlace === 'object') ? birthPlace.description : birthPlace;
-      delete userProfile.birthLatitude;
-      delete userProfile.birthLongitude;
+    try {
+        const updatedProfile = await db.updateProfile(req.userId, userProfile);
+        res.status(200).json(updatedProfile);
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ error: 'Failed to update profile' });
     }
-  } catch (error) {
-    console.error('[Geocode] 💥 Hard error during geocoding:', error.message);
-    userProfile.birthPlace = (birthPlace && typeof birthPlace === 'object') ? birthPlace.description : birthPlace;
-    delete userProfile.birthLatitude;
-    delete userProfile.birthLongitude;
-  }
-
-  try {
-    const updatedProfile = await db.updateProfile(req.userId, userProfile);
-    res.status(200).json(updatedProfile);
-  } catch (error) {
-    console.error('Error updating profile:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
-  }
 });
 
 // --- Dream Routes ---
 
 app.get('/dreams', async (req, res) => {
-  try {
-    const dreams = await db.getDreams(req.userId);
-    const sortedDreams = dreams.sort((a, b) => new Date(b.date) - new Date(a.date));
-    res.status(200).json(sortedDreams);
-  } catch (error) {
-    console.error('Error fetching dreams:', error);
-    res.status(500).json({ error: 'Failed to fetch dreams' });
-  }
+    try {
+        const dreams = await db.getDreams(req.userId);
+        const sortedDreams = dreams.sort((a, b) => new Date(b.date) - new Date(a.date));
+        res.status(200).json(sortedDreams);
+    } catch (error) {
+        console.error('Error fetching dreams:', error);
+        res.status(500).json({ error: 'Failed to fetch dreams' });
+    }
 });
 
 app.get('/dreams/:dreamId', async (req, res) => {
@@ -176,16 +177,16 @@ app.get('/dreams/:dreamId', async (req, res) => {
   console.log(`[Server] 🔍 Fetching dream by ID: ${dreamId} for user: ${req.userId}`);
   
   try {
-    const dream = await db.getDreamById(req.userId, dreamId);
-    if (!dream) {
-      console.log(`[Server] ❌ Dream not found: ${dreamId} for user: ${req.userId}`);
-      return res.status(404).json({ error: 'Dream not found' });
-    }
-    console.log(`[Server] ✅ Dream found: ${dreamId}`);
-    res.status(200).json(dream);
+      const dream = await db.getDreamById(req.userId, dreamId);
+      if (!dream) {
+        console.log(`[Server] ❌ Dream not found: ${dreamId} for user: ${req.userId}`);
+        return res.status(404).json({ error: 'Dream not found' });
+      }
+      console.log(`[Server] ✅ Dream found: ${dreamId}`);
+      res.status(200).json(dream);
   } catch (error) {
-    console.error(`[Server] Error fetching dream ${dreamId}:`, error);
-    res.status(500).json({ error: 'Failed to fetch dream' });
+      console.error(`[Server] Error fetching dream ${dreamId}:`, error);
+      res.status(500).json({ error: 'Failed to fetch dream' });
   }
 });
 
@@ -196,11 +197,11 @@ app.delete('/dreams', async (req, res) => {
   }
   
   try {
-    await db.deleteDreams(req.userId, dreamIds);
-    res.status(200).json({ message: 'Dreams deleted successfully' });
+      await db.deleteDreams(req.userId, dreamIds);
+      res.status(200).json({ message: 'Dreams deleted successfully' });
   } catch (error) {
-    console.error('Error deleting dreams:', error);
-    res.status(500).json({ error: 'Failed to delete dreams' });
+      console.error('Error deleting dreams:', error);
+      res.status(500).json({ error: 'Failed to delete dreams' });
   }
 });
 
@@ -264,7 +265,7 @@ app.post('/processDreamAudio', upload.single('audiofile'), async (req, res) => {
       });
     }
     
-  } catch (error) {
+        } catch (error) {
     console.error('[Server] ❌ Audio processing error:', error);
     res.status(500).json({ 
       error: 'Failed to process audio',
@@ -280,9 +281,9 @@ app.post('/interpretDream', async (req, res) => {
   
   if (!text || !date) {
     return res.status(400).json({ error: 'text and date are required' });
-  }
+    }
 
-  try {
+    try {
     // Get user profile for gender
     const userProfile = await db.getProfile(req.userId);
     const userGender = userProfile?.gender || 'male';
@@ -311,9 +312,33 @@ app.post('/interpretDream', async (req, res) => {
   }
 });
 
+// =============================================================================
+// ERROR HANDLING MIDDLEWARE
+// =============================================================================
+
+// Telegram notification for critical errors
+app.use(errorNotificationMiddleware);
+
+// General error handler
+app.use((err, req, res, next) => {
+  console.error('[Server] ❌ Unhandled error:', err);
+  
+  const statusCode = err.statusCode || err.status || 500;
+  res.status(statusCode).json({
+    error: err.message || 'Internal server error',
+    details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`✨ Morpheus Backend running on http://localhost:${PORT}`);
   console.log(`🔧 Mode: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📦 Database: ${process.env.DATABASE_TYPE || 'json'}`);
+  
+  if (process.env.ADMIN_ID) {
+    console.log(`📱 Telegram notifications enabled for admin: ${process.env.ADMIN_ID}`);
+  } else {
+    console.warn('⚠️  ADMIN_ID not set - Telegram notifications disabled');
+  }
 });
