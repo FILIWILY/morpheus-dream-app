@@ -95,6 +95,76 @@ function escapeHtml(text) {
 }
 
 /**
+ * Report frontend error to admin
+ * @param {Object} frontendError - Error from frontend
+ */
+export async function notifyFrontendError(frontendError) {
+  if (!TELEGRAM_BOT_TOKEN || !ADMIN_ID) {
+    console.warn('[TelegramNotifier] ⚠️ Cannot send frontend error: TELEGRAM_BOT_TOKEN or ADMIN_ID not set');
+    return;
+  }
+
+  try {
+    const timestamp = frontendError.timestamp || new Date().toISOString();
+    
+    let message = `🔴 <b>FRONTEND ERROR</b>\n\n`;
+    message += `⏰ <b>Time:</b> ${timestamp}\n`;
+    message += `📱 <b>Type:</b> ${frontendError.type || 'Unknown'}\n`;
+    
+    if (frontendError.context) {
+      message += `📍 <b>Context:</b> ${frontendError.context}\n`;
+    }
+    
+    if (frontendError.url) {
+      message += `🌐 <b>URL:</b> ${escapeHtml(frontendError.url)}\n`;
+    }
+    
+    message += `\n❌ <b>Error:</b>\n<code>${escapeHtml(frontendError.message || 'No message')}</code>\n`;
+    
+    if (frontendError.filename) {
+      message += `\n📄 <b>File:</b> ${escapeHtml(frontendError.filename)}:${frontendError.line || '?'}:${frontendError.column || '?'}\n`;
+    }
+    
+    if (frontendError.stack) {
+      const shortStack = frontendError.stack.split('\n').slice(0, 3).join('\n');
+      message += `\n📚 <b>Stack:</b>\n<code>${escapeHtml(shortStack)}</code>\n`;
+    }
+    
+    if (frontendError.metadata) {
+      message += `\n📋 <b>Metadata:</b>\n`;
+      for (const [key, value] of Object.entries(frontendError.metadata)) {
+        message += `  • ${key}: ${escapeHtml(String(value))}\n`;
+      }
+    }
+    
+    if (frontendError.userAgent) {
+      message += `\n🔧 <b>User Agent:</b> ${escapeHtml(frontendError.userAgent.substring(0, 100))}\n`;
+    }
+
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: ADMIN_ID,
+        text: message,
+        parse_mode: 'HTML'
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[TelegramNotifier] ❌ Failed to send frontend error notification: ${errorText}`);
+    } else {
+      console.log('[TelegramNotifier] ✅ Frontend error notification sent successfully');
+    }
+  } catch (error) {
+    console.error('[TelegramNotifier] ❌ Error sending frontend error notification:', error);
+  }
+}
+
+/**
  * Express middleware for error notification
  */
 export function errorNotificationMiddleware(err, req, res, next) {

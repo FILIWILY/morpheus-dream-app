@@ -125,13 +125,19 @@ sudo systemctl reload nginx
 2. Добавь в `.env` на сервере:
 ```bash
 ADMIN_ID=280186359
+TELEGRAM_BOT_TOKEN=your_bot_token_here
 ```
 3. Пересобери backend:
 ```bash
 docker compose up -d --build backend
 ```
 
-Теперь при критических ошибках (5xx) будут приходить уведомления в Telegram!
+**Что будет приходить:**
+- 🚨 Backend ошибки (5xx)
+- 🔴 Frontend ошибки (uncaught errors, unhandled rejections)
+- 🔀 Ошибки навигации (404, missing IDs)
+
+**Примечание:** Frontend ошибки не видны в `docker compose logs frontend` - там только Nginx access логи. Все критические ошибки теперь приходят в Telegram!
 
 ---
 

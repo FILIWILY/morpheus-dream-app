@@ -7,6 +7,10 @@ import { LocalizationProvider as MuiLocalizationProvider } from '@mui/x-date-pic
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ru } from 'date-fns/locale';
 import { ProfileProvider } from './context/ProfileContext.jsx';
+import { setupErrorReporting } from './services/errorReporter.js';
+
+// Setup global error reporting to Telegram
+setupErrorReporting();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 

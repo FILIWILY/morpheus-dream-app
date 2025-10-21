@@ -13,6 +13,7 @@ import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { LocalizationContext } from '../context/LocalizationContext';
 import DateSelectionModal from '../components/DateSelectionModal';
 import { useProfile } from '../context/ProfileContext';
+import { reportError } from '../services/errorReporter';
 
 const DEV_USER_ID = import.meta.env.DEV ? 'dev_test_user_123' : null;
 
@@ -82,7 +83,15 @@ const RecordingPage = () => {
           navigate(`/interpretation/${dreamId}`);
         } else {
           console.error('[RecordingPage] ❌ Unexpected response structure:', response.data);
-          setError(t('unknownError') + ' (No ID returned)');
+          const errorMsg = t('unknownError') + ' (No ID returned)';
+          setError(errorMsg);
+          
+          // Report to admin via Telegram
+          reportError('RecordingPage (Audio)', new Error(errorMsg), {
+            responseData: JSON.stringify(response.data),
+            expectedField: 'id',
+            actualFields: Object.keys(response.data || {}).join(', ')
+          });
         }
       } catch (err) {
         console.error('[RecordingPage] ❌ Audio processing error:', err);
@@ -92,6 +101,13 @@ const RecordingPage = () => {
           status: err.response?.status
         });
         setError(err.response?.data?.error || err.message || t('unknownError'));
+        
+        // Report to admin via Telegram
+        reportError('RecordingPage (Audio)', err, {
+          endpoint: '/processDreamAudio',
+          status: err.response?.status,
+          responseData: JSON.stringify(err.response?.data)
+        });
       } finally {
         setIsLoading(false);
         setLoadingStage(0);
@@ -177,7 +193,15 @@ const RecordingPage = () => {
         navigate(`/interpretation/${dreamId}`);
       } else {
         console.error('[RecordingPage] ❌ Unexpected response structure:', response.data);
-        setError(t('unknownError') + ' (No ID returned)');
+        const errorMsg = t('unknownError') + ' (No ID returned)';
+        setError(errorMsg);
+        
+        // Report to admin via Telegram
+        reportError('RecordingPage (Text)', new Error(errorMsg), {
+          responseData: JSON.stringify(response.data),
+          expectedField: 'id',
+          actualFields: Object.keys(response.data || {}).join(', ')
+        });
       }
       
     } catch (err) {
@@ -188,6 +212,13 @@ const RecordingPage = () => {
         status: err.response?.status
       });
       setError(err.response?.data?.error || err.message || t('unknownError'));
+      
+      // Report to admin via Telegram
+      reportError('RecordingPage (Text)', err, {
+        endpoint: '/interpretDream',
+        status: err.response?.status,
+        responseData: JSON.stringify(err.response?.data)
+      });
     } finally {
       setIsLoading(false);
       setLoadingStage(0);

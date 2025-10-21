@@ -21,7 +21,7 @@ import * as db from './services/database.js';
 import { interpretDream } from './services/dreamInterpreter.js';
 import { transcribeAudio } from './services/whisper.js';
 import { verifyTelegramAuth } from './middleware/auth.js';
-import { errorNotificationMiddleware } from './services/telegramNotifier.js';
+import { errorNotificationMiddleware, notifyFrontendError } from './services/telegramNotifier.js';
 import axios from 'axios';
 import multer from 'multer';
 
@@ -49,6 +49,21 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
   res.json({ message: 'Morpheus Dream App - Simplified API' });
+});
+
+// Frontend error reporting endpoint (public, no auth required)
+app.post('/reportFrontendError', async (req, res) => {
+  try {
+    console.log('[Server] 🔴 Frontend error report received');
+    
+    // Send to Telegram admin
+    await notifyFrontendError(req.body);
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('[Server] ❌ Failed to process frontend error report:', error);
+    res.status(500).json({ error: 'Failed to report error' });
+  }
 });
 
 // =============================================================================
