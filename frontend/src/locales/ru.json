@@ -120,5 +120,9 @@
   "transcribingSpeech": "Расшифровываем речь...",
   "extractingImages": "Выделяем образы...",
   "analyzingDreambooks": "Изучаем сонники...",
-  "awaitingInterpretation": "Готовим толкование..."
+  "awaitingInterpretation": "Готовим толкование...",
+  
+  "recordingWillStartIn": "Запись начнётся через",
+  "recordingInProgress": "Запись идёт",
+  "tapToCancelCountdown": "Нажмите, чтобы отменить"
 }

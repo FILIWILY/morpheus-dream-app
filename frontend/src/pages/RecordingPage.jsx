@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import api from '../services/api';
 import styles from './RecordingPage.module.css';
@@ -30,15 +30,128 @@ const RecordingPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dreamDate, setDreamDate] = useState(null);
   const [userAction, setUserAction] = useState(null);
+  const [countdown, setCountdown] = useState(null); // 3, 2, 1, or null
+  const [isPreparingRecording, setIsPreparingRecording] = useState(false);
 
   const { isRecording, audioBlob, amplitude, startRecording, stopRecording } = useAudioRecorder();
+  
+  // Ref to prevent double-triggering of countdown
+  const countdownStartedRef = useRef(false);
+  // Refs to store timer IDs for cancellation
+  const countdownTimersRef = useRef({ timer1: null, timer2: null, timer3: null });
+
+  // Debug: log countdown state changes
+  useEffect(() => {
+    const orbIsRecording = countdown === null ? isRecording : (countdown === 1);
+    console.log('[RecordingPage] 🔄 State update - countdown:', countdown, 'isPreparingRecording:', isPreparingRecording, 'isRecording:', isRecording, '→ Orb isRecording:', orbIsRecording);
+  }, [countdown, isPreparingRecording, isRecording]);
+
+  // Reset countdown UI when recording actually starts
+  useEffect(() => {
+    if (isRecording && countdown !== null) {
+      console.log('[RecordingPage] 🎙️ Recording started! Resetting countdown UI');
+      setCountdown(null);
+      setIsPreparingRecording(false);
+    }
+  }, [isRecording, countdown]);
+
+  // Hide BottomNav during countdown/recording - same timing as fadeOut
+  useEffect(() => {
+    // Layout wraps BottomNav in <nav className={styles.nav}>
+    const bottomNavContainer = document.querySelector('nav:has(.MuiBottomNavigation-root)');
+    
+    console.log('[RecordingPage] 🔍 BottomNav container:', bottomNavContainer);
+    console.log('[RecordingPage] 📊 isPreparingRecording:', isPreparingRecording, 'isRecording:', isRecording);
+    
+    if (!bottomNavContainer) {
+      console.warn('[RecordingPage] ⚠️ BottomNav container not found in DOM');
+      return;
+    }
+    
+    if (isPreparingRecording || isRecording) {
+      console.log('[RecordingPage] 📉 Hiding BottomNav (translateY 100%)');
+      bottomNavContainer.style.transition = 'transform 0.4s ease-out';
+      bottomNavContainer.style.transform = 'translateY(100%)';
+    } else {
+      console.log('[RecordingPage] 📈 Showing BottomNav (translateY 0)');
+      bottomNavContainer.style.transition = 'transform 0.4s ease-out';
+      bottomNavContainer.style.transform = 'translateY(0)';
+    }
+    
+    return () => {
+      if (bottomNavContainer) {
+        bottomNavContainer.style.transition = '';
+        bottomNavContainer.style.transform = '';
+      }
+    };
+  }, [isPreparingRecording, isRecording]);
+
+  // Function to cancel countdown
+  const cancelCountdown = () => {
+    console.log('[RecordingPage] ❌ Cancelling countdown');
+    clearTimeout(countdownTimersRef.current.timer1);
+    clearTimeout(countdownTimersRef.current.timer2);
+    clearTimeout(countdownTimersRef.current.timer3);
+    setCountdown(null);
+    setIsPreparingRecording(false);
+    setUserAction(null); // Reset userAction when cancelled
+    countdownStartedRef.current = false;
+    countdownTimersRef.current = { timer1: null, timer2: null, timer3: null };
+  };
 
   useEffect(() => {
-    if (dreamDate && userAction === 'startRecording') {
-      startRecording().catch(err => setError(err.message));
-      setUserAction(null);
+    console.log('[RecordingPage] 🔍 useEffect triggered - dreamDate:', dreamDate, 'userAction:', userAction, 'countdownStarted:', countdownStartedRef.current);
+    
+    if (dreamDate && userAction === 'startRecording' && !countdownStartedRef.current) {
+      console.log('[RecordingPage] 🎬 ✅ All conditions met! Starting countdown sequence');
+      countdownStartedRef.current = true; // Mark as started
+      
+      // Start countdown sequence
+      setIsPreparingRecording(true);
+      setCountdown(3);
+      console.log('[RecordingPage] ⏱️ Countdown: 3');
+      
+      countdownTimersRef.current.timer1 = setTimeout(() => {
+        console.log('[RecordingPage] ⏱️ Countdown: 2');
+        setCountdown(2);
+      }, 1100);
+      
+      countdownTimersRef.current.timer2 = setTimeout(() => {
+        console.log('[RecordingPage] ⏱️ Countdown: 1');
+        setCountdown(1);
+      }, 2200);
+      
+      countdownTimersRef.current.timer3 = setTimeout(() => {
+        console.log('[RecordingPage] ⏱️ Countdown finished, starting recording');
+        // Don't reset countdown/isPreparingRecording yet - keep UI frozen
+        // Just start recording
+        countdownStartedRef.current = false; // Reset for next time
+        setUserAction(null); // Reset userAction AFTER countdown finishes
+        startRecording().catch(err => {
+          console.error('[RecordingPage] ❌ Recording start error:', err);
+          setError(err.message);
+          countdownStartedRef.current = false; // Reset on error too
+          setUserAction(null); // Reset on error too
+          // Reset UI on error
+          setCountdown(null);
+          setIsPreparingRecording(false);
+        });
+      }, 3300);
     }
-  }, [dreamDate, userAction, startRecording]);
+    
+    // Cleanup only on unmount (not on re-render)
+    return () => {
+      // Only cleanup if timers are actually running
+      if (countdownStartedRef.current) {
+        console.log('[RecordingPage] 🧹 Cleaning up countdown timers (component unmounting)');
+        clearTimeout(countdownTimersRef.current.timer1);
+        clearTimeout(countdownTimersRef.current.timer2);
+        clearTimeout(countdownTimersRef.current.timer3);
+        countdownStartedRef.current = false;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dreamDate, userAction]);
 
   useEffect(() => {
     if (!audioBlob) return;
@@ -148,27 +261,50 @@ const RecordingPage = () => {
   }, [audioBlob, locale, navigate, t, dreamDate]);
 
   const handleInitiateAction = (actionType) => {
+    console.log('[RecordingPage] 🚀 Initiating action:', actionType);
     setError(null);
     if (actionType === 'sendText' && !dreamText.trim()) {
       setError('Пожалуйста, опишите свой сон.');
       return;
     }
+    
+    // Clear previous date and set new action
+    setDreamDate(null);
     setUserAction(actionType);
     setIsModalOpen(true);
+    console.log('[RecordingPage] 📅 Opening date selection modal');
   };
 
   const handleDateSelect = (date) => {
-    setDreamDate(date);
+    console.log('[RecordingPage] 📅 Date selected:', date, 'userAction:', userAction);
     setIsModalOpen(false);
+    
     if (userAction === 'sendText') {
+      console.log('[RecordingPage] 📝 Processing text submission');
       handleTextSubmit(date);
+    } else if (userAction === 'startRecording') {
+      console.log('[RecordingPage] 🎬 Date selected, will trigger countdown');
+      // Set date and action together to trigger countdown
+      setDreamDate(date);
     }
   };
 
   const handleRecordClick = () => {
+    console.log('[RecordingPage] 🎤 Record button clicked. isRecording:', isRecording, 'countdown:', countdown);
+    
+    // If countdown is active, cancel it
+    if (countdown !== null) {
+      console.log('[RecordingPage] ❌ Cancelling countdown');
+      cancelCountdown();
+      return;
+    }
+    
+    // If recording, stop it
     if (isRecording) {
+      console.log('[RecordingPage] 🛑 Stopping recording');
       stopRecording();
     } else {
+      console.log('[RecordingPage] ▶️ Starting recording flow (will open date modal)');
       handleInitiateAction('startRecording');
     }
   };
@@ -272,7 +408,8 @@ const RecordingPage = () => {
       {!isLoading && (
         <>
           <main className={styles.content}>
-            <header className={styles.header}>
+            {/* Header - hidden during countdown/recording */}
+            <header className={`${styles.header} ${(isPreparingRecording || isRecording) ? styles.fadeOut : ''}`}>
               <IconButton 
                 size="large" 
                 aria-label="menu" 
@@ -285,12 +422,12 @@ const RecordingPage = () => {
                 variant="h1" 
                 className={styles.title}
               >
-                {isRecording ? t('recording') : t('recordYourDream')}
+                {t('recordYourDream')}
               </Typography>
             </header>
 
             <Box className={styles.orbContainer}>
-              {error && (
+              {error && !isPreparingRecording && !isRecording && (
                 <Alert 
                   severity="error" 
                   onClose={() => setError(null)} 
@@ -300,15 +437,47 @@ const RecordingPage = () => {
                 </Alert>
               )}
 
+              {/* Countdown or Recording status */}
+              {(countdown !== null || isRecording) && (
+                <Box className={styles.statusContainer}>
+                  {countdown !== null && (
+                    <>
+                      <Typography variant="body1" className={styles.countdownLabel}>
+                        {t('recordingWillStartIn')}
+                      </Typography>
+                      <Typography 
+                        key={countdown} 
+                        variant="h1" 
+                        className={styles.countdownNumber}
+                      >
+                        {countdown}
+                      </Typography>
+                      <Typography variant="caption" className={styles.cancelHint}>
+                        {t('tapToCancelCountdown')}
+                      </Typography>
+                    </>
+                  )}
+                  {countdown === null && isRecording && (
+                    <Typography 
+                      key="recording" 
+                      variant="h5" 
+                      className={styles.recordingLabel}
+                    >
+                      {t('recordingInProgress')}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+
               <RecordingOrb
-                isRecording={isRecording}
+                isRecording={countdown === null ? isRecording : (countdown === 1)}
                 amplitude={amplitude}
                 onClick={handleRecordClick}
               />
             </Box>
           </main>
 
-          <footer className={`${styles.footer} ${isRecording ? styles.faded : ''}`}>
+          <footer className={`${styles.footer} ${(isPreparingRecording || isRecording) ? styles.fadeOut : ''}`}>
             <Box
               component="form"
               onSubmit={handleTextFormSubmit}

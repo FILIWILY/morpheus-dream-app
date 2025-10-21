@@ -244,7 +244,7 @@ const SettingsDrawer = ({ open, onClose }) => {
                         boxShadow: 'none', 
                         flexShrink: 0,
                     }}>
-                        <Toolbar>
+                        <Toolbar sx={{ paddingTop: '48px' }}>
                             <IconButton edge="start" color="inherit" onClick={onClose}>
                                 <ArrowBackIcon />
                             </IconButton>

@@ -16,7 +16,8 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 // Restore full application with all providers
 root.render(
-  <React.StrictMode>
+  // StrictMode temporarily disabled to prevent double-mounting during countdown
+  // <React.StrictMode>
     <AppLocalizationProvider>
       <MuiLocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ru}>
         <ProfileProvider>
@@ -24,7 +25,7 @@ root.render(
         </ProfileProvider>
       </MuiLocalizationProvider>
     </AppLocalizationProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );
 
 // The Google Maps script is now loaded directly in index.html

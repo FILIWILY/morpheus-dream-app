@@ -113,5 +113,9 @@
   "transcribingSpeech": "Transcribing speech...",
   "extractingImages": "Extracting symbols...",
   "analyzingDreambooks": "Analyzing dream books...",
-  "awaitingInterpretation": "Preparing interpretation..."
+  "awaitingInterpretation": "Preparing interpretation...",
+  
+  "recordingWillStartIn": "Recording will start in",
+  "recordingInProgress": "Recording in progress",
+  "tapToCancelCountdown": "Tap to cancel"
 }

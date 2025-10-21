@@ -267,7 +267,8 @@ const InterpretationPageInteractive = () => {
             backgroundColor: '#1a1a2e',
             color: 'var(--text-primary)',
             borderRadius: '16px',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            marginTop: '40px' // Отступ сверху для Telegram кнопок
           }
         }}
       >

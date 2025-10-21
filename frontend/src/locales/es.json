@@ -107,5 +107,9 @@
   "transcribingSpeech": "Transcribiendo voz...",
   "extractingImages": "Extrayendo símbolos...",
   "analyzingDreambooks": "Analizando libros de sueños...",
-  "awaitingInterpretation": "Preparando interpretación..."
+  "awaitingInterpretation": "Preparando interpretación...",
+  
+  "recordingWillStartIn": "La grabación comenzará en",
+  "recordingInProgress": "Grabación en curso",
+  "tapToCancelCountdown": "Toca para cancelar"
 }

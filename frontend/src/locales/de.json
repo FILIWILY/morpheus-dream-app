@@ -105,5 +105,9 @@
   "transcribingSpeech": "Sprache transkribieren...",
   "extractingImages": "Symbole extrahieren...",
   "analyzingDreambooks": "Traumbücher analysieren...",
-  "awaitingInterpretation": "Deutung vorbereiten..."
+  "awaitingInterpretation": "Deutung vorbereiten...",
+  
+  "recordingWillStartIn": "Aufnahme beginnt in",
+  "recordingInProgress": "Aufnahme läuft",
+  "tapToCancelCountdown": "Tippen zum Abbrechen"
 }
