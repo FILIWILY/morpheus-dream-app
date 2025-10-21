@@ -67,7 +67,7 @@ export async function interpretDream(userId, dreamText, dreamDate, userGender = 
     const response = await client.responses.create({
       prompt: {
         id: "pmpt_68de883ddb2c8194af2c136bf403a7410bebe0a38c798ba8",
-        version: "12"
+        version: "13"
       },
       input: JSON.stringify({
         dream: dreamText,
