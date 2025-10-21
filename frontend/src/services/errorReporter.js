@@ -9,8 +9,47 @@ import api from './api';
  * Report critical error to admin
  * @param {Object} errorDetails - Error information
  */
+/**
+ * Check if request is from a bot
+ */
+const isBot = (userAgent) => {
+  const botPatterns = [
+    'bot', 'crawler', 'spider', 'crawling',
+    'Googlebot', 'Bingbot', 'Slurp', 'DuckDuckBot',
+    'Baiduspider', 'YandexBot', 'Sogou', 'Exabot',
+    'facebookexternalhit', 'ia_archiver'
+  ];
+  
+  return botPatterns.some(pattern => 
+    userAgent.toLowerCase().includes(pattern.toLowerCase())
+  );
+};
+
+/**
+ * Check if error is from localhost
+ */
+const isLocalhost = (url) => {
+  return url.includes('localhost') || url.includes('127.0.0.1') || url.includes('0.0.0.0');
+};
+
 export async function reportCriticalError(errorDetails) {
   const isDev = import.meta.env.DEV || import.meta.env.MODE === 'development';
+  const userAgent = navigator.userAgent;
+  const url = window.location.href;
+  
+  // Skip reporting for bots
+  if (isBot(userAgent)) {
+    console.log('[ErrorReporter] 🤖 Skipping error report from bot:', userAgent);
+    return;
+  }
+  
+  // Skip reporting for localhost (both dev and prod)
+  if (isLocalhost(url)) {
+    if (isDev) {
+      console.log('[ErrorReporter] 🏠 Skipping error report from localhost (dev mode)');
+    }
+    return;
+  }
   
   try {
     if (isDev) {
@@ -21,8 +60,8 @@ export async function reportCriticalError(errorDetails) {
     const response = await api.post('/reportFrontendError', {
       ...errorDetails,
       timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href
+      userAgent: userAgent,
+      url: url
     });
     
     if (isDev) {

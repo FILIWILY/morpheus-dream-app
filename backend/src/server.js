@@ -15,6 +15,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 console.log('[ENV] DATABASE_TYPE:', process.env.DATABASE_TYPE);
 console.log('[ENV] NODE_ENV:', process.env.NODE_ENV);
 console.log('[ENV] DANGEROUSLY_BYPASS_AUTH:', process.env.DANGEROUSLY_BYPASS_AUTH);
+console.log('[ENV] USE_MOCK_AI:', process.env.USE_MOCK_AI);
 
 // Import services
 import * as db from './services/database.js';
@@ -202,6 +203,21 @@ app.get('/dreams/:dreamId', async (req, res) => {
   } catch (error) {
       console.error(`[Server] Error fetching dream ${dreamId}:`, error);
       res.status(500).json({ error: 'Failed to fetch dream' });
+  }
+});
+
+// Mark symbol as viewed
+app.put('/symbols/:symbolId/viewed', async (req, res) => {
+  const { symbolId } = req.params;
+  
+  console.log(`[Server] 👁️ Marking symbol ${symbolId} as viewed`);
+  
+  try {
+    await db.markSymbolAsViewed(symbolId);
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error(`[Server] ❌ Error marking symbol as viewed:`, error);
+    res.status(500).json({ error: 'Failed to mark symbol as viewed' });
   }
 });
 

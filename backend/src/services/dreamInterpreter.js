@@ -1,7 +1,56 @@
 import OpenAI from 'openai';
 import * as db from './database.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 let client = null;
+
+// Available colors for dream symbols (same as frontend)
+const SYMBOL_COLORS = [
+  '#8B5CF6', // фиолетовый
+  '#06B6D4', // cyan
+  '#10B981', // зелёный
+  '#F59E0B', // оранжевый
+  '#EF4444', // красный
+  '#EC4899', // розовый
+  '#6366F1', // индиго
+  '#14B8A6', // teal
+];
+
+/**
+ * Generate random color from predefined palette
+ */
+const generateRandomColor = () => {
+  return SYMBOL_COLORS[Math.floor(Math.random() * SYMBOL_COLORS.length)];
+};
+
+// Load mock data from JSON file
+let MOCK_INTERPRETATION = null;
+try {
+  const mockPath = resolve(__dirname, '../../mock-interpretation.json');
+  MOCK_INTERPRETATION = JSON.parse(readFileSync(mockPath, 'utf-8'));
+  console.log('[DreamInterpreter] 📦 Mock data loaded from mock-interpretation.json');
+} catch (error) {
+  console.error('[DreamInterpreter] ❌ Failed to load mock data:', error);
+  // Fallback mock data
+  MOCK_INTERPRETATION = {
+    title: "Тестовый сон",
+    introduction: "Моковые данные не загрузились. Это резервная интерпретация.",
+    symbols: [
+      { title: "Символ 1", interpretation: "Интерпретация 1", category: "общее" },
+      { title: "Символ 2", interpretation: "Интерпретация 2", category: "общее" },
+      { title: "Символ 3", interpretation: "Интерпретация 3", category: "общее" }
+    ],
+    advice: {
+      title: "Совет",
+      content: "Это тестовый совет из резервных моковых данных."
+    }
+  };
+}
 
 /**
  * Initialize OpenAI client
@@ -46,6 +95,17 @@ const extractResponseText = (response) => {
 export async function interpretDream(userId, dreamText, dreamDate, userGender = 'male') {
   console.log(`[DreamInterpreter] Starting interpretation for user ${userId}`);
   
+  // Check if mock mode is enabled
+  console.log(`[DreamInterpreter] 🔍 DEBUG: process.env.USE_MOCK_AI = "${process.env.USE_MOCK_AI}" (type: ${typeof process.env.USE_MOCK_AI})`);
+  const useMockAI = process.env.USE_MOCK_AI === 'true';
+  console.log(`[DreamInterpreter] 🔍 DEBUG: useMockAI = ${useMockAI}`);
+  
+  if (useMockAI) {
+    console.log('[DreamInterpreter] 🎭 MOCK MODE enabled - using test data');
+  } else {
+    console.log('[DreamInterpreter] 🌐 REAL MODE - will call OpenAI API');
+  }
+  
   // 1. Create empty dream record in database
   const dream = await db.createDream(userId, {
     dream_text: dreamText,
@@ -59,7 +119,46 @@ export async function interpretDream(userId, dreamText, dreamDate, userGender = 
   console.log(`[DreamInterpreter] Created dream record with ID: ${dream.id}`);
 
   try {
-    // 2. Initialize OpenAI
+    // 2. Use mock data if enabled
+    if (useMockAI) {
+      console.log('[DreamInterpreter] Using mock interpretation data');
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const data = MOCK_INTERPRETATION;
+      
+      // 3. Update dream with mock data
+      await db.updateDream(dream.id, {
+        title: data.title,
+        introduction: data.introduction,
+        advice_title: data.advice.title,
+        advice_content: data.advice.content
+      });
+
+      console.log('[DreamInterpreter] Updated dream record with mock data');
+
+      // 4. Save mock symbols with random colors
+      for (let i = 0; i < data.symbols.length; i++) {
+        await db.createDreamSymbol(dream.id, {
+          title: data.symbols[i].title,
+          interpretation: data.symbols[i].interpretation,
+          category: null,
+          symbol_order: i + 1,
+          color: generateRandomColor()
+        });
+      }
+
+      console.log(`[DreamInterpreter] Created ${data.symbols.length} mock symbol records`);
+
+      // 5. Fetch and return complete dream
+      const completeDream = await db.getDreamWithSymbols(dream.id);
+      console.log('[DreamInterpreter] ✅ Mock interpretation complete');
+      
+      return completeDream;
+    }
+    
+    // 2. Initialize OpenAI (real mode)
     initializeOpenAI();
 
     // 3. Call OpenAI Responses API (single request!)
@@ -111,13 +210,14 @@ export async function interpretDream(userId, dreamText, dreamDate, userGender = 
 
     console.log('[DreamInterpreter] Updated dream record');
 
-    // 7. Save symbols
+    // 7. Save symbols with random colors
     for (let i = 0; i < data.symbols.length; i++) {
       await db.createDreamSymbol(dream.id, {
         title: data.symbols[i].title,
         interpretation: data.symbols[i].interpretation,
         category: null,  // For future analytics
-        symbol_order: i + 1
+        symbol_order: i + 1,
+        color: generateRandomColor()
       });
     }
 

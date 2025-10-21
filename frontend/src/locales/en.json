@@ -105,5 +105,13 @@
   "welcomeFeature3": "Practical advice and recommendations",
   "welcomeFeature4": "History of all your dreams with the ability to review them",
   "welcomeClosing": "Simply describe your dream in text, and our AI will find important symbols and interpret them through the lens of folk wisdom and classical dream books.",
-  "welcomeStart": "Get Started"
+  "welcomeStart": "Get Started",
+  
+  "stage": "Step",
+  "of": "of",
+  
+  "transcribingSpeech": "Transcribing speech...",
+  "extractingImages": "Extracting symbols...",
+  "analyzingDreambooks": "Analyzing dream books...",
+  "awaitingInterpretation": "Preparing interpretation..."
 }

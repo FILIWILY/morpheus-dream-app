@@ -97,5 +97,13 @@
   "morpheus": "Morpheus",
   "tarot": "Tarot",
   "welcomeNewTitle": "Ein KI-Tagebuch zum Aufzeichnen und Entschlüsseln von Träumen",
-  "mockProcessedText": "Dies ist ein Beispiel für verarbeiteten Text für einen Mock-Traum."
+  "mockProcessedText": "Dies ist ein Beispiel für verarbeiteten Text für einen Mock-Traum.",
+  
+  "stage": "Schritt",
+  "of": "von",
+  
+  "transcribingSpeech": "Sprache transkribieren...",
+  "extractingImages": "Symbole extrahieren...",
+  "analyzingDreambooks": "Traumbücher analysieren...",
+  "awaitingInterpretation": "Deutung vorbereiten..."
 }

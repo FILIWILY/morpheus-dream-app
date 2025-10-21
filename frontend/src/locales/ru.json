@@ -112,5 +112,13 @@
   "morpheus": "Морфей",
   "tarot": "Таро",
   "welcomeNewTitle": "ИИ-дневник для записи и расшифровки снов",
-  "mockProcessedText": "Это пример обработанного текста для мокового сна."
+  "mockProcessedText": "Это пример обработанного текста для мокового сна.",
+  
+  "stage": "Шаг",
+  "of": "из",
+  
+  "transcribingSpeech": "Расшифровываем речь...",
+  "extractingImages": "Выделяем образы...",
+  "analyzingDreambooks": "Изучаем сонники...",
+  "awaitingInterpretation": "Готовим толкование..."
 }

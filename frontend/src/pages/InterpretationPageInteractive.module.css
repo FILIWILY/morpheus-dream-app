@@ -1,0 +1,309 @@
+/* Mobile-first design */
+.pageWrapper {
+  min-height: 100vh;
+  background: var(--bg-primary, #0a0a0f);
+  color: var(--text-primary, #ffffff);
+  padding: 8px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 12px 8px;
+  margin-bottom: 16px;
+}
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 8px;
+}
+
+/* Introduction */
+.introduction {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary, #b0b0b0);
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Symbol Tiles Grid */
+.tilesContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tile {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tile-color);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tile:active {
+  transform: scale(0.95);
+}
+
+.tileActive {
+  border-color: var(--tile-color) !important;
+  color: var(--tile-color) !important;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 20px rgba(var(--tile-color), 0.3);
+  animation: tileActivate 0.4s ease-out;
+}
+
+.tileActive::before {
+  opacity: 0.1;
+}
+
+@keyframes tileActivate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Progress Orbs */
+.orbsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0;
+  flex-wrap: wrap;
+  scroll-margin-top: 20px; /* Отступ при автоскролле */
+}
+
+.orb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.orbActive {
+  background-color: var(--orb-color) !important;
+  border-color: var(--orb-color) !important;
+  box-shadow: 0 0 16px var(--orb-color);
+  animation: orbGlow 0.6s ease-out;
+}
+
+@keyframes orbGlow {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Advice Animation */
+.adviceAnimation {
+  text-align: center;
+  margin: 40px 0;
+  padding: 24px;
+}
+
+.animatedText {
+  font-size: 18px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.dots::after {
+  content: '...';
+  animation: ellipsis 1.5s steps(4, end) infinite;
+}
+
+@keyframes ellipsis {
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75% {
+    content: '...';
+  }
+  100% {
+    content: '';
+  }
+}
+
+/* Advice Card */
+.adviceCard {
+  background: linear-gradient(135deg, rgba(100, 200, 255, 0.08) 0%, rgba(138, 92, 246, 0.08) 100%);
+  border: 1px solid rgba(138, 92, 246, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 24px;
+  margin-bottom: 32px;
+  animation: fadeIn 0.6s ease-out;
+  scroll-margin-top: 20px; /* Отступ при автоскролле */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.adviceTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #8B5CF6;
+  margin: 0 0 16px 0;
+}
+
+.adviceContent {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-secondary, #d0d0d0);
+}
+
+.adviceContent p {
+  margin: 0 0 12px 0;
+}
+
+.adviceContent p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive - Medium screens */
+@media (min-width: 480px) {
+  .pageWrapper {
+    padding: 12px;
+  }
+  
+  .tilesContainer {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  
+  .tile {
+    font-size: 17px;
+  }
+  
+  .orb {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Responsive - Large screens */
+@media (min-width: 768px) {
+  .pageWrapper {
+    padding: 16px;
+  }
+  
+  .content {
+    padding: 0 16px;
+  }
+  
+  .introduction {
+    font-size: 16px;
+    padding: 20px;
+  }
+  
+  .tilesContainer {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  
+  .tile {
+    font-size: 18px;
+    padding: 20px;
+  }
+  
+  .tile:hover:not(.tileActive) {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  .orb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .adviceCard {
+    padding: 32px;
+  }
+  
+  .adviceTitle {
+    font-size: 24px;
+  }
+  
+  .adviceContent {
+    font-size: 16px;
+  }
+}
+
+/* Extra safety for very small screens */
+@media (max-width: 360px) {
+  .tile {
+    font-size: 14px;
+    padding: 12px;
+  }
+  
+  .orb {
+    width: 14px;
+    height: 14px;
+    gap: 10px;
+  }
+  
+  .introduction {
+    font-size: 14px;
+    padding: 12px;
+  }
+}
+

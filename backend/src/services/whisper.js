@@ -10,6 +10,15 @@ const WHISPER_URL = process.env.WHISPER_URL || 'http://localhost:8000';
  * @returns {Promise<string>} - Распознанный текст
  */
 export async function transcribeAudio(audioBuffer, language = 'ru') {
+  // Mock mode - skip actual transcription
+  if (process.env.USE_MOCK_AI === 'true') {
+    console.log(`[Whisper] 🎭 MOCK MODE: Skipping real transcription`);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Небольшая задержка для реализма
+    const mockText = "Мне приснился удивительный сон. Я стоял на берегу бескрайнего океана и смотрел на волны. Вдруг в небе появилась большая белая птица, она летела прямо ко мне. В руках у меня был старинный золотой ключ.";
+    console.log(`[Whisper] 🎭 MOCK: Returning mock transcription: "${mockText.substring(0, 50)}..."`);
+    return mockText;
+  }
+  
   try {
     console.log(`[Whisper] Starting transcription. Language: ${language}, buffer size: ${audioBuffer.length} bytes`);
     console.log(`[Whisper] Target URL: ${WHISPER_URL}/v1/audio/transcriptions`);

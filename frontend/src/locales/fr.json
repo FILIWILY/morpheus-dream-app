@@ -90,5 +90,13 @@
   "morpheus": "Morphée",
   "tarot": "Tarot",
   "welcomeNewTitle": "Un journal d'IA pour enregistrer et décoder les rêves",
-  "mockProcessedText": "Ceci est un exemple de texte traité pour un rêve fictif."
+  "mockProcessedText": "Ceci est un exemple de texte traité pour un rêve fictif.",
+  
+  "stage": "Étape",
+  "of": "sur",
+  
+  "transcribingSpeech": "Transcription de la parole...",
+  "extractingImages": "Extraction des symboles...",
+  "analyzingDreambooks": "Analyse des livres de rêves...",
+  "awaitingInterpretation": "Préparation de l'interprétation..."
 }

@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import styles from './LoadingOverlay.module.css';
+import { LocalizationContext } from '../context/LocalizationContext';
 
 const STAGES = [
-  { key: 'transcribing', label: 'Расшифровываем речь...', minDuration: 2000 },
-  { key: 'extracting', label: 'Выделяем образы...', minDuration: 2000 },
-  { key: 'analyzing', label: 'Изучаем сонники...', minDuration: 2000 },
-  { key: 'finalizing', label: 'Готовим толкование...', minDuration: 2000 }
+  { key: 'transcribing', labelKey: 'transcribingSpeech', minDuration: 800 },
+  { key: 'extracting', labelKey: 'extractingImages', minDuration: 800 },
+  { key: 'analyzing', labelKey: 'analyzingDreambooks', minDuration: 800 },
+  { key: 'finalizing', labelKey: 'awaitingInterpretation', minDuration: 800 }
 ];
 
 const LoadingOverlay = ({ isVisible, onComplete, currentStage = 0 }) => {
+  const { t } = useContext(LocalizationContext);
   const [displayStage, setDisplayStage] = useState(0);
   const [stageStartTime, setStageStartTime] = useState(Date.now());
 
@@ -55,10 +57,10 @@ const LoadingOverlay = ({ isVisible, onComplete, currentStage = 0 }) => {
       <Box className={styles.content}>
         <CircularProgress size={80} thickness={2} sx={{ color: 'var(--accent-primary)' }} />
         <Typography variant="h5" className={styles.stageText}>
-          {STAGES[displayStage]?.label || 'Обработка...'}
+          {t(STAGES[displayStage]?.labelKey) || t('pleaseWait')}
         </Typography>
         <Typography variant="body2" className={styles.progressText}>
-          Шаг {displayStage + 1} из {STAGES.length}
+          {t('stage')} {displayStage + 1} {t('of')} {STAGES.length}
         </Typography>
       </Box>
     </Box>

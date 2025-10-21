@@ -99,5 +99,13 @@
   "morpheus": "Morfeo",
   "tarot": "Tarot",
   "welcomeNewTitle": "Un diario de IA para grabar y decodificar sueños",
-  "mockProcessedText": "Este es un ejemplo de texto procesado para un sueño de prueba."
+  "mockProcessedText": "Este es un ejemplo de texto procesado para un sueño de prueba.",
+  
+  "stage": "Paso",
+  "of": "de",
+  
+  "transcribingSpeech": "Transcribiendo voz...",
+  "extractingImages": "Extrayendo símbolos...",
+  "analyzingDreambooks": "Analizando libros de sueños...",
+  "awaitingInterpretation": "Preparando interpretación..."
 }

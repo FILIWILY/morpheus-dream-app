@@ -55,8 +55,13 @@ CREATE TABLE IF NOT EXISTS dream_symbols (
     interpretation TEXT NOT NULL,
     category VARCHAR(100),              -- For future analytics (can be NULL)
     symbol_order INTEGER NOT NULL,      -- Display order (1, 2, 3...)
+    viewed BOOLEAN DEFAULT FALSE,       -- Tracks if user has viewed this symbol
+    color VARCHAR(7) DEFAULT NULL,      -- Hex color for UI (e.g. #8B5CF6)
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Index for faster viewed queries
+CREATE INDEX IF NOT EXISTS idx_dream_symbols_viewed ON dream_symbols(dream_id, viewed);
 
 -- =============================================================================
 -- INDEXES

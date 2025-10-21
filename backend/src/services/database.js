@@ -314,15 +314,16 @@ export async function updateDream(dreamId, updateData) {
 export async function createDreamSymbol(dreamId, symbolData) {
   if (usePostgresDatabase) {
     const result = await pool.query(
-      `INSERT INTO dream_symbols (dream_id, title, interpretation, category, symbol_order)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO dream_symbols (dream_id, title, interpretation, category, symbol_order, color)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
       [
         dreamId,
         symbolData.title,
         symbolData.interpretation,
         symbolData.category,
-        symbolData.symbol_order
+        symbolData.symbol_order,
+        symbolData.color || null
       ]
     );
     
@@ -340,6 +341,7 @@ export async function createDreamSymbol(dreamId, symbolData) {
       interpretation: symbolData.interpretation,
       category: symbolData.category,
       symbol_order: symbolData.symbol_order,
+      color: symbolData.color || null,
       created_at: new Date().toISOString()
     };
     
@@ -381,7 +383,9 @@ export async function getDreamWithSymbols(dreamId) {
         title: s.title,
         interpretation: s.interpretation,
         category: s.category,
-        order: s.symbol_order
+        order: s.symbol_order,
+        viewed: s.viewed || false,
+        color: s.color || null
       })),
       createdAt: dream.created_at
     };
@@ -473,6 +477,25 @@ export async function deleteDreams(userId, dreamIds) {
       !(d.user_id === userId && dreamIds.includes(d.id))
     );
     writeJsonDb(db);
+  }
+}
+
+// =============================================================================
+// SYMBOL INTERACTIONS
+// =============================================================================
+export async function markSymbolAsViewed(symbolId) {
+  if (usePostgresDatabase) {
+    await pool.query(
+      'UPDATE dream_symbols SET viewed = TRUE WHERE id = $1',
+      [symbolId]
+    );
+  } else {
+    const db = readJsonDb();
+    const symbol = db.dream_symbols?.find(s => s.id === symbolId);
+    if (symbol) {
+      symbol.viewed = true;
+      writeJsonDb(db);
+    }
   }
 }
 

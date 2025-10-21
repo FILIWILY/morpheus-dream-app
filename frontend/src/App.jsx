@@ -8,7 +8,7 @@ import WelcomePage from './pages/WelcomePage';
 import LanguageSelectionPage from './pages/LanguageSelectionPage';
 import RecordingPage from './pages/RecordingPage';
 import HistoryPage from './pages/HistoryPage';
-import InterpretationPage from './pages/InterpretationPage';
+import InterpretationPageInteractive from './pages/InterpretationPageInteractive';
 import ProfilePage from './pages/ProfilePage';
 import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
@@ -57,7 +57,7 @@ function App() {
                       <Route element={<Layout />}>
                         <Route path="/record" element={<RecordingPage />} />
                         <Route path="/history" element={<HistoryPage />} />
-                        <Route path="/interpretation/:dreamId" element={<InterpretationPage />} />
+                        <Route path="/interpretation/:dreamId" element={<InterpretationPageInteractive />} />
                         {/* Redirect any other nested path to /record */}
                         <Route path="*" element={<Navigate to="/record" replace />} />
                       </Route>
