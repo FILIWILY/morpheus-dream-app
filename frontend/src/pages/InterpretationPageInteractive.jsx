@@ -122,19 +122,17 @@ const InterpretationPageInteractive = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     
-    // Проверяем, все ли символы просмотрены
-    if (dream?.symbols && viewedSymbols.size === dream.symbols.length) {
+    // Проверяем, все ли символы просмотрены И это первый просмотр
+    if (dream?.symbols && viewedSymbols.size === dream.symbols.length && isInitialView) {
       // Плавно скроллим к секции с прогрессом (только при первом просмотре)
-      if (isInitialView) {
-        setTimeout(() => {
-          progressSectionRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-        }, 300); // Небольшая задержка для закрытия модалки
-      }
+      setTimeout(() => {
+        progressSectionRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }, 300); // Небольшая задержка для закрытия модалки
       
-      // Показываем анимацию "обрабатываем результаты..."
+      // Показываем анимацию "обрабатываем результаты..." (только при первом просмотре!)
       setShowAdviceAnimation(true);
       
       setTimeout(() => {
@@ -268,11 +266,17 @@ const InterpretationPageInteractive = () => {
             color: 'var(--text-primary)',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            marginTop: '40px' // Отступ сверху для Telegram кнопок
+            marginTop: '80px', // Увеличенный отступ сверху для Telegram кнопок
+            marginBottom: '20px' // Отступ снизу
+          }
+        }}
+        sx={{
+          '& .MuiDialog-container': {
+            alignItems: 'flex-start' // Выравнивание по верху
           }
         }}
       >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1, pt: 2 }}>
           <Typography 
             variant="h5" 
             component="div"

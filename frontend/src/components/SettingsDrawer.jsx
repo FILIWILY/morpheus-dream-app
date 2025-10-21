@@ -33,17 +33,95 @@ const SuccessAlert = styled(Alert)(({ theme }) => ({
     }
 }));
 
-const formatDate = (value) => {
+const formatDate = (value, locale = 'ru') => {
   const digits = value.replace(/\D/g, '').slice(0, 8);
-  if (digits.length > 4) return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
-  if (digits.length > 2) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-  return digits;
+  
+  if (locale === 'en') {
+    // MM/DD/YYYY для американцев
+    if (digits.length > 4) return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    if (digits.length > 2) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    return digits;
+  } else {
+    // DD.MM.YYYY для остальных
+    if (digits.length > 4) return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
+    if (digits.length > 2) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+    return digits;
+  }
 };
 
 const formatTime = (value) => {
   const digits = value.replace(/\D/g, '').slice(0, 4);
   if (digits.length > 2) return `${digits.slice(0, 2)}:${digits.slice(2)}`;
   return digits;
+};
+
+// Форматирование даты из БД для отображения
+const formatDateFromDB = (isoDateString, locale = 'ru') => {
+  if (!isoDateString) return '';
+  
+  console.log('[formatDateFromDB] 🔍 Input:', isoDateString, 'Locale:', locale);
+  
+  try {
+    // Парсим ISO строку напрямую (YYYY-MM-DD)
+    const datePart = isoDateString.split('T')[0]; // Берем только дату до 'T'
+    const [year, month, day] = datePart.split('-');
+    
+    console.log('[formatDateFromDB] 📅 Parsed:', { year, month, day });
+    
+    let result;
+    if (locale === 'en') {
+      result = `${month}/${day}/${year}`; // MM/DD/YYYY американский формат
+    } else {
+      result = `${day}.${month}.${year}`; // DD.MM.YYYY европейский формат
+    }
+    
+    console.log('[formatDateFromDB] ✅ Output:', result);
+    return result;
+  } catch (e) {
+    console.error('[SettingsDrawer] Error formatting date:', e);
+    return isoDateString;
+  }
+};
+
+// Форматирование времени из БД для отображения
+const formatTimeFromDB = (timeString) => {
+  if (!timeString) return '';
+  // Если формат HH:MM:SS, оставляем только HH:MM
+  return timeString.split(':').slice(0, 2).join(':');
+};
+
+// Конвертация даты из формата ввода в ISO формат для БД
+const convertDateToISO = (dateString, locale = 'ru') => {
+  if (!dateString) return '';
+  
+  console.log('[convertDateToISO] 🔍 Input:', dateString, 'Locale:', locale);
+  
+  try {
+    if (locale === 'en') {
+      // MM/DD/YYYY → YYYY-MM-DD
+      const parts = dateString.split('/');
+      if (parts.length === 3) {
+        const [month, day, year] = parts;
+        const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        console.log('[convertDateToISO] ✅ EN format:', { month, day, year }, '→', result);
+        return result;
+      }
+    } else {
+      // DD.MM.YYYY → YYYY-MM-DD
+      const parts = dateString.split('.');
+      if (parts.length === 3) {
+        const [day, month, year] = parts;
+        const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        console.log('[convertDateToISO] ✅ RU format:', { day, month, year }, '→', result);
+        return result;
+      }
+    }
+    console.warn('[convertDateToISO] ⚠️ Could not parse, returning original:', dateString);
+    return dateString;
+  } catch (e) {
+    console.error('[convertDateToISO] ❌ Error converting date to ISO:', e);
+    return dateString;
+  }
 };
 
 
@@ -82,6 +160,7 @@ const SettingsDrawer = ({ open, onClose }) => {
         let initialPlaceId = null;
 
         console.log('[SettingsDrawer] 🔍 Profile loaded:', profile);
+        console.log('[SettingsDrawer] 🔍 Profile.birthDate raw value:', profile?.birthDate);
 
         if (profile) {
             if (typeof profile.birthPlace === 'string') {
@@ -106,14 +185,16 @@ const SettingsDrawer = ({ open, onClose }) => {
         }
         
         const initialData = {
-            birthDate: profile?.birthDate || '',
-            birthTime: profile?.birthTime || '',
+            birthDate: formatDateFromDB(profile?.birthDate, lang),
+            birthTime: formatTimeFromDB(profile?.birthTime),
             birthPlace: birthPlaceText,
             gender: profile?.gender || '',
             placeId: initialPlaceId,
         };
         
         console.log('[SettingsDrawer] 📝 Setting initial gender:', initialData.gender);
+        console.log('[SettingsDrawer] 📅 Formatted birthDate:', initialData.birthDate);
+        console.log('[SettingsDrawer] ⏰ Formatted birthTime:', initialData.birthTime);
         
         setBirthDate(initialData.birthDate);
         setBirthTime(initialData.birthTime);
@@ -121,7 +202,7 @@ const SettingsDrawer = ({ open, onClose }) => {
         setGender(initialData.gender);
         setPlaceId(initialData.placeId);
         setInitialProfile(initialData);
-    }, [profile, setBirthPlace, t]);
+    }, [profile, setBirthPlace, t, lang]); // Добавили lang для обновления при смене языка
 
     useEffect(() => {
         if (!open) {
@@ -184,13 +265,18 @@ const SettingsDrawer = ({ open, onClose }) => {
         setError('');
         setSuccess('');
         try {
+            // Конвертируем дату из формата ввода в ISO формат для БД
+            const isoDate = convertDateToISO(birthDate, lang);
+            
             const profileData = {
-                birthDate,
+                birthDate: isoDate,
                 birthTime,
                 birthPlace: { description: birthPlace, placeId: placeId || null },
                 gender,
             };
             console.log('[SettingsDrawer] 💾 Saving profile with gender:', gender);
+            console.log('[SettingsDrawer] 📤 Original birthDate:', birthDate);
+            console.log('[SettingsDrawer] 📤 ISO birthDate:', isoDate);
             console.log('[SettingsDrawer] 📤 Full profileData:', profileData);
             
             await updateProfile(profileData);
@@ -313,8 +399,11 @@ const SettingsDrawer = ({ open, onClose }) => {
                                     variant="outlined"
                                     fullWidth
                                     value={birthDate}
-                                    onChange={(e) => setBirthDate(formatDate(e.target.value))}
-                                    inputProps={{ maxLength: 10, placeholder: "23.05.1990" }}
+                                    onChange={(e) => setBirthDate(formatDate(e.target.value, lang))}
+                                    inputProps={{ 
+                                        maxLength: 10, 
+                                        placeholder: lang === 'en' ? '12/31/1990' : '31.12.1990'
+                                    }}
                                     sx={{...textFieldStyles, mb: 2}}
                                 />
                                 <TextField

@@ -11,15 +11,14 @@
     flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden; /* Prevent horizontal scroll */
-    /* Add padding for the top safe area (notch) and bottom fixed nav */
-    padding-top: env(safe-area-inset-top);
+    /* No padding-top - pages handle their own top spacing */
     /* 56px (nav height) + safe area */
     padding-bottom: calc(56px + env(safe-area-inset-bottom));
 }
 
 .mainContentNoNav {
-    /* When nav is hidden, only account for the safe area and a small base padding */
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    /* When nav is hidden, only account for the safe area, no extra padding */
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .nav {

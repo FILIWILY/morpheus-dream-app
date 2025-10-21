@@ -129,13 +129,19 @@ export async function findOrCreateUser(telegramId) {
 export async function getProfile(telegramId) {
   if (usePostgresDatabase) {
     const result = await pool.query(
-      'SELECT * FROM users WHERE telegram_id = $1',
+      `SELECT telegram_id, 
+              birth_date::text as birth_date, 
+              birth_time::text as birth_time,
+              birth_place, birth_latitude, birth_longitude, gender, onboarding_completed 
+       FROM users WHERE telegram_id = $1`,
             [telegramId]
         );
 
     if (result.rows.length === 0) return null;
     
     const user = result.rows[0];
+    console.log('[getProfile] 📅 birth_date from DB (as text):', user.birth_date);
+    
             return {
       birthDate: user.birth_date,
       birthTime: user.birth_time,
@@ -174,7 +180,10 @@ export async function updateProfile(telegramId, profileData) {
            birth_latitude = $5, birth_longitude = $6, gender = $7,
            onboarding_completed = $8
        WHERE telegram_id = $1
-       RETURNING *`,
+       RETURNING telegram_id, 
+                 birth_date::text as birth_date,
+                 birth_time::text as birth_time, 
+                 birth_place, birth_latitude, birth_longitude, gender, onboarding_completed`,
       [
         telegramId,
         profileData.birthDate,
@@ -189,6 +198,8 @@ export async function updateProfile(telegramId, profileData) {
     
     // Convert snake_case to camelCase for frontend
     const user = result.rows[0];
+    console.log('[updateProfile] 📅 birth_date from DB (as text):', user.birth_date);
+    
     return {
       birthDate: user.birth_date,
       birthTime: user.birth_time,
