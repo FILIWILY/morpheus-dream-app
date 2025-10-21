@@ -15,8 +15,8 @@
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  /* Отступ сверху для Telegram кнопок */
-  padding-top: 40px;
+  /* Увеличенный отступ сверху для Telegram кнопок + дополнительная строка */
+  padding-top: 56px;
   margin-bottom: 16px;
 }
 
