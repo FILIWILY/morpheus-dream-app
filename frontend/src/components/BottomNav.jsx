@@ -13,11 +13,11 @@ const BottomNav = () => {
   const [value, setValue] = useState(location.pathname);
 
   useEffect(() => {
-    // Updated to handle root path correctly
-    if (location.pathname === '/') {
-        setValue('/');
-    } else if (["/history"].includes(location.pathname)) {
-        setValue(location.pathname);
+    // Handle all navigation paths correctly
+    if (location.pathname === '/' || location.pathname === '/record') {
+        setValue('/record');
+    } else if (location.pathname === '/history') {
+        setValue('/history');
     }
   }, [location.pathname]);
 
@@ -25,10 +25,31 @@ const BottomNav = () => {
     navigate(newValue);
   };
 
-  const iconStyle = {
-    color: 'var(--text-secondary)',
+  const navigationItemStyle = {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: '0.75rem',
+    minWidth: 'auto',
+    padding: '6px 12px',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    '& .MuiBottomNavigationAction-label': {
+      fontSize: '0.75rem',
+      transition: 'all 0.3s ease',
+      opacity: 0.7,
+    },
     '&.Mui-selected': {
-        color: 'var(--accent-primary)'
+      color: '#8B5CF6',
+      '& .MuiBottomNavigationAction-label': {
+        fontSize: '0.8rem',
+        opacity: 1,
+        fontWeight: 600,
+      },
+      '& .MuiSvgIcon-root': {
+        filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))',
+        transform: 'scale(1.1)',
+      }
+    },
+    '&:hover:not(.Mui-selected)': {
+      color: 'rgba(255, 255, 255, 0.8)',
     }
   };
 
@@ -39,20 +60,20 @@ const BottomNav = () => {
       showLabels 
       sx={{ 
         background: 'transparent',
-        height: '100%' 
+        height: '100%',
       }}
     >
       <BottomNavigationAction 
         label={t('recordDream')} 
-        value="/" 
+        value="/record" 
         icon={<MicIcon />} 
-        sx={iconStyle}
+        sx={navigationItemStyle}
       />
       <BottomNavigationAction 
         label={t('history')} 
         value="/history" 
         icon={<HistoryIcon />} 
-        sx={iconStyle}
+        sx={navigationItemStyle}
       />
     </BottomNavigation>
   );

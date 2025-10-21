@@ -1,24 +1,18 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Container, AppBar, Toolbar, Typography, IconButton, FormControl, FormControlLabel, RadioGroup, Radio, Button } from '@mui/material';
+import { Box, Typography, IconButton, Button, Radio } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { LocalizationContext } from '../context/LocalizationContext';
+import styles from './LanguagePage.module.css';
 
 const LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'ru', label: 'Русский' },
-  { code: 'de', label: 'Deutsch' },
-  { code: 'es', label: 'Español' },
-  { code: 'fr', label: 'Français' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
 ];
-
-// ✅ Стили для радио-кнопок на темном фоне
-const radioStyles = {
-    color: 'var(--text-secondary)', // Цвет неактивного кружка
-    '&.Mui-checked': {
-        color: 'var(--accent-primary)', // Цвет активного кружка
-    },
-};
 
 const LanguagePage = () => {
   const navigate = useNavigate();
@@ -26,54 +20,72 @@ const LanguagePage = () => {
 
   const [selectedLocale, setSelectedLocale] = useState(locale);
 
-  const handleLanguageChange = (event) => {
-    setSelectedLocale(event.target.value);
+  const handleLanguageChange = (code) => {
+    setSelectedLocale(code);
+    // Сразу меняем язык при выборе
+    setLocale(code);
   };
 
   const handleSave = () => {
-    setLocale(selectedLocale);
+    // Язык уже изменен, просто возвращаемся назад
     navigate(-1);
   };
 
   return (
-    <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <AppBar position="static" sx={{ background: 'transparent', boxShadow: 'none' }}>
-        <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={() => navigate(-1)} aria-label="go back">
+    <div className={styles.container}>
+      <Box className={styles.glassCard}>
+        {/* Header */}
+        <div className={styles.header}>
+          <IconButton 
+            onClick={() => navigate(-1)}
+            sx={{ 
+              color: 'var(--text-primary)',
+              padding: '8px'
+            }}
+          >
             <ArrowBackIcon />
           </IconButton>
-          <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
+          <Typography className={styles.title}>
             {t('language')}
           </Typography>
-        </Toolbar>
-      </AppBar>
+        </div>
 
-      <Box sx={{ p: 2, textAlign: 'left' }}>
-        <FormControl component="fieldset">
-          <RadioGroup
-            aria-label="language"
-            name="language-radio-buttons-group"
-            value={selectedLocale}
-            onChange={handleLanguageChange}
-          >
-            {LANGUAGES.map((lang) => (
-              <FormControlLabel 
-                key={lang.code}
-                value={lang.code} 
-                control={<Radio sx={radioStyles} />} // ✅ Применяем стили
-                label={lang.label} 
+        {/* Language Options */}
+        <div className={styles.languageOptions}>
+          {LANGUAGES.map((lang) => (
+            <div
+              key={lang.code}
+              className={`${styles.languageOption} ${selectedLocale === lang.code ? styles.selected : ''}`}
+              onClick={() => handleLanguageChange(lang.code)}
+            >
+              <Radio
+                checked={selectedLocale === lang.code}
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  padding: 0,
+                  '&.Mui-checked': {
+                    color: '#8B5CF6',
+                  }
+                }}
               />
-            ))}
-          </RadioGroup>
-        </FormControl>
+              <span style={{ fontSize: '1.5rem' }}>{lang.flag}</span>
+              <span className={styles.languageLabel}>{lang.label}</span>
+              {selectedLocale === lang.code && (
+                <CheckCircleIcon sx={{ color: '#8B5CF6', fontSize: '1.25rem' }} />
+              )}
+            </div>
+          ))}
+        </div>
 
-        <Box sx={{ mt: 3 }}>
-          <Button variant="contained" onClick={handleSave}>
-            {t('save')}
-          </Button>
-        </Box>
+        {/* Close Button */}
+        <Button 
+          className={styles.saveButton}
+          onClick={handleSave}
+        >
+          {t('done')}
+        </Button>
       </Box>
-    </Container>
+    </div>
   );
 };
 

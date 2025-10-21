@@ -1,47 +1,182 @@
+/* ============================================================================
+   LanguagePage Styles - Modern gradient design
+   Inspired by InterpretationPage & updated WelcomePage
+   ============================================================================ */
+
 .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 16px;
-    box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
+/* Glass Card with gradient border */
 .glassCard {
-    background: rgba(30, 30, 50, 0.75);
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 32px;
-    color: var(--text-primary);
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    text-align: center;
+  background: linear-gradient(135deg, rgba(15, 15, 25, 0.9) 0%, rgba(26, 26, 46, 0.85) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(138, 92, 246, 0.3);
+  padding: 2rem 1.75rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(138, 92, 246, 0.1);
+  animation: fadeIn 0.6s ease-out;
+  position: relative;
+}
+
+/* Gradient overlay effect */
+.glassCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(138, 92, 246, 0.4), rgba(100, 200, 255, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 12px;
 }
 
 .title {
-    font-weight: bold !important;
-    margin-bottom: 24px !important;
-    color: white;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #d0d0d0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  flex-grow: 1;
 }
 
-.grid {
-    margin-top: 16px;
+/* Language Options Container */
+.languageOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 1.5rem;
 }
 
-.button {
-    color: var(--text-primary) !important;
-    border-color: var(--border-color) !important;
-    padding: 12px 0 !important;
-    text-transform: none !important;
-    font-size: 1rem !important;
-    border-radius: 8px !important;
-    transition: background-color 0.3s ease, border-color 0.3s ease !important;
+/* Language Option Item */
+.languageOption {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
 }
 
-.button:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    border-color: var(--accent-primary) !important;
+.languageOption::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(138, 92, 246, 0.15) 0%, rgba(100, 200, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.languageOption:hover::before {
+  opacity: 1;
+}
+
+.languageOption:hover {
+  border-color: rgba(138, 92, 246, 0.4);
+  transform: translateX(4px);
+}
+
+/* Selected state */
+.languageOption.selected {
+  background: linear-gradient(135deg, rgba(138, 92, 246, 0.15) 0%, rgba(100, 200, 255, 0.1) 100%);
+  border-color: #8B5CF6;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.languageOption.selected::before {
+  opacity: 0;
+}
+
+/* Language Label */
+.languageLabel {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+/* Close/Done Button */
+.saveButton {
+  width: 100%;
+  padding: 12px 24px !important;
+  border-radius: 12px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
+}
+
+.saveButton:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5) !important;
+  background: linear-gradient(135deg, #9B6CF6 0%, #16C6E4 100%) !important;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .glassCard {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .title {
+    font-size: 1.15rem !important;
+  }
+
+  .languageOption {
+    padding: 12px 14px;
+  }
+
+  .languageLabel {
+    font-size: 0.95rem;
+  }
+
+  .saveButton {
+    font-size: 0.95rem !important;
+    padding: 11px 20px !important;
+  }
 }

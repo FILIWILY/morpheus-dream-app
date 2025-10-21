@@ -16,14 +16,6 @@ const WelcomePage = () => {
     <div className={styles.container}>
       <Box className={styles.glassCard}>
         <Typography 
-          variant="h1" 
-          component="h1" 
-          className={styles.title}
-        >
-          {t('welcomeTitle')}
-        </Typography>
-
-        <Typography 
           className={styles.subtitle}
         >
           {t('welcomeSubtitle')}

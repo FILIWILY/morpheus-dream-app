@@ -12,7 +12,7 @@
     overflow-y: auto;
     overflow-x: hidden; /* Prevent horizontal scroll */
     /* Standard top padding for most pages (RecordingPage, HistoryPage, etc) */
-    padding-top: 16px;
+    padding-top: 22px;
     /* 56px (nav height) + safe area */
     padding-bottom: calc(56px + env(safe-area-inset-bottom));
 }
@@ -30,10 +30,12 @@
     right: 0;
     z-index: 1000;
 
-    background-color: rgba(0, 0, 0, 0.8);
+    /* Glassmorphism как у плашки и поля ввода */
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 
     /* Handle bottom safe area directly on the nav's padding */
     padding-bottom: env(safe-area-inset-bottom);

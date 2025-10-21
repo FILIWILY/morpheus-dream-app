@@ -194,14 +194,78 @@ const HistoryPage = () => {
         </Box>
       </Container>
       
-      <Dialog open={isConfirmOpen} onClose={() => setIsConfirmOpen(false)}>
-        <DialogTitle>{t('confirmationTitle')}</DialogTitle>
+      <Dialog 
+        open={isConfirmOpen} 
+        onClose={() => setIsConfirmOpen(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: '#1a1a2e',
+            backgroundImage: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)',
+            color: 'var(--text-primary)',
+            borderRadius: '16px',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+            padding: '8px',
+            minWidth: '300px',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          color: '#8B5CF6', 
+          fontSize: '20px', 
+          fontWeight: 600,
+          paddingBottom: '8px'
+        }}>
+          {t('confirmationTitle')}
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>{t('confirmationText')}</DialogContentText>
+          <DialogContentText sx={{ 
+            color: 'var(--text-secondary)', 
+            fontSize: '15px',
+            lineHeight: 1.6
+          }}>
+            {t('confirmationText')}
+          </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsConfirmOpen(false)}>{t('no')}</Button>
-          <Button onClick={handleDeleteDreams} autoFocus color="error">{t('yesDelete')}</Button>
+        <DialogActions sx={{ padding: '16px', gap: '8px' }}>
+          <Button 
+            onClick={() => setIsConfirmOpen(false)}
+            sx={{
+              color: 'var(--text-primary)',
+              borderRadius: '10px',
+              padding: '8px 20px',
+              textTransform: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              '&:hover': {
+                background: 'rgba(255, 255, 255, 0.1)',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+              }
+            }}
+          >
+            {t('no')}
+          </Button>
+          <Button 
+            onClick={handleDeleteDreams} 
+            autoFocus
+            sx={{
+              color: '#ffffff',
+              borderRadius: '10px',
+              padding: '8px 20px',
+              textTransform: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+              background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
+                boxShadow: '0 6px 20px rgba(239, 68, 68, 0.4)',
+              }
+            }}
+          >
+            {t('yesDelete')}
+          </Button>
         </DialogActions>
       </Dialog>
 

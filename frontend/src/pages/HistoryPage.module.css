@@ -1,26 +1,144 @@
+/* ============================================================================
+   HistoryPage Styles - Inspired by InterpretationPage
+   Modern gradient cards with glassmorphism effects
+   ============================================================================ */
+
+/* Dream Card Container */
 .dreamItemContainer {
-  /* ✅ Затемняем фон стекла */
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+  background: linear-gradient(135deg, rgba(100, 200, 255, 0.08) 0%, rgba(138, 92, 246, 0.08) 100%);
+  border: 1px solid rgba(138, 92, 246, 0.2);
+  border-radius: 16px;
+  margin-bottom: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+}
 
-  border-radius: 14px;
-  margin-bottom: 12px;
-  overflow: hidden;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-  padding: 12px; /* Уменьшаем внутренние отступы */
+/* Subtle gradient overlay on hover */
+.dreamItemContainer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(138, 92, 246, 0.15) 0%, rgba(100, 200, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.dreamItemContainer:hover::before {
+  opacity: 1;
+}
+
+.dreamItemContainer:hover {
+  transform: translateY(-2px);
+  border-color: rgba(138, 92, 246, 0.4);
+  box-shadow: 0 8px 24px rgba(138, 92, 246, 0.2);
+}
+
+/* Selected state */
+.dreamItemContainer.selected {
+  background: linear-gradient(135deg, rgba(138, 92, 246, 0.2) 0%, rgba(236, 72, 153, 0.15) 100%);
+  border-color: #8B5CF6;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.dreamItemContainer.selected::before {
+  opacity: 0;
+}
+
+/* Card Content */
+.cardContent {
   display: flex;
   flex-direction: column;
-  cursor: pointer;
+  gap: 12px;
 }
 
-.dreamItemContainer.selected {
-    background: linear-gradient(135deg, rgba(200, 80, 255, 0.25), rgba(200, 80, 255, 0.05));
-    border-color: var(--accent-primary);
+/* Dream Title */
+.dreamTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary, #ffffff);
+  margin: 0;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
+/* Dream Date */
+.dreamDate {
+  font-size: 13px !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-weight: 400;
+  margin: 0 !important;
+  line-height: 1.2;
+}
+
+/* Card Actions (Buttons Container) */
+.cardActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* Button Base Styles */
+.cardButton {
+  flex: 1;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  line-height: 1.4 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Outlined Button (Толкование) */
+.outlined {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(138, 92, 246, 0.3) !important;
+}
+
+.outlined::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(138, 92, 246, 0.2), rgba(100, 200, 255, 0.2));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.outlined:hover::before {
+  opacity: 1;
+}
+
+.outlined:hover {
+  border-color: #8B5CF6 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(138, 92, 246, 0.3);
+}
+
+/* Contained Button (Текст сна) */
+.contained {
+  background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.contained:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(135deg, #9B6CF6 0%, #16C6E4 100%) !important;
+}
+
+/* Unused legacy styles (kept for compatibility) */
 .listItem {
   background-color: transparent !important;
 }
@@ -41,65 +159,26 @@
   margin-left: 16px;
 }
 
-.cardContent {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px; /* Уменьшаем и унифицируем отступы */
-}
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
 
-.dreamTitle {
-  font-family: 'Roboto', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.5;
-  color: var(--text-primary);
-  margin: 0;
-}
+@media (max-width: 480px) {
+  .dreamItemContainer {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
 
-.dreamDate {
-  color: var(--text-secondary);
-  font-size: 0.65rem !important; /* Принудительно уменьшаем шрифт в ~2 раза */
-  line-height: 1;
-  margin-top: 4px; /* Небольшой отступ сверху */
-}
+  .dreamTitle {
+    font-size: 16px;
+  }
 
-.cardActions {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
-}
+  .cardButton {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
 
-/* Общий стиль для кастомных кнопок */
-.cardButton {
-  flex: 1; /* Кнопки занимают равное пространство */
-  padding: 6px 12px !important;
-  border-radius: 8px !important;
-  font-size: 0.8rem !important;
-  font-weight: 500 !important;
-  text-transform: none !important; /* Убираем КАПС */
-  line-height: 1.5 !important;
-  transition: all 0.2s ease-in-out !important;
-  border: 1px solid transparent !important;
-}
-
-/* Стили для "контурной" кнопки */
-.outlined {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: var(--text-primary) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
-.outlined:hover {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border-color: var(--accent-primary) !important;
-}
-
-/* Стили для "залитой" кнопки */
-.contained {
-  background-color: var(--accent-primary) !important;
-  color: #fff !important;
-  border: none !important;
-}
-.contained:hover {
-  background-color: var(--accent-primary-dark) !important; /* Нужно определить этот цвет в :root */
+  .dreamDate {
+    font-size: 12px !important;
+  }
 }
