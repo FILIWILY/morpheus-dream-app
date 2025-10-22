@@ -14,7 +14,11 @@
 .modalBox {
     width: 90%;
     max-width: 600px;
-    max-height: 85vh;
+    /* Учитываем safe area для максимальной высоты */
+    max-height: calc(100vh - max(40px, calc(var(--tg-safe-area-inset-top) + var(--tg-safe-area-inset-bottom) + 40px)));
+    /* Отступы от краев с учетом safe area */
+    margin-top: max(20px, var(--tg-safe-area-inset-top));
+    margin-bottom: max(20px, var(--tg-safe-area-inset-bottom));
     
     /* Стили подложки */
     background-color: rgba(0, 0, 0, 0.75);

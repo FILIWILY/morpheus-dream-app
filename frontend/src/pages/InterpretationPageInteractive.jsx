@@ -266,13 +266,17 @@ const InterpretationPageInteractive = () => {
             color: 'var(--text-primary)',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            marginTop: '80px', // Увеличенный отступ сверху для Telegram кнопок
-            marginBottom: '20px' // Отступ снизу
+            // Используем safe area для отступов сверху и снизу
+            marginTop: 'max(20px, var(--tg-safe-area-inset-top))',
+            marginBottom: 'max(20px, var(--tg-safe-area-inset-bottom))',
+            // Ограничиваем максимальную высоту с учетом safe areas
+            maxHeight: 'calc(100vh - max(20px, var(--tg-safe-area-inset-top)) - max(20px, var(--tg-safe-area-inset-bottom)))',
+            overflowY: 'auto'
           }
         }}
         sx={{
           '& .MuiDialog-container': {
-            alignItems: 'flex-start' // Выравнивание по верху
+            alignItems: 'center' // Центрирование (было flex-start)
           }
         }}
       >

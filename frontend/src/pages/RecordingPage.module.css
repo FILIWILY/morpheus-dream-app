@@ -14,7 +14,8 @@
     justify-content: flex-start; /* Align icon to the left */
     align-items: center;
     width: 100%;
-    margin-top: 80px; /* Уменьшили с 60px до 24px - плашка ближе к сфере */
+    /* Используем max() для комбинации дизайнерского отступа и safe area от Telegram */
+    margin-top: max(80px, calc(var(--tg-safe-area-inset-top) + 40px));
     padding: 4px 8px;
     box-sizing: border-box;
     position: relative; /* Needed for absolute positioning of the title */
@@ -40,6 +41,27 @@
     transform: translateX(-50%);
     width: 70%; /* Allow wrapping */
     pointer-events: none; /* Make it non-interactive */
+}
+
+.orbHighlight {
+    font-weight: 700;
+    background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+    /* Свечение для не-webkit браузеров */
+    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8));
+    animation: orbPulse 2s ease-in-out infinite;
+}
+
+@keyframes orbPulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8));
+    }
+    50% {
+        filter: drop-shadow(0 0 20px rgba(139, 92, 246, 1));
+    }
 }
 
 .content {

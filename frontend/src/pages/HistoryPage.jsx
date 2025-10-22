@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import MenuIcon from '@mui/icons-material/Menu'; // Import menu icon
 import EditIcon from '@mui/icons-material/Edit'; // Import edit icon
+import LockIcon from '@mui/icons-material/Lock'; // Import lock icon
 import { LocalizationContext } from '../context/LocalizationContext';
 import styles from './HistoryPage.module.css';
 import { useDreams } from '../hooks/useDreams'; // Corrected the import path
@@ -67,7 +68,13 @@ const HistoryPage = () => {
 
   return (
     <>
-      <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', height: '100%', pt: '60px' }}>
+      <Container maxWidth="md" sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: '100%', 
+        // Используем max() для комбинации дизайнерского отступа и safe area от Telegram
+        pt: 'max(60px, calc(var(--tg-safe-area-inset-top) + 20px))'
+      }}>
         {/* Updated AppBar */}
         <AppBar position="static" sx={{ background: 'transparent', boxShadow: 'none' }}>
           <Toolbar>
@@ -125,13 +132,61 @@ const HistoryPage = () => {
 
         <Box sx={{ flexGrow: 1, overflow: 'auto', px: 1 }}>
             {isLoading ? (
-                <Typography>Loading...</Typography> // TODO: Localize this
-            ) : error ? (
-                <Typography>{t(error)}</Typography>
-            ) : dreams.length === 0 ? (
                 <Typography sx={{ textAlign: 'center', color: 'var(--text-secondary)', mt: 4 }}>
-                    {t('historyEmptyNew')}
+                    {t('loading')}
                 </Typography>
+            ) : dreams.length === 0 ? (
+                <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    mt: 8,
+                    px: 3
+                }}>
+                    {/* Стеклянная иконка замка */}
+                    <Box sx={{
+                        background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1))',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.18)',
+                        boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.3)',
+                        borderRadius: '50%',
+                        width: '120px',
+                        height: '120px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 3
+                    }}>
+                        <LockIcon sx={{ 
+                            fontSize: '64px', 
+                            color: 'rgba(255, 255, 255, 0.6)' 
+                        }} />
+                    </Box>
+                    
+                    {/* Текст */}
+                    <Typography sx={{ 
+                        textAlign: 'center', 
+                        color: 'var(--text-primary)',
+                        fontSize: '1.1rem',
+                        fontWeight: 500,
+                        mb: 1,
+                        lineHeight: 1.6
+                    }}>
+                        {t('historyLocked')}
+                    </Typography>
+                    
+                    <Typography sx={{ 
+                        textAlign: 'center', 
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.95rem',
+                        lineHeight: 1.6,
+                        maxWidth: '320px'
+                    }}>
+                        {t('historyLockedHint')}
+                    </Typography>
+                </Box>
             ) : (
                 <List sx={{ pt: 1, p: 0, listStyle: 'none' }}>
                     {dreams.map((dream) => {
@@ -206,6 +261,9 @@ const HistoryPage = () => {
             border: '1px solid rgba(139, 92, 246, 0.3)',
             padding: '8px',
             minWidth: '300px',
+            // Ограничиваем высоту с учетом safe area
+            maxHeight: 'calc(100vh - max(40px, calc(var(--tg-safe-area-inset-top) + var(--tg-safe-area-inset-bottom) + 40px)))',
+            overflowY: 'auto'
           }
         }}
       >

@@ -18,6 +18,9 @@ const modalStyle = {
   transform: 'translate(-50%, -50%)',
   width: 'calc(100% - 64px)',
   maxWidth: 320,
+  // Ограничиваем высоту с учетом safe area
+  maxHeight: 'calc(100vh - max(40px, calc(var(--tg-safe-area-inset-top) + var(--tg-safe-area-inset-bottom) + 40px)))',
+  overflowY: 'auto',
   bgcolor: 'transparent',
   border: 'none',
   boxShadow: 'none',

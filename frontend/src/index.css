@@ -10,6 +10,12 @@
   --accent-psychoanalytic: #4D7BFF;
   --accent-tarot: #FFC700;
   --accent-astrology: #C850FF;
+  
+  /* Telegram Safe Area Insets (устанавливаются автоматически или из platformDetection.js) */
+  --tg-safe-area-inset-top: 0px;
+  --tg-safe-area-inset-bottom: 0px;
+  --tg-safe-area-inset-left: 0px;
+  --tg-safe-area-inset-right: 0px;
 }
 
 body, html {
@@ -31,4 +37,6 @@ body, html {
   height: 100%;
   overflow-y: auto;
   background: transparent;
+  
+  /* Safe Area Insets применяются индивидуально в каждой странице через max() */
 }

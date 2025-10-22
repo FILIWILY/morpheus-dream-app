@@ -8,9 +8,13 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ru } from 'date-fns/locale';
 import { ProfileProvider } from './context/ProfileContext.jsx';
 import { setupErrorReporting } from './services/errorReporter.js';
+import { applyPlatformClass } from './utils/platformDetection.js';
 
 // Setup global error reporting to Telegram
 setupErrorReporting();
+
+// Apply platform-specific class to body
+applyPlatformClass();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 

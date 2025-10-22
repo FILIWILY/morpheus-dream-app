@@ -26,18 +26,10 @@ const bot = new TelegramBot(token, { polling: true });
 
 console.log('🤖 Telegram Bot started successfully!');
 
-// Команда /start
-bot.onText(/\/start/, async (msg) => {
-  const chatId = msg.chat.id;
-  const firstName = msg.from.first_name || 'User';
-  const languageCode = msg.from.language_code || 'en';
-  
-  // Определяем язык пользователя
-  const isRussian = languageCode === 'ru';
-  
-  // Первое сообщение - приветствие и описание
-  const welcomeMessage = isRussian ? 
-    `👋 Привет, ${firstName}!
+// Локализованные сообщения
+const messages = {
+  ru: {
+    welcome: (name) => `👋 Привет, ${name}!
 
 🌙 *Morpheus* — твой личный толкователь снов, работающий на основе искусственного интеллекта.
 
@@ -46,8 +38,13 @@ bot.onText(/\/start/, async (msg) => {
 • 🔮 Толковать образы с помощью AI
 • 📚 Анализировать символы снов
 • 💜 Давать персонализированные советы
-• 📖 Хранить историю твоих снов` :
-    `👋 Hi, ${firstName}!
+• 📖 Хранить историю твоих снов`,
+    instruction: `🚀 *Как открыть приложение?*
+
+Нажмите на кнопку *Open* в поле ввода сообщения, чтобы запустить Morpheus и начать толковать свои сны!`
+  },
+  en: {
+    welcome: (name) => `👋 Hi, ${name}!
 
 🌙 *Morpheus* — your personal AI-powered dream interpreter.
 
@@ -56,7 +53,72 @@ bot.onText(/\/start/, async (msg) => {
 • 🔮 Interpret symbols using AI
 • 📚 Analyze dream meanings
 • 💜 Provide personalized insights
-• 📖 Save your dream history`;
+• 📖 Save your dream history`,
+    instruction: `🚀 *How to open the app?*
+
+Tap the *Open* button in the message input field to launch Morpheus and start interpreting your dreams!`
+  },
+  de: {
+    welcome: (name) => `👋 Hallo, ${name}!
+
+🌙 *Morpheus* — dein persönlicher KI-gestützter Traumdeuter.
+
+✨ *Was die App kann:*
+• 🎙️ Träume per Sprache oder Text aufzeichnen
+• 🔮 Symbole mit KI interpretieren
+• 📚 Traumbedeutungen analysieren
+• 💜 Personalisierte Einblicke erhalten
+• 📖 Traumgeschichte speichern`,
+    instruction: `🚀 *Wie öffne ich die App?*
+
+Tippe auf die *Open*-Schaltfläche im Nachrichteneingabefeld, um Morpheus zu starten und deine Träume zu deuten!`
+  },
+  es: {
+    welcome: (name) => `👋 ¡Hola, ${name}!
+
+🌙 *Morpheus* — tu intérprete de sueños personal impulsado por IA.
+
+✨ *Lo que puede hacer la aplicación:*
+• 🎙️ Grabar sueños por voz o texto
+• 🔮 Interpretar símbolos usando IA
+• 📚 Analizar significados de sueños
+• 💜 Proporcionar perspectivas personalizadas
+• 📖 Guardar tu historial de sueños`,
+    instruction: `🚀 *¿Cómo abrir la aplicación?*
+
+¡Toca el botón *Open* en el campo de entrada de mensajes para iniciar Morpheus y comenzar a interpretar tus sueños!`
+  },
+  fr: {
+    welcome: (name) => `👋 Salut, ${name}!
+
+🌙 *Morpheus* — votre interprète de rêves personnel alimenté par l'IA.
+
+✨ *Ce que l'application peut faire:*
+• 🎙️ Enregistrer les rêves par voix ou texte
+• 🔮 Interpréter les symboles avec l'IA
+• 📚 Analyser les significations des rêves
+• 💜 Fournir des perspectives personnalisées
+• 📖 Sauvegarder votre historique de rêves`,
+    instruction: `🚀 *Comment ouvrir l'application?*
+
+Appuyez sur le bouton *Open* dans le champ de saisie de message pour lancer Morpheus et commencer à interpréter vos rêves!`
+  }
+};
+
+// Команда /start
+bot.onText(/\/start/, async (msg) => {
+  const chatId = msg.chat.id;
+  const firstName = msg.from.first_name || 'User';
+  const languageCode = msg.from.language_code || 'en';
+  
+  // Определяем язык пользователя (поддерживаем ru, en, de, es, fr)
+  const supportedLanguages = ['ru', 'en', 'de', 'es', 'fr'];
+  const userLanguage = supportedLanguages.includes(languageCode) ? languageCode : 'en';
+  
+  const userMessages = messages[userLanguage];
+  
+  // Первое сообщение - приветствие и описание
+  const welcomeMessage = userMessages.welcome(firstName);
 
   // Отправляем приветствие
   await bot.sendMessage(chatId, welcomeMessage, {
@@ -64,13 +126,7 @@ bot.onText(/\/start/, async (msg) => {
   });
 
   // Второе сообщение - инструкция с картинкой
-  const instructionMessage = isRussian ?
-    `🚀 *Как открыть приложение?*
-
-Нажмите на кнопку *Menu* (🌙) в поле ввода сообщения, чтобы запустить Morpheus и начать толковать свои сны!` :
-    `🚀 *How to open the app?*
-
-Tap the *Menu* button (🌙) in the message input field to launch Morpheus and start interpreting your dreams!`;
+  const instructionMessage = userMessages.instruction;
 
   // Путь к картинке
   const photoPath = join(__dirname, '..', 'assets', 'bot', 'open.png');

@@ -422,7 +422,7 @@ const RecordingPage = () => {
                 variant="h1" 
                 className={styles.title}
               >
-                {t('recordYourDream')}
+                {t('recordYourDreamBefore')} <span className={styles.orbHighlight}>{t('recordYourDreamOrb')}</span>, {t('recordYourDreamAfter')}
               </Typography>
             </header>
 
