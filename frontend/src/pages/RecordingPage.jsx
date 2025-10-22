@@ -3,7 +3,7 @@ import { useNavigate, useOutletContext } from 'react-router-dom';
 import api from '../services/api';
 import styles from './RecordingPage.module.css';
 
-import { Box, TextField, IconButton, Alert, Typography } from '@mui/material';
+import { Box, TextField, IconButton, Alert, Typography, Button } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MenuIcon from '@mui/icons-material/Menu';
 
@@ -33,12 +33,14 @@ const RecordingPage = () => {
   const [countdown, setCountdown] = useState(null); // 3, 2, 1, or null
   const [isPreparingRecording, setIsPreparingRecording] = useState(false);
 
-  const { isRecording, audioBlob, amplitude, startRecording, stopRecording } = useAudioRecorder();
+  const { isRecording, audioBlob, amplitude, startRecording, stopRecording, clearAudioBlob } = useAudioRecorder();
   
   // Ref to prevent double-triggering of countdown
   const countdownStartedRef = useRef(false);
   // Refs to store timer IDs for cancellation
   const countdownTimersRef = useRef({ timer1: null, timer2: null, timer3: null });
+  // Ref to track if recording was cancelled (needs to be ref for immediate access)
+  const isRecordingCancelledRef = useRef(false);
 
   // Debug: log countdown state changes
   useEffect(() => {
@@ -155,6 +157,22 @@ const RecordingPage = () => {
 
   useEffect(() => {
     if (!audioBlob) return;
+    
+    console.log('[RecordingPage] 🔍 audioBlob detected, checking if cancelled:', isRecordingCancelledRef.current);
+    
+    // If recording was cancelled, ignore the audioBlob
+    if (isRecordingCancelledRef.current) {
+      console.log('[RecordingPage] ❌ Recording was cancelled, ignoring audioBlob');
+      isRecordingCancelledRef.current = false; // Reset flag
+      return;
+    }
+    
+    // Also check if dreamDate is valid
+    if (!dreamDate || dreamDate === '') {
+      console.log('[RecordingPage] ⚠️ No valid dreamDate, skipping audio processing');
+      return;
+    }
+    
     const sendAudio = async () => {
       const isDev = import.meta.env.DEV || import.meta.env.MODE === 'development';
       
@@ -263,6 +281,10 @@ const RecordingPage = () => {
   const handleInitiateAction = (actionType) => {
     console.log('[RecordingPage] 🚀 Initiating action:', actionType);
     setError(null);
+    
+    // Reset cancellation flag for new recording
+    isRecordingCancelledRef.current = false;
+    
     if (actionType === 'sendText' && !dreamText.trim()) {
       setError('Пожалуйста, опишите свой сон.');
       return;
@@ -307,6 +329,29 @@ const RecordingPage = () => {
       console.log('[RecordingPage] ▶️ Starting recording flow (will open date modal)');
       handleInitiateAction('startRecording');
     }
+  };
+
+  const handleCancelRecording = () => {
+    console.log('[RecordingPage] ❌ Cancelling recording without processing');
+    // Set flag to ignore the audioBlob when it arrives (using ref for immediate effect)
+    isRecordingCancelledRef.current = true;
+    
+    // Reset all states to prevent any processing
+    setDreamDate(null);
+    setUserAction(null);
+    setIsPreparingRecording(false);
+    
+    // Stop recording
+    stopRecording();
+    
+    // Clear any existing audioBlob immediately
+    // We use setTimeout to ensure stopRecording's onstop handler completes first
+    setTimeout(() => {
+      clearAudioBlob();
+      console.log('[RecordingPage] 🗑️ AudioBlob cleared');
+    }, 100);
+    
+    console.log('[RecordingPage] ✅ Recording cancelled, all states reset');
   };
 
   const triggerTextSubmit = () => {
@@ -437,35 +482,45 @@ const RecordingPage = () => {
                 </Alert>
               )}
 
-              {/* Countdown or Recording status */}
+              {/* Top label - at header level */}
               {(countdown !== null || isRecording) && (
-                <Box className={styles.statusContainer}>
+                <Box className={styles.topLabelContainer}>
                   {countdown !== null && (
-                    <>
-                      <Typography variant="body1" className={styles.countdownLabel}>
-                        {t('recordingWillStartIn')}
-                      </Typography>
-                      <Typography 
-                        key={countdown} 
-                        variant="h1" 
-                        className={styles.countdownNumber}
-                      >
-                        {countdown}
-                      </Typography>
-                      <Typography variant="caption" className={styles.cancelHint}>
-                        {t('tapToCancelCountdown')}
-                      </Typography>
-                    </>
+                    <Typography variant="body1" className={styles.countdownLabel}>
+                      {t('recordingWillStartIn')}
+                    </Typography>
                   )}
                   {countdown === null && isRecording && (
                     <Typography 
                       key="recording" 
-                      variant="h5" 
+                      variant="body1" 
                       className={styles.recordingLabel}
                     >
-                      {t('recordingInProgress')}
+                      {t('tapToStopBefore')} <span className={styles.orbHighlightStop}>{t('tapToStopOrb')}</span> {t('tapToStopAfter')}
                     </Typography>
                   )}
+                </Box>
+              )}
+
+              {/* Center number - countdown digits */}
+              {countdown !== null && (
+                <Box className={styles.centerNumberContainer}>
+                  <Typography 
+                    key={countdown} 
+                    variant="h1" 
+                    className={styles.countdownNumber}
+                  >
+                    {countdown}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Bottom hint - tap to cancel */}
+              {countdown !== null && (
+                <Box className={styles.bottomHintContainer}>
+                  <Typography variant="caption" className={styles.cancelHint}>
+                    {t('tapToCancelCountdown')}
+                  </Typography>
                 </Box>
               )}
 
@@ -474,6 +529,19 @@ const RecordingPage = () => {
                 amplitude={amplitude}
                 onClick={handleRecordClick}
               />
+
+              {/* Cancel button during recording */}
+              {isRecording && countdown === null && (
+                <Box className={styles.cancelButtonContainer}>
+                  <Button
+                    variant="outlined"
+                    onClick={handleCancelRecording}
+                    className={styles.cancelButton}
+                  >
+                    {t('cancelRecording')}
+                  </Button>
+                </Box>
+              )}
             </Box>
           </main>
 

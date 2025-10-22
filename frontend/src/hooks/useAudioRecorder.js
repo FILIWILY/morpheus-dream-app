@@ -79,6 +79,10 @@ export const useAudioRecorder = () => {
     }
   };
 
-  // Возвращаем новое значение амплитуды
-  return { isRecording, audioBlob, amplitude, startRecording, stopRecording };
+  const clearAudioBlob = useCallback(() => {
+    setAudioBlob(null);
+  }, []);
+
+  // Возвращаем новое значение амплитуды + метод для очистки
+  return { isRecording, audioBlob, amplitude, startRecording, stopRecording, clearAudioBlob };
 };
