@@ -48,7 +48,6 @@ docker compose up -d
 Вставьте:
 ```
 start - Start the bot and get app info
-open - Open Morpheus Dream Interpreter
 ```
 
 3. **Edit Description** (что умеет бот):
@@ -65,12 +64,21 @@ open - Open Morpheus Dream Interpreter
 
 🔮 The app uses advanced AI to analyze your dreams and provide meaningful interpretations based on psychology, symbolism, and personalized context.
 
-Use /open to start interpreting your dreams!
+Use /start to get started and open the app via the Menu button!
 ```
+
+4. **Настройка Menu Button:**
+
+**Edit Bot** → **Bot Settings** → **Menu Button** → **Configure Menu Button**
+
+- **Button Text:** `🌙 Open App` (EN) / `🌙 Открыть` (RU)
+- **URL:** Ваш `TELEGRAM_WEB_APP_URL` (должен быть автоматически взят из настроек)
 
 ---
 
 ## ✅ Готово!
 
-Теперь бот должен отвечать на команды `/start` и `/open`.
+Теперь бот отвечает на команду `/start` и отправляет два сообщения:
+1. **Приветствие** с описанием возможностей
+2. **Инструкция с картинкой** как открыть приложение через кнопку Menu
 
