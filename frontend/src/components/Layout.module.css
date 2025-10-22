@@ -39,6 +39,8 @@
 
     /* Handle bottom safe area directly on the nav's padding */
     padding-bottom: env(safe-area-inset-bottom);
+    padding-top: 4px; /* Дополнительное пространство для свечения кнопок */
     height: 56px;
     box-sizing: content-box; /* Ensure padding adds to height */
+    overflow: visible; /* Не обрезать свечение кнопок */
 }

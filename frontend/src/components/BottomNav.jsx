@@ -44,7 +44,7 @@ const BottomNav = () => {
         fontWeight: 600,
       },
       '& .MuiSvgIcon-root': {
-        filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.6))',
+        filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 20px rgba(139, 92, 246, 0.4))',
         transform: 'scale(1.1)',
       }
     },
@@ -61,6 +61,7 @@ const BottomNav = () => {
       sx={{ 
         background: 'transparent',
         height: '100%',
+        overflow: 'visible', // Не обрезать свечение кнопок
       }}
     >
       <BottomNavigationAction 
