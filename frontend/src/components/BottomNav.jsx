@@ -44,7 +44,7 @@ const BottomNav = () => {
         fontWeight: 600,
       },
       '& .MuiSvgIcon-root': {
-        filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 20px rgba(139, 92, 246, 0.4))',
+        filter: 'drop-shadow(0 0 4px rgba(139, 92, 246, 0.5))',
         transform: 'scale(1.1)',
       }
     },

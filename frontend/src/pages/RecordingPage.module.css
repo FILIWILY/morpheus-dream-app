@@ -16,7 +16,7 @@
     width: 100%;
     /* Используем max() для комбинации дизайнерского отступа и safe area от Telegram */
     margin-top: max(80px, calc(var(--tg-safe-area-inset-top) + 40px));
-    padding: 8px 12px; /* Увеличенный padding для свечения */
+    padding: 4px 8px;
     box-sizing: border-box;
     position: relative; /* Needed for absolute positioning of the title */
 
@@ -50,18 +50,18 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
-    /* Усиленное свечение для всех браузеров */
-    filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.9)) drop-shadow(0 0 25px rgba(139, 92, 246, 0.5));
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+    /* Мягкое свечение */
+    filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
     animation: orbPulse 2s ease-in-out infinite;
 }
 
 @keyframes orbPulse {
     0%, 100% {
-        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.9)) drop-shadow(0 0 25px rgba(139, 92, 246, 0.5));
+        filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
     }
     50% {
-        filter: drop-shadow(0 0 20px rgba(139, 92, 246, 1)) drop-shadow(0 0 35px rgba(139, 92, 246, 0.7));
+        filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.7));
     }
 }
 
@@ -137,7 +137,7 @@
     pointer-events: none;
     width: 90%;
     overflow: visible;
-    padding: 20px 0; /* Дополнительное пространство для свечения */
+    padding: 8px 0;
 }
 
 /* Center number container - for countdown digits */
@@ -236,18 +236,18 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 0 20px rgba(255, 65, 108, 0.8);
-    /* Усиленное красное свечение */
-    filter: drop-shadow(0 0 15px rgba(255, 107, 53, 1)) drop-shadow(0 0 25px rgba(255, 65, 108, 0.6));
+    text-shadow: 0 0 10px rgba(255, 65, 108, 0.3);
+    /* Мягкое красное свечение */
+    filter: drop-shadow(0 0 6px rgba(255, 107, 53, 0.6));
     animation: orbStopPulse 2s ease-in-out infinite;
 }
 
 @keyframes orbStopPulse {
     0%, 100% {
-        filter: drop-shadow(0 0 15px rgba(255, 107, 53, 1)) drop-shadow(0 0 25px rgba(255, 65, 108, 0.6));
+        filter: drop-shadow(0 0 6px rgba(255, 107, 53, 0.6));
     }
     50% {
-        filter: drop-shadow(0 0 20px rgba(255, 107, 53, 1)) drop-shadow(0 0 35px rgba(255, 65, 108, 0.8));
+        filter: drop-shadow(0 0 10px rgba(255, 65, 108, 0.8));
     }
 }
 
