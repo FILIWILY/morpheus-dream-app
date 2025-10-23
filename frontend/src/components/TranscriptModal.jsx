@@ -1,65 +1,103 @@
-import React, { useState } from 'react';
-import { Modal, Box, IconButton, Typography, Button } from '@mui/material';
+import React from 'react';
+import { Dialog, DialogTitle, DialogContent, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useSpring, animated } from '@react-spring/web';
 import { useTranslation } from 'react-i18next';
-import styles from './TranscriptModal.module.css';
-
-const AnimatedBox = animated(Box);
 
 const TranscriptModal = ({ open, onClose, transcript, title }) => {
     const { t } = useTranslation();
-    const springProps = useSpring({
-        opacity: open ? 1 : 0,
-        transform: open ? 'scale(1)' : 'scale(0.9)',
-        config: { tension: 300, friction: 20 },
-    });
-
-    if (!open) return null;
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
-            <AnimatedBox 
-                style={springProps} 
-                className={styles.modalBox} 
-                onClick={(e) => e.stopPropagation()}
-                sx={{
-                    // Убеждаемся, что flex работает правильно
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                    // Ограничиваем высоту
-                    maxHeight: 'calc(100vh - max(60px, calc(var(--tg-safe-area-inset-top) + 20px)) - max(20px, var(--tg-safe-area-inset-bottom)))'
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+            PaperProps={{
+                sx: {
+                    backgroundColor: '#16213e',
+                    backgroundImage: 'linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%)',
+                    color: '#ffffff',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+                    // Используем safe area + дополнительный отступ для кнопок Telegram
+                    marginTop: 'max(60px, calc(var(--tg-safe-area-inset-top) + 20px))',
+                    marginBottom: 'max(20px, var(--tg-safe-area-inset-bottom))',
+                    // Ограничиваем максимальную высоту с учетом safe areas
+                    maxHeight: 'calc(100vh - max(60px, calc(var(--tg-safe-area-inset-top) + 20px)) - max(20px, var(--tg-safe-area-inset-bottom)))',
+                    overflowY: 'auto',
+                    // Стилизация скроллбара
+                    '&::-webkit-scrollbar': {
+                        width: '6px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '3px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        background: 'rgba(139, 92, 246, 0.5)',
+                        borderRadius: '3px',
+                    },
+                    '&::-webkit-scrollbar-thumb:hover': {
+                        background: 'rgba(139, 92, 246, 0.7)',
+                    }
+                }
+            }}
+            sx={{
+                '& .MuiDialog-container': {
+                    alignItems: 'center'
+                }
+            }}
+        >
+            <DialogTitle 
+                sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    pb: 1, 
+                    pt: 2,
+                    borderBottom: '1px solid rgba(139, 92, 246, 0.2)'
                 }}
             >
-                <Box className={styles.modalHeader}>
-                    <Typography id="transcript-modal-title" variant="h6" component="h2">
-                        {title || t('dreamTranscript')}
-                    </Typography>
-                    <IconButton onClick={onClose} aria-label="close" sx={{ color: 'var(--text-primary)'}}>
-                        <CloseIcon />
-                    </IconButton>
-                </Box>
-                <Box 
-                    className={styles.modalContent}
-                    sx={{
-                        // Явно разрешаем скролл
-                        overflowY: 'auto',
-                        // Для работы скролла в iOS/Mobile
-                        WebkitOverflowScrolling: 'touch',
-                        // Убеждаемся, что контейнер может расти
-                        flexGrow: 1,
-                        minHeight: 0
+                <Typography 
+                    variant="h6" 
+                    component="div"
+                    sx={{ 
+                        color: '#8B5CF6',
+                        fontWeight: 600,
+                        fontSize: '1.2rem'
                     }}
                 >
-                    <Typography component="p" sx={{ whiteSpace: 'pre-wrap', textAlign: 'justify' }}>
-                        {transcript}
-                    </Typography>
-                </Box>
-            </AnimatedBox>
-        </div>
+                    {title || t('dreamTranscript')}
+                </Typography>
+                <IconButton 
+                    onClick={onClose} 
+                    sx={{ 
+                        color: '#ffffff',
+                        '&:hover': {
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)'
+                        }
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ pt: 2 }}>
+                <Typography 
+                    component="div" 
+                    sx={{ 
+                        color: 'rgba(255, 255, 255, 0.85)', 
+                        lineHeight: 1.7, 
+                        fontSize: '16px',
+                        whiteSpace: 'pre-wrap',
+                        textAlign: 'justify'
+                    }}
+                >
+                    {transcript}
+                </Typography>
+            </DialogContent>
+        </Dialog>
     );
 };
 
 export default TranscriptModal;
-
