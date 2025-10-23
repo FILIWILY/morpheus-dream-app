@@ -10,8 +10,8 @@ const style = {
   transform: 'translate(-50%, -50%)',
   width: 'calc(100% - 64px)',
   maxWidth: 400,
-  // Ограничиваем высоту с учетом safe area
-  maxHeight: 'calc(100vh - max(40px, calc(var(--tg-safe-area-inset-top) + var(--tg-safe-area-inset-bottom) + 40px)))',
+  // Ограничиваем высоту с учетом safe area + дополнительный отступ для кнопок Telegram
+  maxHeight: 'calc(100vh - max(60px, calc(var(--tg-safe-area-inset-top) + 20px)) - max(20px, var(--tg-safe-area-inset-bottom)))',
   overflowY: 'auto',
   p: 3,
   color: 'var(--text-primary)',

@@ -266,11 +266,11 @@ const InterpretationPageInteractive = () => {
             color: 'var(--text-primary)',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.1)',
-            // Используем safe area для отступов сверху и снизу
-            marginTop: 'max(20px, var(--tg-safe-area-inset-top))',
+            // Используем safe area + дополнительный отступ для кнопок Telegram
+            marginTop: 'max(60px, calc(var(--tg-safe-area-inset-top) + 20px))',
             marginBottom: 'max(20px, var(--tg-safe-area-inset-bottom))',
             // Ограничиваем максимальную высоту с учетом safe areas
-            maxHeight: 'calc(100vh - max(20px, var(--tg-safe-area-inset-top)) - max(20px, var(--tg-safe-area-inset-bottom)))',
+            maxHeight: 'calc(100vh - max(60px, calc(var(--tg-safe-area-inset-top) + 20px)) - max(20px, var(--tg-safe-area-inset-bottom)))',
             overflowY: 'auto'
           }
         }}
